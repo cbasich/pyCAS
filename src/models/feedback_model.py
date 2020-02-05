@@ -5,6 +5,8 @@ import itertools as it
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
+from utils.utils import predict
+
 PARAM_PATH = os.path.join('..', 'data', 'model parameters')
 
 class HM():
@@ -14,7 +16,6 @@ class HM():
         self.Sigma = Sigma
         self.flagged = flagged
         self.lambda_ = self.generate_lambda()
-        # self.T_H = self.compute_T_H()
 
     def generate_lambda(self):
         """
@@ -32,13 +33,13 @@ class HM():
                 if not action in lambda_[state].keys():
                     lambda_[state][action] = {}
                 for level in [1.2]:
-                    p = predict(state, action, level)
+                    p = predict('gridworld', action, [level, self.DM.regions[state], state[3]])
                     if p != -1.0:
                         lambda_[state][action][level] = p
         return lambda_
 
     def predict_feedback(self, state, action, sigma):
-        pass
+        
 
     def tau(self, s, state, a, action, sp, statePrime):
         """

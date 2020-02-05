@@ -9,7 +9,7 @@ current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
 import CDB_helper
-from utils.VVI import value_iteration
+from utils.utils import FVI
 
 GRIDWORLD_PATH = os.path.join(current_file_path, '..', '..', 'data', 'domains', 'gridworlds', )
 PICKLE_PATH = os.path.join(current_file_path, '..', 'pickles', )

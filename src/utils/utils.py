@@ -3,6 +3,8 @@ import pandas as pd
 
 from pygam import LogisticGAM, te, s, f, l
 
+MODEL_PATH = os.path.join('..', '..', 'data', 'models')
+
 def FVI(mdp, eps = 0.0001):
     """
         This is a very fast value iteration using vectorized operations only.
@@ -43,7 +45,7 @@ def FVI(mdp, eps = 0.0001):
 
     return results
 
-def build_gam(datapath, distr='binomial', link='logit'):
+def build_gam(datapath, domain, name, distr='binomial', link='logit'):
     """
         This function is for building a GAM classifier.
         It requires a pandas dataframe and assumes no missing values.
@@ -69,7 +71,7 @@ def build_gam(datapath, distr='binomial', link='logit'):
                 X = X.reshape(-1,1)
                 gam_map[key] = X[:,i][np.where(Xv[:,i] == key)[0]][0]
 
-    gam_map_file = open(os.path.join('..', '..', 'data', 'classifiers', 'gam_map.pkl'), mode = 'wb')
+    gam_map_file = open(os.path.join('..', '..', 'data', 'models', domain, name + '_gam_map.pkl'), mode = 'wb')
     pickle.dump(gam_map, gam_map_file, protocol=pickle.HIGHEST_PROTOCOL)
     gam_map_file.close()
 
@@ -79,9 +81,16 @@ def build_gam(datapath, distr='binomial', link='logit'):
     #       If not - will need to manually encode that since it is not in it right now. 
     gam = LogisticGAM.gridsearch(X, y)
 
-    gam_file = open(os.path.join('..', '..', 'data', 'classifiers', 'gam.pkl'), mode='wb')
+    gam_file = open(os.path.join('..', '..', 'data', 'models', domain, name + '_gam.pkl'), mode = 'wb')
     pickle.dump(gam, gam_file, protocol=HIGHEST_PROTOCOL)
     gam_filec.close()
 
-
-
+def predict(domain, action, features):
+    gam = pickle.load( open( os.path.join(MODEL_PATH, domain, action + '_gam.pkl'), mode='rb'), encoding = 'bytes')
+    gam_map = pickle.load( open( os.path.join(MODEL_PATH, domain, action + '_gam_map.pkl'), mode='rb'), encoding = 'bytes')
+    p = -1.0
+    try:
+        p = gam.predict_proba([[gam_map[feature] for feature in features]])[0]
+    except Exception:
+        pass
+    return p

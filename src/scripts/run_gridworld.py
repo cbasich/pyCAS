@@ -11,7 +11,7 @@ sys.path.append(os.path.join(current_file_path, '..'))
 sys.path.append(os.path.join(current_file_path, '..', 'models'))
 
 OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'out', 'gridworlds')
-CROSS_DATA_PATH = os.path.join(current_file_path, '..', '..', 'data', 'feedback', 'gridworlds')
+FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'data', 'feedback', 'gridworlds')
 
 from models import CAS, autonomy_model, feedback_model, CDB_domain_model
 
@@ -32,12 +32,17 @@ def main(grid_file, N, generate):
         AM = autonomy_model.AM(DM, [0, 1, 2, 3])
         HM = feedback_model.HM(DM, AM, ['+', '-', '/', None], ['cross', 'open'])
 
+        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'cross') ):
+            init_cross_data()
+        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open') ):
+            init_open_data()
+
         environment = CAS(DM, AM, HM, persistence=0.75)
 
         print("Solving mdp...")
         environment.solve()
 
-        # expected_cost_file.write(str(environment.V[environment.state_map[environment.init]]) + '\n')
+        expected_cost_file.write(str(environment.V[environment.state_map[environment.init]]) + '\n')
         
         print("Beginning simulation...")
         cost = execute_policy(environment, 100, i)
@@ -97,14 +102,33 @@ def updateData(action, level, region, obstacle, feedback):
     if feedback is None:
         pass
     if action == 'cross':
-        filepath = sys.path.append(CROSS_DATA_PATH, 'open.data')
+        filepath = sys.path.append(FEEDBACK_DATA_PATH, 'open.data')
         with open(filepath, mode='a+') as f:
             f.write('\n' + str(level) + ',' + str(region) + ',' + str(obstacle) + ',' + str(feedback))
     elif action == 'open':
-        filepath = sys.path.append(CROSS_DATA_PATH, 'open.data')
+        filepath = sys.path.append(FEEDBACK_DATA_PATH, 'open.data')
         with open(filepath, mode='a+') as f:
             f.write('\n' + str(level) + ',' + str(region) + ',' + str(obstacle) + ',' + str(feedback))
 
+def init_cross_data():
+    with open( os.path.join(FEEDBACK_DATA_PATH, 'cross.data'), 'a+') as f:
+        f.write('level,region,obstacle,feedback')
+        for level in ['1','2']:
+            for region in ['r1','r2','r3']:
+                for obstacle in ['empty', 'light', 'busy']:
+                    for feedback in ['yes','no']:
+                        entry = level + ',' + region + ',' + obstacle + ',' + feedback
+                        f.write('\n' + entry)
+
+def init_open_data():
+    with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
+        f.write('level,region,obstacle,feedback')
+        for level in ['1','2']:
+            for region in ['b1','b2','b3']:
+                for obstacle in ['light-closed', 'medium-closed', 'heavy-closed']:
+                    for feedback in ['yes','no']:
+                        entry = level + ',' + region + ',' + obstacle + ',' + feedback
+                        f.write('\n' + entry)
 
 if __name__ == '__main__':
     grid_file = sys.argv[1]
