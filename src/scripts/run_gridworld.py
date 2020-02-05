@@ -10,7 +10,8 @@ current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 sys.path.append(os.path.join(current_file_path, '..', 'models'))
 
-OUTPUT_PATH = sys.path.append(current_file_path, '..', '..', 'out', 'gridworlds')
+OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'out', 'gridworlds')
+CROSS_DATA_PATH = os.path.join(current_file_path, '..', '..', 'data', 'feedback', 'gridworlds')
 
 from models import CAS, autonomy_model, feedback_model, CDB_domain_model
 
@@ -22,7 +23,6 @@ def main(grid_file, N, generate):
     offices = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','y','z']
 
     for i in range(N):
-
         start = offices[np.random.randint(len(offices))]
         end = offices[np.random.randint(len(offices))]
         while end == start:
@@ -37,11 +37,12 @@ def main(grid_file, N, generate):
         print("Solving mdp...")
         environment.solve()
 
-        expected_cost_file.write(str(environment.V[environment.state_map[environment.init]]) + '\n')
+        # expected_cost_file.write(str(environment.V[environment.state_map[environment.init]]) + '\n')
         
         print("Beginning simulation...")
         cost = execute_policy(environment, 100, i)
-        cost_file.write(str(cost) + '\n')
+        # cost_file.write(str(cost) + '\n')
+        print(cost)
 
         print("Updating parameters...")
         environment.update_kappa()
@@ -50,9 +51,9 @@ def main(grid_file, N, generate):
     expected_cost_file.close()
     cost_file.close()
 
-    if generate:
-        generate_graph(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'),
-                    os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'))
+    # if generate:
+    #     generate_graph(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'),
+                    # os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'))
 
 
 def execute_policy(CAS, M, i):
@@ -71,11 +72,11 @@ def execute_policy(CAS, M, i):
 
             r += CAS.costs[CAS.state_map[state]][CAS.actions.index(action)]
 
-            feedback = None 
+            feedback = None
             if action[1] == 1 or action[1] == 2:
                 feedback = interfaceWithHuman(state, action)
                 if i == M-1:
-                    updateData(state, action, feedback)
+                    updateData(action[0], action[1], CAS.DM.get_region(state), state[3], feedback)
 
             state = CAS.generate_successor(state, action, feedback)
 
@@ -89,10 +90,21 @@ def interfaceWithHuman(state, action):
     if action[1] == 1:
         feedback = input('\nCan I take action --' + str(action[1]) + '-- in state ' + str(state) +'?\n\n')
     else:
-        feedback = input('\Do you override --' + str(action[1]) + '-- in state ' + str(state) +'?\n\n')
+        feedback = input('\nDo you override --' + str(action[1]) + '-- in state ' + str(state) +'?\n\n')
+    return feedback
 
-def updateData(state, action, feedback):
-    pass
+def updateData(action, level, region, obstacle, feedback):
+    if feedback is None:
+        pass
+    if action == 'cross':
+        filepath = sys.path.append(CROSS_DATA_PATH, 'open.data')
+        with open(filepath, mode='a+') as f:
+            f.write('\n' + str(level) + ',' + str(region) + ',' + str(obstacle) + ',' + str(feedback))
+    elif action == 'open':
+        filepath = sys.path.append(CROSS_DATA_PATH, 'open.data')
+        with open(filepath, mode='a+') as f:
+            f.write('\n' + str(level) + ',' + str(region) + ',' + str(obstacle) + ',' + str(feedback))
+
 
 if __name__ == '__main__':
     grid_file = sys.argv[1]

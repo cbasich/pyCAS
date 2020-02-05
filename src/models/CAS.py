@@ -10,6 +10,8 @@ from IPython import embed
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
+from utils.utils import FVI
+
 PARAM_PATH = os.path.join('..', 'data', 'model parameters')
 
 
@@ -182,3 +184,6 @@ class CAS():
 
     def reset(self):
         self.transitions = self.transitions_base
+
+if __name__ == "__main__":
+    print("hello")

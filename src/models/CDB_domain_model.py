@@ -1,14 +1,7 @@
-import os
-import sys
-import time
-import json
-import pickle
-import random
+import os, sys, time, json, pickle, random
 
 from collections import defaultdict
-from threading import Thread
 from IPython import embed
-
 import numpy as np
 import itertools as it
 
@@ -16,11 +9,9 @@ current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
 import CDB_helper
-# import utils.VVI
+from utils.VVI import value_iteration
 
-# from utils.VVI import value_iteration
-
-GRIDWORLD_PATH = os.path.join(current_file_path, '.. ', '..', 'gridworlds', )
+GRIDWORLD_PATH = os.path.join(current_file_path, '..', '..', 'data', 'domains', 'gridworlds', )
 PICKLE_PATH = os.path.join(current_file_path, '..', 'pickles', )
 
 DIRECTIONS = [(1,0),(0,-1),(-1,0),(0,1)]
@@ -37,7 +28,7 @@ def read_gw_map(filename):
 class DeliveryBotDomain():
     def __init__(self, filename, init, destination, gamma=1.0):
         self.gamma = gamma
-        self.grid = read_gw_map(filename)
+        self.grid = read_gw_map(os.path.join(GRIDWORLD_PATH, filename))
         self.rows = len(self.grid)
         self.cols = len(self.grid[0])
 
