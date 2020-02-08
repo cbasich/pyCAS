@@ -6,13 +6,14 @@ import numpy as np
 import itertools as it
 
 current_file_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(current_file_path, '..'))
+sys.path.append(os.path.join(current_file_path, '..', '..'))
 
-import CDB_helper
-from utils.utils import FVI
+from CDB.CDB_helper import CampusDeliveryBotHelper
+from scripts.utils import FVI
 
-GRIDWORLD_PATH = os.path.join(current_file_path, '..', '..', 'data', 'domains', 'gridworlds', )
-PICKLE_PATH = os.path.join(current_file_path, '..', 'pickles', )
+DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB')
+MAP_PATH = os.path.join(DOMAIN_PATH, 'maps')
+PARAM_PATH = os.path.join(DOMAIN_PATH, 'params')
 
 DIRECTIONS = [(1,0),(0,-1),(-1,0),(0,1)]
 MAPPING = {(-1,0): 'NORTH', (0,1) : 'EAST', (1,0) : 'SOUTH', (0,-1): 'WEST'}
@@ -28,13 +29,13 @@ def read_gw_map(filename):
 class DeliveryBotDomain():
     def __init__(self, filename, init, destination, gamma=1.0):
         self.gamma = gamma
-        self.grid = read_gw_map(os.path.join(GRIDWORLD_PATH, filename))
+        self.grid = read_gw_map(os.path.join(MAP_PATH, filename))
         self.rows = len(self.grid)
         self.cols = len(self.grid[0])
 
         self.kappa = {}
         try:
-            self.kappa = pickle.load( open( os.path.join(PICKLE_PATH,'gridworld_kappa.pkl'), mode='rb'), encoding='bytes')
+            self.kappa = pickle.load( open( os.path.join(PARAM_PATH,'kappa.pkl'), mode='rb'), encoding='bytes')
         except Exception:
             pass
 
@@ -47,13 +48,12 @@ class DeliveryBotDomain():
         self.costs = self.generate_costs()
 
         self.check_validity()
-        self.helper = CDB_helper.CampusDeliveryBotHelper(self)
+        self.helper = CampusDeliveryBotHelper(self)
 
     def generate_states(self, init, destination):
         S = set(it.product(range(self.rows), range(self.cols)))
 
-        goals = set()
-        states = set()
+        states, goals = set(), set()
 
         for s in S:
             x,y = s[0],s[1]
@@ -217,7 +217,7 @@ class DeliveryBotDomain():
 
     def cross(self, state, statePrime):
         if len(state) > 2 and state[3] in ['empt', 'light', 'heavy']:
-            xp, yp = state[0] + REV_MAPPING[state[2]][0], state[1] + REV_MAPPING[state[2][1]]
+            xp, yp = state[0] + REV_MAPPING[state[2]][0], state[1] + REV_MAPPING[state[2]][1]
 
             return 1.0 if (statePrime[0] == xp and statePrime[1] == yp) else 0.0
 

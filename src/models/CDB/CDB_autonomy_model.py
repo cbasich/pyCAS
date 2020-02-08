@@ -13,7 +13,7 @@ sys.path.append(os.path.join(current_file_path, '..'))
 
 PARAM_PATH = os.path.join('..', 'data', 'model parameters')
 
-class AM():
+class AutonomyModel():
     def __init__(self, DM, L):
         self.DM = DM
         self.L = L
@@ -34,5 +34,5 @@ class AM():
         pickle.dump(self.kappa, kappa_file, protocol=pickle.HIGHEST_PROTOCOL)
         kappa_file.close()
 
-    def mu(self, l1, l2):
-        return 0.25 if l1 != l2 else 0.0
+    def mu(self, state, action):
+        return 0.25 if state[1] != action[1] else 0.0

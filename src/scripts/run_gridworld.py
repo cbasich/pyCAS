@@ -1,5 +1,6 @@
 import os, sys, time, random, copy, pickle
 
+from copy import deepcopy
 from collections import defaultdict
 from IPython import embed
 
@@ -8,15 +9,20 @@ import itertools as it
 
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
-sys.path.append(os.path.join(current_file_path, '..', 'models'))
 
-OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'out', 'gridworlds')
-FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'data', 'feedback', 'gridworlds')
+OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB')
+FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'feedback')
 
-from models import CAS, autonomy_model, feedback_model, CDB_domain_model
+from models.main.competence_aware_system import CAS
+from models.CDB import CDB_autonomy_model, CDB_feedback_model, CDB_domain_model
 
 
 def main(grid_file, N, generate):
+    if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'cross.data') ):
+        init_cross_data()
+    if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open.data') ):
+        init_open_data()
+
     cost_file = open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), 'a+')
     expected_cost_file = open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'), 'a+')
 
@@ -28,25 +34,24 @@ def main(grid_file, N, generate):
         while end == start:
             end = offices[np.random.randint(len(offices))]
 
+        print("Building environment...")
+        print("Building domain model...")
         DM = CDB_domain_model.DeliveryBotDomain(grid_file, start, end)
-        AM = autonomy_model.AM(DM, [0, 1, 2, 3])
-        HM = feedback_model.HM(DM, AM, ['+', '-', '/', None], ['cross', 'open'])
-
-        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'cross') ):
-            init_cross_data()
-        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open') ):
-            init_open_data()
-
+        print("Building autonomy model...")
+        AM = CDB_autonomy_model.AutonomyModel(DM, [0, 1, 2, 3])
+        print("Building feedback model...")
+        HM = CDB_feedback_model.FeedbackModel(DM, AM, ['+', '-', '/', None], ['cross', 'open'])
+        print("Building CAS...")
         environment = CAS(DM, AM, HM, persistence=0.75)
 
         print("Solving mdp...")
-        environment.solve()
+        print(environment.solve())
 
         expected_cost_file.write(str(environment.V[environment.state_map[environment.init]]) + '\n')
         
         print("Beginning simulation...")
         cost = execute_policy(environment, 100, i)
-        # cost_file.write(str(cost) + '\n')
+        cost_file.write(str(cost) + '\n')
         print(cost)
 
         print("Updating parameters...")
@@ -60,9 +65,9 @@ def main(grid_file, N, generate):
     #     generate_graph(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'),
                     # os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'))
 
-
 def execute_policy(CAS, M, i):
     pi_base = CAS.pi
+    transitions_base = CAS.transitions
     total_returns = 0
 
     for j in range(M):
@@ -86,7 +91,7 @@ def execute_policy(CAS, M, i):
             state = CAS.generate_successor(state, action, feedback)
 
         returns += r
-        CAS.reset()
+        CAS.transitions = transitions_base
 
     return total_returns/M
 
@@ -131,7 +136,8 @@ def init_open_data():
                         f.write('\n' + entry)
 
 if __name__ == '__main__':
-    grid_file = sys.argv[1]
-    N = int(sys.argv[2])
-    generate = int(sys.argv[3])
-    main(grid_file, N, generate)
+    # grid_file = sys.argv[1]
+    # N = int(sys.argv[2])
+    # generate = int(sys.argv[3])
+    # main(grid_file, N, generate)
+    main('map_2.txt', 1, 0)

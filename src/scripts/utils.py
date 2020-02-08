@@ -1,13 +1,13 @@
+import os, sys, pickle
+
 import numpy as np
 import pandas as pd
 
 from pygam import LogisticGAM, te, s, f, l
 
-MODEL_PATH = os.path.join('..', '..', 'data', 'models')
-
-def FVI(mdp, eps = 0.0001):
+def FVI(mdp, eps = 0.001):
     """
-        This is a very fast value iteration using vectorized operations only.
+        This is a fast value iteration using vectorized operations only.
         This function can work on any MDP although it assumes cost-minimizing
         rather than reward-maximizing.
         Additionally, this function requires that C/R and T are given as np arrays
@@ -45,12 +45,13 @@ def FVI(mdp, eps = 0.0001):
 
     return results
 
-def build_gam(datapath, domain, name, distr='binomial', link='logit'):
+def build_gam(domain, name, distr='binomial', link='logit'):
     """
         This function is for building a GAM classifier.
         It requires a pandas dataframe and assumes no missing values.
     """
-    df = pd.read_csv(filepath)
+    domain_path = os.path.join('..', '..', 'domains', domain)
+    df = pd.read_csv(os.path.join(domain_path, 'feedback', name+'.data'))
 
     # First get all of the features (Xv) and convert into the dataframe identifiers
     Xv = df.values[:,:-1]
@@ -71,26 +72,17 @@ def build_gam(datapath, domain, name, distr='binomial', link='logit'):
                 X = X.reshape(-1,1)
                 gam_map[key] = X[:,i][np.where(Xv[:,i] == key)[0]][0]
 
-    gam_map_file = open(os.path.join('..', '..', 'data', 'models', domain, name + '_gam_map.pkl'), mode = 'wb')
+    gam_map_file = open(os.path.join(domain_path, 'params', name + '_gam_map.pkl'), mode = 'wb')
     pickle.dump(gam_map, gam_map_file, protocol=pickle.HIGHEST_PROTOCOL)
     gam_map_file.close()
 
     # Build the GAM now. By default use a Logistic GAM.
     # Use gridsearch to determine optimal parameters.
     # TODO: See if there is a way to automatically use both spline and tensor features.
-    #       If not - will need to manually encode that since it is not in it right now. 
-    gam = LogisticGAM.gridsearch(X, y)
+    #       If not - will need to manually encode that since it is not in it right now.
+    # gam = LogisticGAM().gridsearch(X, y)
+    gam = LogisticGAM().fit(X,y)
 
-    gam_file = open(os.path.join('..', '..', 'data', 'models', domain, name + '_gam.pkl'), mode = 'wb')
-    pickle.dump(gam, gam_file, protocol=HIGHEST_PROTOCOL)
-    gam_filec.close()
-
-def predict(domain, action, features):
-    gam = pickle.load( open( os.path.join(MODEL_PATH, domain, action + '_gam.pkl'), mode='rb'), encoding = 'bytes')
-    gam_map = pickle.load( open( os.path.join(MODEL_PATH, domain, action + '_gam_map.pkl'), mode='rb'), encoding = 'bytes')
-    p = -1.0
-    try:
-        p = gam.predict_proba([[gam_map[feature] for feature in features]])[0]
-    except Exception:
-        pass
-    return p
+    gam_file = open(os.path.join(domain_path, 'params', name + '_gam.pkl'), mode = 'wb')
+    pickle.dump(gam, gam_file, protocol=pickle. HIGHEST_PROTOCOL)
+    gam_file.close()
