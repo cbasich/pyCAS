@@ -111,7 +111,7 @@ class CAS():
 
         for s, state in enumerate(self.DM.states):
             for l1 in range(L):
-                s_bar = L * s + level
+                s_bar = L * s + l1
                 for a, action in enumerate(self.DM.actions):
                     for l2 in range(L):
                         a_bar = L * a + l2

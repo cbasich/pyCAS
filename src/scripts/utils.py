@@ -23,12 +23,17 @@ def FVI(mdp, eps = 0.001):
     dim_array[2] = -1
 
     while True:
-        V_copy = V.copy()
+        # V_copy = V.copy()
         Q = R + gamma*( np.sum( T * V.reshape(dim_array), axis = 2) )
-
-        V = np.amax(Q, axis = 1)
-        if np.max( abs(V - V_copy) ) < eps:
+        tmp = np.amax(Q, axis = 1)
+        if np.max( abs(tmp - V) ) < eps:
+            V = tmp
             break
+        V = tmp
+
+        # V = np.amax(Q, axis = 1)
+        # if np.max( abs(V - V_copy) ) < eps:
+        #     break
 
     V *= -1.0
 
