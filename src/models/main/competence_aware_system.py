@@ -111,10 +111,10 @@ class CAS():
 
         for s, state in enumerate(self.DM.states):
             for l1 in range(L):
-                s_bar = L * s + l1
+                s_bar = L * s + l1                              # Set index in T
                 for a, action in enumerate(self.DM.actions):
                     for l2 in range(L):
-                        a_bar = L * a + l2
+                        a_bar = L * a + l2                      # Set index in T
                         if l2 > self.AM.kappa[state][action]:
                             T[s_bar][a_bar][s_bar] = 1.         # Disallow levels above kappa(s,a)
                             continue
@@ -122,9 +122,9 @@ class CAS():
                             for l3 in range(L):
                                 if l3 != l2:                    # State Prime level must match action level
                                     continue
-                                sp_bar = L * sp + l3
+                                sp_bar = L * sp + l3            # Set index in T
                                 if l2 == 0:
-                                    if action in self.HM.flagged:
+                                    if action in self.HM.flagged:   # Then use 
                                         T[s_bar][a_bar][sp_bar] = self.HM.T_H[s][a][sp]
                                     else:
                                         T[s_bar][a_bar][sp_bar] = self.DM.transitions[s][a][sp]
@@ -133,6 +133,8 @@ class CAS():
                                         * self.HM.tau(state, l1, action, l2,  statePrime))
                         if np.sum(T[s_bar][a_bar]) == 0.:
                             T[s_bar][a_bar][s_bar] = 1.
+
+        #   Everything below this point is less optimized although the code is much cleaner to read.
 
         # for s, state in enumerate(self.states):
         #     s_dm = self.DM.states.index(state[0])

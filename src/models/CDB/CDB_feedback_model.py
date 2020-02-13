@@ -84,3 +84,58 @@ class FeedbackModel():
 
     def rho(self, state, action):
         return len(self.AM.L) - action[1]
+
+    def find_candidates(delta=0.1, thresh=100):
+    """
+        params:
+            delta  - Defines the probability threshold needed for (s,a) to not be a candidate.
+            thresh - Defines the datacount threshold needed for (s,a) to be a candidate
+                     if it does not meet the probability threshold.
+    """
+    candidates = []
+    for state in self.lambda_.keys():
+        for action in self.lambda_[state].keys():
+            candidate = True
+            for sigma in self.Sigma:
+                if self.predict_feedback_probability(state, action, sigma) > 1 - delta:
+                    candidate = False
+            if candidate:
+                candidates.append((state, action))
+
+    return candidates
+
+    def get_most_likely_discriminators(D, candidate, k):
+    """
+        params:
+            D - The data matrix being used to produce the discriminators.
+            candidate - A candidate (s,a) for feature augmentation.
+            k - The number of features to be returned.
+
+        returns:
+            discriminators - A list of features.
+    """
+    unused_features = get_unused_features(D, state)             # TODO: Implement this function
+    C = generate_correlation_matrix(unused_features, D)         # TODO: Implement this function
+    D = generate_discrimination_matrix(unused_features, C)      # TODO: Implement this function
+
+    return unused_features[np.argmax(D, k)]
+
+    def test_discriminators(D_train, D_test, discriminators):
+    """
+        params:
+            D_train        - The data matrix that is going to be used to train the classifiers.
+                             This should be the same or smaller than what was used to produce them.
+            D_test         - The data matrix that is going to be used to test the classifiers.
+                             No data in this should be used to determine the discriminators.
+            discriminators - The discriminators to be testing, where each is an *unused feature*
+                             available to the agent in the full data matrix.
+
+        returns:
+            d*             - The discriminator which produced the classifier with the highest
+                             performance on the test data.
+    """
+    lambdas = [build_lambda(discriminator, D_train) for discriminator in discriminators]    #TODO: Implement this function
+
+    accuracies = [test_lambda(lambda_, D_test) for lambda_ in lambdas]                      #TODO: Implement this function
+
+    return discriminators[np.argmax(accuracies)]

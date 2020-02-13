@@ -3,7 +3,10 @@ import os, sys, pickle
 import numpy as np
 import pandas as pd
 
-from pygam import LogisticGAM, te, s, f, l
+from IPython import embed
+
+from pygam.terms import Term, TermList
+from pygam import GAM, te, s, f, l
 
 def FVI(mdp, eps = 0.001):
     """
@@ -50,10 +53,26 @@ def FVI(mdp, eps = 0.001):
 
     return results
 
-def build_gam(domain, name, distr='binomial', link='logit'):
+def build_gam(domain, name, distr='binomial', link='logit', input_classifier=None):
     """
         This function is for building a GAM classifier.
-        It requires a pandas dataframe and assumes no missing values.
+        
+        params:
+            domain - A string of the name of the domain, e.g. 'CDB'
+            name - A string of the name for the classifier, generally the action in question, e.g. 'cross'
+            distr - The distribution used for the GAM, defaulted to binomial.
+            link - The link used for the GAM, deefaulted to logit.
+            input_classifier - If None, will default to a GAM with a splice term on all singleton terms
+                               and a tensor term on all pairs of terms. Else will use what is provided.
+
+        returns:
+            None
+
+        description:
+            This function produces and pickles a GAM classifier on the data provided, as well as a 'gam map'
+            which provides the mapping for semantic feature value names used in the data set to the tokenized
+            values that the GAM requires.
+
     """
     domain_path = os.path.join('..', '..', 'domains', domain)
     df = pd.read_csv(os.path.join(domain_path, 'feedback', name+'.data'))
@@ -81,12 +100,16 @@ def build_gam(domain, name, distr='binomial', link='logit'):
     pickle.dump(gam_map, gam_map_file, protocol=pickle.HIGHEST_PROTOCOL)
     gam_map_file.close()
 
+    terms = s(0)
+    for i in range(df.shape[1]-1):
+        terms += s(i)
+        for j in range(i+1, df.shape[1]-1):
+            terms += te(i,j)
+
     # Build the GAM now. By default use a Logistic GAM.
     # Use gridsearch to determine optimal parameters.
-    # TODO: See if there is a way to automatically use both spline and tensor features.
-    #       If not - will need to manually encode that since it is not in it right now.
-    # gam = LogisticGAM().gridsearch(X, y)
-    gam = LogisticGAM().fit(X,y)
+    
+    gam = GAM(terms, distribution=distr, link=link).fit(X,y)
 
     gam_file = open(os.path.join(domain_path, 'params', name + '_gam.pkl'), mode = 'wb')
     pickle.dump(gam, gam_file, protocol=pickle. HIGHEST_PROTOCOL)
