@@ -26,7 +26,7 @@ def main(grid_file, N, generate):
     cost_file = open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), 'a+')
     expected_cost_file = open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'), 'a+')
 
-    offices = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','y','z']
+    offices = ['a','b','c','d','e','f','g','h','i','j']#,'k','l','m','n','o','p','q','r','s','t','u','v','w','y','z']
 
     for i in range(N):
         start = offices[np.random.randint(len(offices))]
@@ -44,15 +44,21 @@ def main(grid_file, N, generate):
         print("Building CAS...")
         environment = CAS(DM, AM, HM, persistence=0.75)
 
-        print("Solving mdp...")
-        print(environment.solve())
+        # embed()
 
-        expected_cost_file.write(str(environment.V[environment.state_map[environment.init]]) + '\n')
+        print("Solving mdp...")
+        solver = 'FVI'
+        print(environment.solve(solver=solver))
+        if solver == 'FVI':
+            expected_cost_file.write(str(environment.V[environment.state_map[environment.init]]) + '\n')
         
         print("Beginning simulation...")
-        cost = execute_policy(environment, 100, i)
-        cost_file.write(str(cost) + '\n')
+        if solver == 'FVI':
+            cost = execute_policy(environment, 1000, i)
+        elif solver == 'LRTDP':
+            cost = execute_LRTDP(environment)
         print(cost)
+        cost_file.write(str(cost) + '\n')
 
         print("Updating parameters...")
         environment.update_kappa()
@@ -64,6 +70,29 @@ def main(grid_file, N, generate):
     # if generate:
     #     generate_graph(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'),
                     # os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'))
+
+def execute_LRTDP(CAS):
+    cost = 0.0
+    s = CAS.states.index(CAS.init)
+
+    while not CAS.states[s] in CAS.goals:
+        a, _ = CAS.solver.solve(s)
+        print(CAS.states[s], "  ,  ", CAS.actions[a])
+        cost += CAS.costs[s][a]
+
+        feedback = None
+        state = CAS.states[s]
+        action = CAS.actions[a]
+        if action[1] in [1,2]:
+            feedback = interfaceWithHuman(state[0], action)
+            updateData(action[0], action[1], CAS.DM.get_region(state[0]), state[0][3], feedback)
+            if feedback == '-' or feedback == '/':
+                CAS.remove_transition(state, action)
+
+        s = CAS.solver.generate_successor(s, a)
+
+    return cost
+
 
 def execute_policy(CAS, M, i):
     pi_base = CAS.pi
@@ -79,6 +108,7 @@ def execute_policy(CAS, M, i):
         while not state in CAS.goals:
 
             action = pi[CAS.state_map[state]]
+            print(state, "  ,  ", action)
 
             r += CAS.costs[CAS.state_map[state]][CAS.actions.index(action)]
 
@@ -88,9 +118,13 @@ def execute_policy(CAS, M, i):
                 if i == M-1:
                     updateData(action[0], action[1], CAS.DM.get_region(state), state[3], feedback)
 
-            state = CAS.generate_successor(state, action, feedback)
+            if feedback == '-' or feedback == '/':
+                CAS.remove_transition(state, action)
+                continue
+            else:
+                state = CAS.generate_successor(state, action)
 
-        returns += r
+        total_returns += r
         CAS.transitions = transitions_base
 
     return total_returns/M
@@ -98,9 +132,9 @@ def execute_policy(CAS, M, i):
 def interfaceWithHuman(state, action):
     feedback = None
     if action[1] == 1:
-        feedback = input('\nCan I take action --' + str(action[1]) + '-- in state ' + str(state) +'?\n\n')
+        feedback = input('\nCan I take action --' + str(action[0]) + '-- in state ' + str(state) +'?\n\n')
     else:
-        feedback = input('\nDo you override --' + str(action[1]) + '-- in state ' + str(state) +'?\n\n')
+        feedback = input('\nDo you override --' + str(action[0]) + '-- in state ' + str(state) +'?\n\n')
     return feedback
 
 def updateData(action, level, region, obstacle, feedback):

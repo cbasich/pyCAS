@@ -11,6 +11,7 @@ current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
 from scripts.utils import FVI
+from scripts.LRTDP import LRTDPSolver
 
 PARAM_PATH = os.path.join('..', 'data', 'model parameters')
 
@@ -68,6 +69,7 @@ class CAS():
         self.state_map = None
         self.V = None
         self.Q = None
+        self.solver = None
 
     def generate_states(self):
         """
@@ -133,36 +135,10 @@ class CAS():
                                         * self.HM.tau(state, l1, action, l2,  statePrime))
                         if np.sum(T[s_bar][a_bar]) == 0.:
                             T[s_bar][a_bar][s_bar] = 1.
-
-        #   Everything below this point is less optimized although the code is much cleaner to read.
-
-        # for s, state in enumerate(self.states):
-        #     s_dm = self.DM.states.index(state[0])
-        #     for a, action in enumerate(self.actions):
-        #         a_dm = self.DM.actions.index(action[0])
-
-        #         # Make sure action level is allowed by autonomy profile
-        #         if action[1] > self.AM.kappa[state[0]][action[0]]:
-        #             T[s][a][s] = 1.0
-        #             continue
-
-        #         for sp, statePrime in enumerate(self.states):
-        #             if statePrime[1] != action[1]:      # Can only go to states that agree with level of action
-        #                 continue
-        #             sp_dm = self.DM.states.index(statePrime[0])
-
-        #             if action[1] == 0:      # If operating in *no autonomy* which always exists, follow T_H exactly
-        #                 T[s][a][sp] = self.HM.T_H[s_dm][a_dm][sp_dm]
-
-        #             else:                   # Init value to DM's transition value. Can only be *decreased* from this
-        #                 T[s][a][sp] = self.DM.transitions[s_dm][a_dm][sp_dm]
-
-        #             # Integrate the feedback dynamics
-        #             T[s][a][sp] *= self.HM.tau(state, action, statePrime)
-
-        #         if np.sum(T[s][a]) == 0.0:
-        #             T[s][a][s] = 1.0
         return T
+
+    def T(self, s, a):
+        return self.transitions[s][a]
 
     def compute_costs(self):
         """
@@ -195,6 +171,9 @@ class CAS():
                 # Add the human cost penalty
                 C[s][a] += self.HM.rho(state, action)
         return C
+
+    def C(self, s, a):
+        return self.costs[s][a]
 
     def check_validity(self):
         """
@@ -303,7 +282,7 @@ class CAS():
                         self.potential[s][a][L[level]] = 0.0
                         break
 
-    def solve(self, solve=FVI):
+    def solve(self, solver='FVI'):
         """
             params:
                 solver - The solver to be using. Defaults to FVI.
@@ -318,9 +297,14 @@ class CAS():
                     V - The value function in matrix form over states.
                     Q - The q-value funciton in matrix for over state action pairs.
         """
-        start_time = time.time()
-        mdp_info = FVI(self)
-        end_time = time.time()
+        if solver == 'LRTDP':
+            self.solver = LRTDPSolver(mdp = self, max_trials = 100)
+            return
+
+        if solver == 'FVI':
+            start_time = time.time()
+            mdp_info = FVI(self)
+            end_time = time.time()
 
         self.pi = mdp_info['pi']
         self.state_map = mdp_info['state map']
