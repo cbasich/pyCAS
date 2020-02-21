@@ -26,7 +26,7 @@ def main(grid_file, N, generate):
     cost_file = open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), 'a+')
     expected_cost_file = open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'), 'a+')
 
-    offices = ['a','b','c','d','e','f','g','h','i','j']#,'k','l','m','n','o','p','q','r','s','t','u','v','w','y','z']
+    offices = ['a','b','c','d','e','f','g','h','i','j'] #,'k','l','m','n','o','p','q','r','s','t','u','v','w','y','z']
 
     for i in range(N):
         start = offices[np.random.randint(len(offices))]
@@ -50,11 +50,11 @@ def main(grid_file, N, generate):
         solver = 'FVI'
         print(environment.solve(solver=solver))
         if solver == 'FVI':
-            expected_cost_file.write(str(environment.V[environment.state_map[environment.init]]) + '\n')
-        
+            expected_cost_file.write(str(environment.V[environment.states.index(environment.init)]) + '\n')
+
         print("Beginning simulation...")
         if solver == 'FVI':
-            cost = execute_policy(environment, 1000, i)
+            cost = execute_policy(environment, 1, i)
         elif solver == 'LRTDP':
             cost = execute_LRTDP(environment)
         print(cost)
@@ -114,9 +114,12 @@ def execute_policy(CAS, M, i):
 
             feedback = None
             if action[1] == 1 or action[1] == 2:
-                feedback = interfaceWithHuman(state, action)
+                feedback = interfaceWithHuman(state[0], action)
                 if i == M-1:
-                    updateData(action[0], action[1], CAS.DM.get_region(state), state[3], feedback)
+                    try:
+                        updateData(action[0], action[1], CAS.DM.get_region(state[0]), state[0][3], feedback)
+                    except Exception:
+                        embed()
 
             if feedback == '-' or feedback == '/':
                 CAS.remove_transition(state, action)

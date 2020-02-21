@@ -11,7 +11,8 @@ from IPython import embed
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
-PARAM_PATH = os.path.join('..', 'data', 'model parameters')
+DOMAIN_PATH = os.path.join('..', '..', 'domains')
+PARAM_PATH = os.path.join(DOMAIN_PATH, 'CDB', 'params')
 
 class AutonomyModel():
     def __init__(self, DM, L):
@@ -30,7 +31,10 @@ class AutonomyModel():
         return kappa
 
     def save_kappa(self):
-        kappa_file = open( os.path.join(PARAM_PATH, 'kappa.pkl'), 'wb')
+        try:
+           kappa_file = open( os.path.join(PARAM_PATH, 'kappa.pkl'), 'wb')
+        except Exception:
+            embed()
         pickle.dump(self.kappa, kappa_file, protocol=pickle.HIGHEST_PROTOCOL)
         kappa_file.close()
 

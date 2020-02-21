@@ -45,7 +45,7 @@ class FeedbackModel():
         elif sigma == '-':
             p = 1 - self.lambda_[state][action][1]
         elif sigma == None:
-            p = self.lambda_[stat][action][2]
+            p = self.lambda_[state][action][2]
         elif sigma == '/':
             p = 1 - self.lambda_[state][action][2]
         return p if 0. <= p <= 1. else 0.
@@ -56,14 +56,14 @@ class FeedbackModel():
             for any set of feedback. In general, this will need to be coded by hand.
             In this case for the standard CAS model with feedback signals.
         """
-        if action_level not in self.flagged or action_level == 3:
+        if action not in self.flagged or action_level == 3:
             return 1.
 
         tau_ = 0.0
-        if action[1] == 1:
+        if action_level == 1:
             tau_ = (self.predict_feedback_probability(state, action, '+')
                  + self.predict_feedback_probability(state, action, '-') * (state == statePrime))
-        elif action[1] == 2:    # Initial assumption that when human overrides, they simply stop the agent.
+        elif action_level == 2:    # Initial assumption that when human overrides, they simply stop the agent.
             tau_ = (self.predict_feedback_probability(state, action, None)
                  + self.predict_feedback_probability(state, action, '/') * (state == statePrime))
 

@@ -45,7 +45,7 @@ def FVI(mdp, eps = 0.001):
     state_map = {state: s for s, state in enumerate(states)}
 
     results = {
-        'V': v,
+        'V': V,
         'pi': pi,
         'state map': state_map,
         'Q' : Q

@@ -56,7 +56,7 @@ class CAS():
 
         self.states = self.generate_states()
         self.actions = self.generate_actions()
-        self.init = (self.DM.init, self.AM.L[0])
+        self.init = (self.DM.init, 3)
         self.goals = list(it.product(self.DM.goals, self.AM.L))
         self.transitions = self.compute_transitions()
         self.transitions_base = self.transitions.copy()
@@ -81,7 +81,9 @@ class CAS():
                 domain state s and a level of autonomy l, where l is the
                 level that the previous action was performed in.
         """
-        return list(it.product(self.DM.states, self.AM.L))
+        # return list(it.product(self.DM.states, self.AM.L))                # For testing to speed things up we are
+                                                                            # removing L, and pretending just one l
+        return list(it.product(self.DM.states, [3]))
 
     def generate_actions(self):
         """
@@ -109,32 +111,35 @@ class CAS():
                             for a in range(len(self.actions))]
                             for s in range(len(self.states))])
 
-        L = len(self.AM.L)
+        # L = len(self.AM.L)
+        L = 1                                                   # Removing for testing to speed things up.
 
         for s, state in enumerate(self.DM.states):
             for l1 in range(L):
                 s_bar = L * s + l1                              # Set index in T
                 for a, action in enumerate(self.DM.actions):
-                    for l2 in range(L):
-                        a_bar = L * a + l2                      # Set index in T
+                    for l2 in range(len(self.AM.L)):
+                        a_bar = len(self.AM.L) * a + l2                      # Set index in T
                         if l2 > self.AM.kappa[state][action]:
                             T[s_bar][a_bar][s_bar] = 1.         # Disallow levels above kappa(s,a)
                             continue
                         for sp, statePrime in enumerate(self.DM.states):
                             for l3 in range(L):
-                                if l3 != l2:                    # State Prime level must match action level
-                                    continue
+                                # if l3 != l2:                  # State Prime level must match action level
+                                #     continue
                                 sp_bar = L * sp + l3            # Set index in T
                                 if l2 == 0:
-                                    if action in self.HM.flagged:   # Then use 
+                                    if action in self.HM.flagged: 
                                         T[s_bar][a_bar][sp_bar] = self.HM.T_H[s][a][sp]
                                     else:
                                         T[s_bar][a_bar][sp_bar] = self.DM.transitions[s][a][sp]
                                 else:
                                     T[s_bar][a_bar][sp_bar] = (self.DM.transitions[s][a][sp]
-                                        * self.HM.tau(state, l1, action, l2,  statePrime))
+                                                             * self.HM.tau(state, l1, action, l2,  statePrime))
                         if np.sum(T[s_bar][a_bar]) == 0.:
                             T[s_bar][a_bar][s_bar] = 1.
+                        if np.sum(T[s_bar][a_bar]) != 1.:
+                            embed()
         return T
 
     def T(self, s, a):
@@ -216,10 +221,10 @@ class CAS():
                 case, we should in fact build kkappa in here rather than leaving it to the DM to 
                 save on computation. This would be less efficient in general but more *correct*.
         """
-        sbar = self.states.index((state, 0))
+        sbar = self.states.index((state, 3))
         abar = self.actions.index((self.DM.actions[a], l))
         T = self.transitions[sbar][abar]
-        q = self.costs[sbar][abar] - self.AM.mu(0, l) + np.sum(np.array(self.V * T))
+        q = self.costs[sbar][abar] + np.sum(np.array(self.V * T))
         return q
 
     def update_potential(self, state, s, action, a, L):
@@ -240,7 +245,7 @@ class CAS():
                 the persistence times the softmax over the q values of q(s, a, l) for
                 each l in L. 
         """ 
-        X = np.array([self.q(s, state, a, action, l) for l in L])
+        X = np.array([self.q(state, s, action, a, l) for l in L])
         softmax = (np.exp(-1.0 * X)/np.sum(np.exp(-1.0 * X)))
         for l in range(len(L)):
             self.potential[s][a][L[l]] += self.persistence * softmax[l]
@@ -273,14 +278,17 @@ class CAS():
                     L = [level - 1, level]
                 else:
                     L = [level-1, level, level+1]
-                self.update_potential(s, state, a, action, L)
+                self.update_potential(state, s, action, a, L)
 
                 for level_index in np.argsort(-1.0 * np.array([self.potential[s][a][l] for l in L])):
                     if np.random.uniform() <= self.potential[s][a][L[level_index]]:
                         # TODO insert level update logic here
-                        self.AM.kappa[state][action] = L[level]
-                        self.potential[s][a][L[level]] = 0.0
+                        self.AM.kappa[state][action] = L[level_index]
+                        self.potential[s][a][L[level_index]] = 0.0
                         break
+
+    def save_kappa(self):
+        self.AM.save_kappa()
 
     def solve(self, solver='FVI'):
         """

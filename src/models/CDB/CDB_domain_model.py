@@ -151,6 +151,8 @@ class DeliveryBotDomain():
 
         return regions
 
+    def get_region(self, state):
+        return self.regions[(state[0], state[1])]
 
     def generate_costs(self):
         C = np.array([[1.0 for a in range(len(self.actions))] 
@@ -160,7 +162,6 @@ class DeliveryBotDomain():
             C[self.states.index(goal)] *= 0.0
 
         return C
-
 
     def generate_transitions(self):
         T = np.array([[[0.0 for sp in range(len(self.states))]
