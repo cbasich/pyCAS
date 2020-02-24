@@ -75,39 +75,50 @@ class DeliveryBotDomain():
                                 self.kappa[tmp][a] = 3
                             else:
                                 self.kappa[tmp][a] = 1
-            elif self.grid[x][y] == 'L':
-                tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['light-open', 'light-closed']))
+            elif self.grid[x][y] in ['L', 'M', 'H']:
+                tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed']))
                 states = states.union(tmp_states)
                 for tmp in tmp_states:
                     if tmp not in self.kappa.keys():
                         self.kappa[tmp] = {}
                         for a in self.actions:
-                            if 'closed' in tmp[3] and (a == REV_MAPPING[tmp[2]] or a == 'open'):
+                            if 'closed' in tmp[3] and a == 'open':
                                 self.kappa[tmp][a] = 1
                             else:
                                 self.kappa[tmp][a] = 3
-            elif self.grid[x][y] == 'M':
-                tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['medium-open', 'medium-closed']))
-                states = states.union(tmp_states)
-                for tmp in tmp_states:
-                    if tmp not in self.kappa.keys():
-                        self.kappa[tmp] = {}
-                        for a in self.actions:
-                            if 'closed' in tmp[3] and (a == REV_MAPPING[tmp[2]] or a == 'open'):
-                                self.kappa[tmp][a] = 1
-                            else:
-                                self.kappa[tmp][a] = 3
-            elif self.grid[x][y] == 'H':
-                tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['heavy-open', 'heavy-closed']))
-                states = states.union(tmp_states)
-                for tmp in tmp_states:
-                    if tmp not in self.kappa.keys():
-                        self.kappa[tmp] = {}
-                        for a in self.actions:
-                            if 'closed' in tmp[3] and (a == REV_MAPPING[tmp[2]] or a == 'open'):
-                                self.kappa[tmp][a] = 1
-                            else:
-                                self.kappa[tmp][a] = 3
+            # elif self.grid[x][y] == 'L':
+            #     tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['light-open', 'light-closed']))
+            #     states = states.union(tmp_states)
+            #     for tmp in tmp_states:
+            #         if tmp not in self.kappa.keys():
+            #             self.kappa[tmp] = {}
+            #             for a in self.actions:
+            #                 if 'closed' in tmp[3] and (a == REV_MAPPING[tmp[2]] or a == 'open'):
+            #                     self.kappa[tmp][a] = 1
+            #                 else:
+            #                     self.kappa[tmp][a] = 3
+            # elif self.grid[x][y] == 'M':
+            #     tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['medium-open', 'medium-closed']))
+            #     states = states.union(tmp_states)
+            #     for tmp in tmp_states:
+            #         if tmp not in self.kappa.keys():
+            #             self.kappa[tmp] = {}
+            #             for a in self.actions:
+            #                 if 'closed' in tmp[3] and (a == REV_MAPPING[tmp[2]] or a == 'open'):
+            #                     self.kappa[tmp][a] = 1
+            #                 else:
+            #                     self.kappa[tmp][a] = 3
+            # elif self.grid[x][y] == 'H':
+            #     tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['heavy-open', 'heavy-closed']))
+            #     states = states.union(tmp_states)
+            #     for tmp in tmp_states:
+            #         if tmp not in self.kappa.keys():
+            #             self.kappa[tmp] = {}
+            #             for a in self.actions:
+            #                 if 'closed' in tmp[3] and (a == REV_MAPPING[tmp[2]] or a == 'open'):
+            #                     self.kappa[tmp][a] = 1
+            #                 else:
+            #                     self.kappa[tmp][a] = 3
             elif self.grid[x][y] == '.':
                 states.add(s)
                 if s not in self.kappa.keys():
@@ -203,10 +214,10 @@ class DeliveryBotDomain():
             else:
                 return 1.0 if (xp == statePrime[0] and yp == statePrime[1]) else 0.0
 
-        if (statePrime == (xp, yp) or
-            statePrime == (xp, yp, MAPPING[action], 'light-closed') or
-            statePrime == (xp, yp, MAPPING[action], 'medium-closed') or
-            statePrime == (xp, yp, MAPPING[action], 'heavy-closed')):
+        if (statePrime == (xp, yp) or statePrime == (xp, yp, MAPPING[action], 'door-closed')):
+            # statePrime == (xp, yp, MAPPING[action], 'light-closed') or
+            # statePrime == (xp, yp, MAPPING[action], 'medium-closed') or
+            # statePrime == (xp, yp, MAPPING[action], 'heavy-closed')):
             return 1.0
 
         elif (statePrime == (xp, yp, MAPPING[action], 'empty') or
@@ -232,9 +243,11 @@ class DeliveryBotDomain():
              state[0] == statePrime[0] and
              state[1] == statePrime[1] and
              state[2] == statePrime[2]):
-            if ((state[3] == 'light-closed' and statePrime[3] == 'light-open') or
-                (state[3] == 'medium-closed' and statePrime[3] == 'medium-open') or
-                (state[3] == 'heavy-closed' and statePrime[3] == 'heavy-open')):
+            # if ((state[3] == 'light-closed' and statePrime[3] == 'light-open') or
+            #     (state[3] == 'medium-closed' and statePrime[3] == 'medium-open') or
+            #     (state[3] == 'heavy-closed' and statePrime[3] == 'heavy-open')):
+            #     return 1.0
+            if state[3] == 'door-closed' and statePrime[3] == 'door-open':
                 return 1.0
 
         return 0.0
@@ -275,3 +288,25 @@ class DeliveryBotDomain():
                     print("Error @ state " + str(self.states[s]) + " and action " + str(self.actions[a]))
                     embed()
                     quit()
+
+    def generate_successor(self, state, action):
+        """
+            params:
+                state - The state we are generating a successor for.
+                action - The action we are generating a successor for.
+
+            returns:
+                successor - The successor state that the agent arrives in
+                            when taking 'action' in 'state', as determined
+                            by the transition function. 
+        """
+        s = self.states.index(state)
+        a = self.actions.index(action)
+
+        rand = np.random.uniform()
+        thresh = 0.0
+
+        for sp in range(len(self.states)):
+            thresh += self.transitions[s][a][sp]
+            if rand <= thresh:
+                return self.states[sp]

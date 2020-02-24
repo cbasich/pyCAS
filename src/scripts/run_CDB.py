@@ -44,8 +44,6 @@ def main(grid_file, N, generate):
         print("Building CAS...")
         environment = CAS(DM, AM, HM, persistence=0.75)
 
-        # embed()
-
         print("Solving mdp...")
         solver = 'FVI'
         print(environment.solve(solver=solver))
@@ -63,6 +61,9 @@ def main(grid_file, N, generate):
         print("Updating parameters...")
         environment.update_kappa()
         environment.save_kappa()
+
+        print("Identifying candidates...")
+        print(environment.HM.find_candidates())
     
     expected_cost_file.close()
     cost_file.close()
@@ -116,14 +117,14 @@ def execute_policy(CAS, M, i):
             if action[1] == 1 or action[1] == 2:
                 feedback = interfaceWithHuman(state[0], action)
                 if i == M-1:
-                    try:
-                        updateData(action[0], action[1], CAS.DM.get_region(state[0]), state[0][3], feedback)
-                    except Exception:
-                        embed()
-
-            if feedback == '-' or feedback == '/':
+                    used_features = [action[1], CAS.DM.get_region(state[0]), state[0][3]]
+                    unused_features = [CAS.DM.helper.get_door_type(state[0])]
+                    updateData(action[0], used_features, unused_features, feedback)
+            if feedback == 'no':
                 CAS.remove_transition(state, action)
                 continue
+            elif feedback == 'yes':
+                state = (CAS.DM.generate_successor(state[0], action[0]), state[1])
             else:
                 state = CAS.generate_successor(state, action)
 
@@ -138,19 +139,30 @@ def interfaceWithHuman(state, action):
         feedback = input('\nCan I take action --' + str(action[0]) + '-- in state ' + str(state) +'?\n\n')
     else:
         feedback = input('\nDo you override --' + str(action[0]) + '-- in state ' + str(state) +'?\n\n')
+        if feedback == 'yes':
+            feedback = 'no'
+        elif feedback == 'no':
+            feedback = 'yes'
     return feedback
 
-def updateData(action, level, region, obstacle, feedback):
+def updateData(action, used_features, unused_features, feedback):
     if feedback is None:
         pass
+    data_string = ",".join([str(f) for f in used_features])
+    full_data_string = data_string + "," + ",".join([str(f) for f in unused_features])
+
     if action == 'cross':
-        filepath = sys.path.append(FEEDBACK_DATA_PATH, 'open.data')
+        filepath = os.path.join(FEEDBACK_DATA_PATH, 'cross.data')
         with open(filepath, mode='a+') as f:
-            f.write('\n' + str(level) + ',' + str(region) + ',' + str(obstacle) + ',' + str(feedback))
+            f.write('\n' + data_string + ',' + str(feedback))
     elif action == 'open':
-        filepath = sys.path.append(FEEDBACK_DATA_PATH, 'open.data')
+        filepath = os.path.join(FEEDBACK_DATA_PATH, 'open.data')
         with open(filepath, mode='a+') as f:
-            f.write('\n' + str(level) + ',' + str(region) + ',' + str(obstacle) + ',' + str(feedback))
+            f.write('\n' + data_string + ',' + str(feedback))
+        if len(unused_features) > 0:
+            filepath = os.path.join(FEEDBACK_DATA_PATH, 'open_full.data')
+            with open(filepath, mode='a+') as f:
+                f.write('\n' + full_data_string + ',' + str(feedback))
 
 def init_cross_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross.data'), 'a+') as f:
@@ -167,7 +179,19 @@ def init_open_data():
         f.write('level,region,obstacle,feedback')
         for level in ['1','2']:
             for region in ['b1','b2','b3']:
-                for obstacle in ['light-closed', 'medium-closed', 'heavy-closed']:
+                # for obstacle in ['light-closed', 'medium-closed', 'heavy-closed']:
+                for obstacle in ['door-open', 'door-closed']:
+                    for feedback in ['yes','no']:
+                        entry = level + ',' + region + ',' + obstacle + ',' + feedback
+                        f.write('\n' + entry)
+
+def init_full_open_data():
+    with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
+        f.write('level,region,obstacle,feedback')
+        for level in ['1','2']:
+            for region in ['b1','b2','b3']:
+                # for obstacle in ['light-closed', 'medium-closed', 'heavy-closed']:
+                for obstacle in ['door-open', 'door-closed']:
                     for feedback in ['yes','no']:
                         entry = level + ',' + region + ',' + obstacle + ',' + feedback
                         f.write('\n' + entry)
@@ -177,4 +201,4 @@ if __name__ == '__main__':
     # N = int(sys.argv[2])
     # generate = int(sys.argv[3])
     # main(grid_file, N, generate)
-    main('map_2.txt', 1, 0)
+    main('map_1.txt', 1, 0)

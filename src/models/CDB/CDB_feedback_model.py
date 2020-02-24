@@ -50,21 +50,23 @@ class FeedbackModel():
             p = 1 - self.lambda_[state][action][2]
         return p if 0. <= p <= 1. else 0.
 
-    def tau(self, state, state_level, action, action_level, statePrime):
+    def tau(self, s, state, state_level, a, action, action_level, sp, statePrime):
         """
             This function is going to encode the 'feedback-dynamics', so-called,
             for any set of feedback. In general, this will need to be coded by hand.
             In this case for the standard CAS model with feedback signals.
         """
+        p = self.DM.transitions[s][a][sp]
+
         if action not in self.flagged or action_level == 3:
-            return 1.
+            return p
 
         tau_ = 0.0
         if action_level == 1:
-            tau_ = (self.predict_feedback_probability(state, action, '+')
+            tau_ = (self.predict_feedback_probability(state, action, '+') * p
                  + self.predict_feedback_probability(state, action, '-') * (state == statePrime))
         elif action_level == 2:    # Initial assumption that when human overrides, they simply stop the agent.
-            tau_ = (self.predict_feedback_probability(state, action, None)
+            tau_ = (self.predict_feedback_probability(state, action, None) * p
                  + self.predict_feedback_probability(state, action, '/') * (state == statePrime))
 
         return tau_
@@ -83,26 +85,33 @@ class FeedbackModel():
         return np.where(self.DM.transitions == row_maxes, 1., 0.)
 
     def rho(self, state, action):
-        return len(self.AM.L) - action[1]
+        if action[1] == 0:
+            return 10
+        elif action[1] == 1:
+            return 2
+        elif action[1] == 2:
+            return 1
+        else:
+            return 0.
 
-    # def find_candidates(delta=0.1, thresh=100):
-    # """
-    #     params:
-    #         delta  - Defines the probability threshold needed for (s,a) to not be a candidate.
-    #         thresh - Defines the datacount threshold needed for (s,a) to be a candidate
-    #                  if it does not meet the probability threshold.
-    # """
-    # candidates = []
-    # for state in self.lambda_.keys():
-    #     for action in self.lambda_[state].keys():
-    #         candidate = True
-    #         for sigma in self.Sigma:
-    #             if self.predict_feedback_probability(state, action, sigma) > 1 - delta:
-    #                 candidate = False
-    #         if candidate:
-    #             candidates.append((state, action))
+    def find_candidates(self, delta=0.1, thresh=100):
+        """
+        params:
+            delta  - Defines the probability threshold needed for (s,a) to not be a candidate.
+            thresh - Defines the datacount threshold needed for (s,a) to be a candidate
+                     if it does not meet the probability threshold.
+        """
+        candidates = []
+        for state in self.lambda_.keys():
+            for action in self.lambda_[state].keys():
+                candidate = True
+                for sigma in self.Sigma:
+                    if self.predict_feedback_probability(state, action, sigma) > 1 - delta:
+                        candidate = False
+                if candidate:
+                    candidates.append((state, action))
 
-    # return candidates
+        return candidates
 
     # def get_most_likely_discriminators(D, candidate, k):
     # """

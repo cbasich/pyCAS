@@ -1,6 +1,7 @@
 import os, sys, time, random, pickle
 
 import numpy as np
+from IPython import embed
 
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..', '..'))
@@ -41,13 +42,20 @@ class CampusDeliveryBotHelper():
         if len(state) == 2 or 'open' in state[3]:
             return 1.
         features = [level] + self.extract_state_features(state)
-        if action == 'open':
-            try:
-                return self.open_GAM.predict_proba([[self.open_GAM_map[f] for f in features]])
-            except Exception:
-                return 0.0
+        if action == 'open' and 'door' in state[3]:
+            return self.open_GAM.predict_mu([[self.open_GAM_map[f] for f in features]])
+        elif action == 'cross' and 'door' not in state[3]:
+            return self.cross_GAM.predict_mu([[self.cross_GAM_map[f] for f in features]])
         else:
-            try:
-                return self.cross_GAM.predict_proba([[self.cross_GAM_map[f] for f in features]])
-            except Exception:
-                return 0.0
+            return -1.
+
+    def get_door_type(self, state):
+        x, y = state[0], state[1]
+        if self.DM.grid[x][y] == 'L':
+            return 'light'
+        elif self.DM.grid[x][y] == 'M':
+            return 'medium'
+        elif self.DM.grid[x][y] == 'H':
+            return 'heavy'
+        else:
+            return

@@ -134,8 +134,7 @@ class CAS():
                                     else:
                                         T[s_bar][a_bar][sp_bar] = self.DM.transitions[s][a][sp]
                                 else:
-                                    T[s_bar][a_bar][sp_bar] = (self.DM.transitions[s][a][sp]
-                                                             * self.HM.tau(state, l1, action, l2,  statePrime))
+                                    T[s_bar][a_bar][sp_bar] = self.HM.tau(s, state, l1, a, action, l2, sp, statePrime)
                         if np.sum(T[s_bar][a_bar]) == 0.:
                             T[s_bar][a_bar][s_bar] = 1.
                         if np.sum(T[s_bar][a_bar]) != 1.:
@@ -271,6 +270,9 @@ class CAS():
         """
         for s, state in enumerate(self.DM.states):
             for a, action in enumerate(self.DM.actions):
+                if action not in self.HM.flagged:
+                    continue
+
                 level = self.AM.kappa[state][action]
                 if level == 0:
                     L = [level, level + 1]
