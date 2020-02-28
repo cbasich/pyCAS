@@ -63,8 +63,16 @@ def main(grid_file, N, generate):
         environment.save_kappa()
 
         print("Identifying candidates...")
-        print(environment.HM.find_candidates())
-    
+        candidates = environment.HM.find_candidates()
+        if len(candidates) > 0:
+            candidate = candidates[np.random.randint(len(candidates))]
+
+            print("Identifying potential discriminators...")
+            discriminator = environment.HM.get_most_likely_discriminator(candidate, 1)
+            print(discriminator)
+        else:
+            print("No candidates...")
+
     expected_cost_file.close()
     cost_file.close()
 
@@ -122,6 +130,8 @@ def execute_policy(CAS, M, i):
                     updateData(action[0], used_features, unused_features, feedback)
             if feedback == 'no':
                 CAS.remove_transition(state, action)
+                CAS.solve()
+                pi = CAS.pi
                 continue
             elif feedback == 'yes':
                 state = (CAS.DM.generate_successor(state[0], action[0]), state[1])
@@ -201,4 +211,4 @@ if __name__ == '__main__':
     # N = int(sys.argv[2])
     # generate = int(sys.argv[3])
     # main(grid_file, N, generate)
-    main('map_1.txt', 1, 0)
+    main('map_2.txt', 1, 0)

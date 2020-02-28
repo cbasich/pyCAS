@@ -1,6 +1,8 @@
 import os, sys, time, random, pickle
 
 import numpy as np
+import pandas as pd
+
 from IPython import embed
 
 current_file_path = os.path.dirname(os.path.realpath(__file__))
@@ -13,8 +15,28 @@ FEEDBACK_PATH = os.path.join(DOMAIN_PATH, 'feedback')
 PARAM_PATH = os.path.join(DOMAIN_PATH, 'params')
 
 def build_gams():
-    build_gam('CDB', 'cross')
-    build_gam('CDB', 'open')
+    # Build and save the gam and gam_map for the action 'open'
+    open_gam, open_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'open.data')))
+
+    gam_map_file = open(os.path.join(PARAM_PATH, 'open_gam_map.pkl'), mode = 'wb')
+    pickle.dump(open_gam_map, gam_map_file, protocol=pickle.HIGHEST_PROTOCOL)
+    gam_map_file.close()
+    
+    gam_file = open(os.path.join(PARAM_PATH, 'open_gam.pkl'), mode = 'wb')
+    pickle.dump(open_gam, gam_file, protocol=pickle. HIGHEST_PROTOCOL)
+    gam_file.close()
+
+    # Build and save the gam and gam_map for the action 'cross'
+    cross_gam, cross_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'cross.data')))
+
+    gam_map_file = open(os.path.join(PARAM_PATH, 'cross_gam_map.pkl'), mode = 'wb')
+    pickle.dump(cross_gam_map, gam_map_file, protocol=pickle.HIGHEST_PROTOCOL)
+    gam_map_file.close()
+
+    gam_file = open(os.path.join(PARAM_PATH, 'cross_gam.pkl'), mode = 'wb')
+    pickle.dump(cross_gam, gam_file, protocol=pickle. HIGHEST_PROTOCOL)
+    gam_file.close()
+
 
 def load_gams():
     cross_GAM = pickle.load( open( os.path.join(PARAM_PATH, 'cross_gam.pkl'), mode='rb'), encoding='bytes')

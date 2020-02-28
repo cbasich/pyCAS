@@ -1,5 +1,6 @@
 import os, sys, time, random, pickle
 import numpy as np
+import pandas as pd
 import itertools as it
 
 from IPython import embed
@@ -7,7 +8,9 @@ from IPython import embed
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
-PARAM_PATH = os.path.join('..', 'data', 'model parameters')
+from scripts.utils import build_gam
+
+FEEDBACK_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB', 'feedback')
 
 class FeedbackModel():
     def __init__(self, DM, AM, Sigma, flagged):
@@ -28,6 +31,8 @@ class FeedbackModel():
         """
         lambda_ = {}
         for state in self.DM.states:        # Assumption that level component doesnt impact lambda
+            if len(state) == 2:
+                continue
             if not state in lambda_.keys():
                 lambda_[state] = {}
             for action in self.flagged:
@@ -58,7 +63,7 @@ class FeedbackModel():
         """
         p = self.DM.transitions[s][a][sp]
 
-        if action not in self.flagged or action_level == 3:
+        if len(state) == 2 or action not in self.flagged or action_level == 3:
             return p
 
         tau_ = 0.0
@@ -94,57 +99,161 @@ class FeedbackModel():
         else:
             return 0.
 
-    def find_candidates(self, delta=0.1, thresh=100):
+    def get_unused_features(self, state, action):
+            """
+                params:
+                    state    - The state that we are getting unused features for.
+                    action   - The action in question; used for loading the dataframe.
+
+                returns:
+                    features - The list of features that are currently not being used
+                               in the factored representation of the state.
+            """
+            data_file = os.path.join(FEEDBACK_PATH, action+'.data')
+            df = pd.read_csv(data_file)
+
+            data_file_full = os.path.join(FEEDBACK_PATH, action+'_full.data')
+            df_full = pd.read_csv(data_file_full)
+
+            # Get the column names which are the features currently being used.
+            used_features = df.columns
+
+            # Get the complete list of features available.
+            full_features = df_full.columns
+
+            # Get the features in full_features not in used_features
+            unused_features = full_features.drop(used_features)
+            return unused_features
+
+    def find_candidates(self, delta=0.1, thresh=30):
         """
         params:
             delta  - Defines the probability threshold needed for (s,a) to not be a candidate.
             thresh - Defines the datacount threshold needed for (s,a) to be a candidate
                      if it does not meet the probability threshold.
         """
+
+        # Load the relevant data files
+        cross_path = os.path.join(FEEDBACK_PATH, 'cross.data')
+        open_path = os.path.join(FEEDBACK_PATH, 'open.data')
+        cross_df = pd.read_csv(cross_path)
+        open_df = pd.read_csv(open_path)
+
         candidates = []
         for state in self.lambda_.keys():
             for action in self.lambda_[state].keys():
-                candidate = True
-                for sigma in self.Sigma:
-                    if self.predict_feedback_probability(state, action, sigma) > 1 - delta:
-                        candidate = False
-                if candidate:
-                    candidates.append((state, action))
+                for level in self.lambda_[state][action].keys():
+
+                    # Get the count for thist (s, a, l) tuple in the relevant datafile.
+                    dic = {'level': level, 'region': self.DM.get_region(state), 'obstacle': state[3]}
+                    if action == 'open':
+                        count = np.sum(pd.DataFrame([open_df[k] == v for k,v in dic.items()]).all())
+                    elif action == 'cross':
+                        count = np.sum(pd.DataFrame([cross_df[k] == v for k,v in dic.items()]).all())
+
+                    # If we have not seen this (s, a, l) a sufficient number of times, skip it.
+                    if count < thresh: 
+                        continue
+
+                    candidate = True
+
+                    # Determine if there is *any* feedback signal that we can predict with probability
+                    # at least 1 - delta for some given delta. If there isn't, then this (s, a, l) is
+                    # considered to be a candidate. 
+                    for sigma in self.Sigma:
+                        if self.predict_feedback_probability(state, action, sigma) > 1 - delta:
+                            candidate = False
+                    if candidate:
+                        candidates.append((state, action, level))
 
         return candidates
 
-    # def get_most_likely_discriminators(D, candidate, k):
-    # """
-    #     params:
-    #         D - The data matrix being used to produce the discriminators.
-    #         candidate - A candidate (s,a) for feature augmentation.
-    #         k - The number of features to be returned.
+    def get_most_likely_discriminator(self, candidate, k):
+        """y
+            params:
+                D - The data matrix being used to produce the discriminators.
+                candidate - A candidate (s,a) for feature augmentation.
+                k - The number of features to be returned.
 
-    #     returns:
-    #         discriminators - A list of features.
-    # """
-    # unused_features = get_unused_features(D, state)             # TODO: Implement this function
-    # C = generate_correlation_matrix(unused_features, D)         # TODO: Implement this function
-    # D = generate_discrimination_matrix(unused_features, C)      # TODO: Implement this function
+            returns:
+                discriminators - A list of features.
+        """
+        state, action, level = candidate
 
-    # return unused_features[np.argmax(D, k)]
+        # First, for a given candidate, procure its unused features.
+        unused_features = self.get_unused_features(state, action)
 
-    # def test_discriminators(D_train, D_test, discriminators):
-    # """
-    #     params:
-    #         D_train        - The data matrix that is going to be used to train the classifiers.
-    #                          This should be the same or smaller than what was used to produce them.
-    #         D_test         - The data matrix that is going to be used to test the classifiers.
-    #                          No data in this should be used to determine the discriminators.
-    #         discriminators - The discriminators to be testing, where each is an *unused feature*
-    #                          available to the agent in the full data matrix.
+        # Second, compute the correlation matrix over each unused feature
+        # and the feedback.
+        # TODO: Include all *pairs* of features as rows in the matrix.
+        # TODO: There is an issue right now with features that take on <= 2
+        #       integral values (i.e. level) in the presence of objects. The issue
+        #       is that during the one hot encoding, each value (i.e. level 1, level 2)
+        #       is not assigned a separate row. So there is a correlation only for 'feature'
+        #       whereas the other features have a correlation for each 'feature-value'.
+        #       This may present problems below when calculating the discriminator matrix.
+        #       The real todo is check if that is the case or not.
+        D = pd.read_csv(os.path.join(FEEDBACK_PATH, action + "_full.data"))
+        _corr = pd.get_dummies( D[np.append(unused_features, 'feedback')] ).corr()
+        _corr = _corr[[c for c in _corr.columns.values if 'feedback' in c]]
+        _corr = _corr.drop([c for c in _corr.axes[0].values if 'feedback' in c], axis = 0)
 
-    #     returns:
-    #         d*             - The discriminator which produced the classifier with the highest
-    #                          performance on the test data.
-    # """
-    # lambdas = [build_lambda(discriminator, D_train) for discriminator in discriminators]    #TODO: Implement this function
 
-    # accuracies = [test_lambda(lambda_, D_test) for lambda_ in lambdas]                      #TODO: Implement this function
+        # Third, build the discrimantor matrix for each feature or pair
+        # of features present in the correlation matrix. Right now we are simply
+        # doing this by taking the max over all feature-values, and then summing
+        # over each feature value's max correlation with the feedback for the
+        # relevant Feature.
+        _disc = {f: 0 for f in unused_features}
+        for row_name in _corr.axes[0].values:
+            try:
+                f = row_name[:row_name.index('_')]
+                _disc[f] += np.max(_corr.loc[row_name])
+            except:
+                _disc[row_name] += np.max(_corr.loc[row_name])
 
-    # return discriminators[np.argmax(accuracies)]
+        discriminators = unused_features[np.argpartition(_disc, -k)[-k:]]
+
+        D_train = D.sample(frac=0.75)
+        D_test = D.drop(D_train.index)
+
+        return self.test_discriminators(D_train, D_test, D.columns.drop(np.append(unused_features, 'feedback')), discriminators)
+ 
+    def test_discriminators(self, D_train, D_test, used_features, discriminators):
+        """
+            params:
+                D_train        - The data matrix that is going to be used to train the classifiers.
+                                 This should be the same or smaller than what was used to produce them.
+                D_test         - The data matrix that is going to be used to test the classifiers.
+                                 No data in this should be used to determine the discriminators.
+                discriminators - The discriminators to be testing, where each is an *unused feature*
+                                 available to the agent in the full data matrix.
+
+            returns:
+                d*             - The discriminator which produced the classifier with the highest
+                                 performance on the test data.
+        """
+        lambdas = [(self.build_lambda(D_train, used_features, discriminator), discriminator) for discriminator in discriminators]
+        accuracies = [self.test_lambda(lambda_, lambda_map, D_test, used_features, discriminator) for (lambda_, lambda_map), discriminator in lambdas]
+
+        return discriminators[np.argmax(accuracies)]
+
+    def build_lambda(self, D_train, used_features, discriminator):
+        train = D_train[np.append(used_features, [discriminator, 'feedback'])]
+
+        gam, gam_map = build_gam(train)
+
+        return (gam, gam_map)
+
+    def test_lambda(self, lambda_, lambda_map, D_test, used_features, discriminator):
+        # embed()
+        X = D_test[np.append(used_features, discriminator)]
+        y = D_test['feedback'] == 'yes'
+
+        X_ = np.array([[lambda_map[f] for f in x] for x in X.values])
+
+        predictions = lambda_.predict(X_) > 0.5
+
+        accuracy = np.sum( predictions == y )
+
+        return accuracy

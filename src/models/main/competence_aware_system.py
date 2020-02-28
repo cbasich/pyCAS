@@ -345,7 +345,7 @@ class CAS():
             if rand <= thresh:
                 return self.states[sp]
 
-    def remove_transitions(self, state, action):
+    def remove_transition(self, state, action):
         """
             params:
                 state - The state we are removing the transition for.
@@ -363,6 +363,6 @@ class CAS():
         s = self.states.index(state)
 
         for i in np.arange(1, len(self.AM.L)):
-            a = self.actions.index((action, i))
+            a = self.actions.index((action[0], i))
             self.transitions[s][a] *= 0.0
             self.transitions[s][a][s] = 1.0
