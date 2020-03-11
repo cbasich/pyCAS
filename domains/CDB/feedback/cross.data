@@ -35,3 +35,6 @@ level,region,obstacle,feedback
 2,r3,light,no
 2,r3,busy,yes
 2,r3,busy,no
+1,r1,light,yes
+1,r1,light,yes
+1,r1,light,yes

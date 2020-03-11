@@ -12,6 +12,7 @@ sys.path.append(os.path.join(current_file_path, '..'))
 
 OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB')
 FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'feedback')
+PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'params')
 
 from models.main.competence_aware_system import CAS
 from models.CDB import CDB_autonomy_model, CDB_feedback_model, CDB_domain_model
@@ -22,17 +23,24 @@ def main(grid_file, N, generate):
         init_cross_data()
     if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open.data') ):
         init_open_data()
+    if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data') ):
+        init_full_cross_data()
+    if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data') ):
+        init_full_open_data()
 
     cost_file = open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), 'a+')
     expected_cost_file = open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'), 'a+')
 
-    offices = ['a','b','c','d','e','f','g','h','i','j'] #,'k','l','m','n','o','p','q','r','s','t','u','v','w','y','z']
+    offices = ['a','b','d','e','f','g','h','i','j','k','l','m','n'] #,'o','p','q','r','s','t','u','v','w','y','z']
 
     for i in range(N):
-        start = offices[np.random.randint(len(offices))]
-        end = offices[np.random.randint(len(offices))]
-        while end == start:
-            end = offices[np.random.randint(len(offices))]
+        # start = offices[np.random.randint(len(offices))]
+        # end = offices[np.random.randint(len(offices))]
+        # while end == start:
+        #     end = offices[np.random.randint(len(offices))]
+
+        start = 'h'
+        end = 'm'
 
         print("Building environment...")
         print("Building domain model...")
@@ -44,12 +52,14 @@ def main(grid_file, N, generate):
         print("Building CAS...")
         environment = CAS(DM, AM, HM, persistence=0.75)
 
+        embed()
+
         print("Solving mdp...")
         solver = 'FVI'
         print(environment.solve(solver=solver))
         if solver == 'FVI':
             expected_cost_file.write(str(environment.V[environment.states.index(environment.init)]) + '\n')
-
+        # quit()
         print("Beginning simulation...")
         if solver == 'FVI':
             cost = execute_policy(environment, 1, i)
@@ -69,16 +79,16 @@ def main(grid_file, N, generate):
 
             print("Identifying potential discriminators...")
             discriminator = environment.HM.get_most_likely_discriminator(candidate, 1)
-            print(discriminator)
+            if discriminator == None:
+                print("No discriminator found")
+            else:
+                environment.DM.helper.add_feature(discriminator, candidate)
+                print(discriminator)
         else:
             print("No candidates...")
 
     expected_cost_file.close()
     cost_file.close()
-
-    # if generate:
-    #     generate_graph(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'),
-                    # os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'))
 
 def execute_LRTDP(CAS):
     cost = 0.0
@@ -108,6 +118,10 @@ def execute_policy(CAS, M, i):
     transitions_base = CAS.transitions
     total_returns = 0
 
+    used_features = open(os.path.join(PARAM_PATH, 'used_features.txt')).readline().split(',')
+    full_features = open(os.path.join(PARAM_PATH, 'full_features.txt')).readline().split(',')
+    unused_features = [feature for feature in full_features if feature not in used_features]
+
     for j in range(M):
         pi = pi_base
 
@@ -125,9 +139,18 @@ def execute_policy(CAS, M, i):
             if action[1] == 1 or action[1] == 2:
                 feedback = interfaceWithHuman(state[0], action)
                 if i == M-1:
-                    used_features = [action[1], CAS.DM.get_region(state[0]), state[0][3]]
-                    unused_features = [CAS.DM.helper.get_door_type(state[0])]
-                    updateData(action[0], used_features, unused_features, feedback)
+                    f1 = [action[1], CAS.DM.get_region(state[0]), state[0][3]]
+                    if (('doortype' in used_features and 'door' in state[0][3])
+                     or ('visibility' in used_features and state[0][3] in ['empty', 'light', 'heavy'])):
+                        f1.append(state[0][4])
+
+                    f2 = []
+                    if 'doortype' in unused_features:
+                        f2.append(CAS.DM.helper.get_door_type(state[0]))
+                    if 'visibility' in unused_features:
+                        f2.append(CAS.DM.helper.get_visibility(state[0]))
+
+                    updateData(action[0], f1, f2, feedback)
             if feedback == 'no':
                 CAS.remove_transition(state, action)
                 CAS.solve()
@@ -165,6 +188,10 @@ def updateData(action, used_features, unused_features, feedback):
         filepath = os.path.join(FEEDBACK_DATA_PATH, 'cross.data')
         with open(filepath, mode='a+') as f:
             f.write('\n' + data_string + ',' + str(feedback))
+        if len(unused_features) > 0:
+            filepath = os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data')
+            with open(filepath, mode='a+') as f:
+                f.write('\n' + full_data_string + ',' + str(feedback))
     elif action == 'open':
         filepath = os.path.join(FEEDBACK_DATA_PATH, 'open.data')
         with open(filepath, mode='a+') as f:
@@ -184,6 +211,17 @@ def init_cross_data():
                         entry = level + ',' + region + ',' + obstacle + ',' + feedback
                         f.write('\n' + entry)
 
+def init_full_cross_data():
+    with open( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data'), 'a+') as f:
+        f.write('level,region,obstacle,visibility,feedback')
+        # for level in ['1','2']:
+        #     for region in ['b1','b2','b3']:
+        #         # for obstacle in ['light-closed', 'medium-closed', 'heavy-closed']:
+        #         for obstacle in ['door-open', 'door-closed']:
+        #             for feedback in ['yes','no']:
+        #                 entry = level + ',' + region + ',' + obstacle + ',' + feedback
+        #                 f.write('\n' + entry)
+
 def init_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
         f.write('level,region,obstacle,feedback')
@@ -196,15 +234,15 @@ def init_open_data():
                         f.write('\n' + entry)
 
 def init_full_open_data():
-    with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
-        f.write('level,region,obstacle,feedback')
-        for level in ['1','2']:
-            for region in ['b1','b2','b3']:
-                # for obstacle in ['light-closed', 'medium-closed', 'heavy-closed']:
-                for obstacle in ['door-open', 'door-closed']:
-                    for feedback in ['yes','no']:
-                        entry = level + ',' + region + ',' + obstacle + ',' + feedback
-                        f.write('\n' + entry)
+    with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'a+') as f:
+        f.write('level,region,obstacle,doortype,feedback')
+        # for level in ['1','2']:
+        #     for region in ['b1','b2','b3']:
+        #         # for obstacle in ['light-closed', 'medium-closed', 'heavy-closed']:
+        #         for obstacle in ['door-open', 'door-closed']:
+        #             for feedback in ['yes','no']:
+        #                 entry = level + ',' + region + ',' + obstacle + ',' + feedback
+        #                 f.write('\n' + entry)
 
 if __name__ == '__main__':
     # grid_file = sys.argv[1]

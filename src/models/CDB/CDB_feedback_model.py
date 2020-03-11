@@ -39,7 +39,10 @@ class FeedbackModel():
                 if not action in lambda_[state].keys():
                     lambda_[state][action] = {}
                 for level in [1,2]:
-                    p = self.DM.helper.predict(state, action, level)
+                    try:
+                        p = self.DM.helper.predict(state, action, level)
+                    except Exception:
+                        p = 0.5
                     lambda_[state][action][level] = p
         return lambda_
 
@@ -182,7 +185,9 @@ class FeedbackModel():
 
         # First, for a given candidate, procure its unused features.
         unused_features = self.get_unused_features(state, action)
-
+        if len(unused_features) == 0:
+            return None
+            
         # Second, compute the correlation matrix over each unused feature
         # and the feedback.
         # TODO: Include all *pairs* of features as rows in the matrix.

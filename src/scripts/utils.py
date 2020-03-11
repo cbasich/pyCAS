@@ -18,7 +18,7 @@ def FVI(mdp, eps = 0.001):
         rather than functions.
     """
     states, actions = list(mdp.states), list(mdp.actions)
-    R, T, gamma, = -1.0*np.array(mdp.costs).astype('float32'), np.array(mdp.transitions).astype('float32'), mdp.gamma
+    R, T, gamma = -1.0*np.array(mdp.costs).astype('float32'), np.array(mdp.transitions).astype('float32'), mdp.gamma
 
     V = np.array([0.0 for s in range(len(states))]).astype('float32').reshape(-1, 1)
     Q = np.array([[0.0 for a in range(len(actions))] for s in range(len(states))]).astype('float32')

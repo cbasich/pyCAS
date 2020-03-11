@@ -18,7 +18,8 @@ class AutonomyModel():
     def __init__(self, DM, L):
         self.DM = DM
         self.L = L
-        self.kappa = self.generate_kappa()
+        # self.kappa = self.generate_kappa()
+        self.kappa = self.DM.kappa
 
     def generate_kappa(self):
         kappa = None
@@ -39,4 +40,5 @@ class AutonomyModel():
         kappa_file.close()
 
     def mu(self, state, action):
-        return 0.25 if state[1] != action[1] else 0.0
+        return 0.0
+        # return 0.25 if state[1] != action[1] else 0.0
