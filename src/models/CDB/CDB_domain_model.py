@@ -30,6 +30,8 @@ class DeliveryBotDomain():
     def __init__(self, filename, init, destination, gamma=1.0):
         self.gamma = gamma
         self.grid = read_gw_map(os.path.join(MAP_PATH, filename))
+        with open(os.path.join(MAP_PATH, 'map_info.json')) as F:
+            self.map_info = json.load(F)
         self.rows = len(self.grid)
         self.cols = len(self.grid[0])
 
@@ -43,7 +45,6 @@ class DeliveryBotDomain():
 
         self.actions = DIRECTIONS + ['cross', 'open', 'wait']
         self.states, self.goals = self.generate_states(init, destination)
-        self.regions = self.generate_regions()
         self.transitions = self.generate_transitions()
         self.costs = self.generate_costs()
 
@@ -68,12 +69,15 @@ class DeliveryBotDomain():
                     self.kappa[s] = {}
                     for a in self.actions:
                         self.kappa[s][a] = 3
-            elif self.grid[x][y] in ['c', 'C']:
+            elif self.grid[x][y] == 'C':
+                features = []
                 if 'visibility' in used_features:
-                    if self.grid[x][y] == 'c':
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], ['low']))
-                    elif self.grid[x][y] == 'C':
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], ['high']))
+                    features.append(map_info[str((x,y))]['visibility'])
+                if 'streettype' in used_features:
+                    features.append(map_info[str((x,y))]['streettype'])
+
+                if len(features) > 0:
+                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], features))
                 else:
                     tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy']))
                 states = states.union(tmp_states)
@@ -85,14 +89,15 @@ class DeliveryBotDomain():
                                 self.kappa[tmp][a] = 3
                             else:
                                 self.kappa[tmp][a] = 1
-            elif self.grid[x][y] in ['L', 'M', 'H']:
+            elif self.grid[x][y] == 'D':
+                features = []
                 if 'doortype' in used_features:
-                    if self.grid[x][y] == 'L':
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed'], ['light']))
-                    elif self.grid[x][y] == 'M':
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed'], ['medium']))
-                    elif self.grid[x][y] == 'H':
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed'], ['heavy']))
+                    features.append(map_info[str((x,y))]['doortype'])
+                if 'doorcolor' in used_features:
+                    features.append(map_info[str((x,y))]['doorcolor'])
+
+                if len(features) > 0:
+                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed'], features))
                 else:
                     tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed']))
                 states = states.union(tmp_states)
@@ -123,32 +128,6 @@ class DeliveryBotDomain():
                         self.kappa[s][a] = 3
 
         return list(states), list(goals)
-
-    def generate_regions(self):
-        regions = {}
-        for s in self.states:
-            if s[0] <= 14 and s[1] == 14:
-                regions[(s[0], s[1])] = 'r1'
-
-            elif s[0] == 15:
-                if s[1] < 14:
-                    regions[(s[0], s[1])] = 'r2'
-                else:
-                    regions[(s[0], s[1])] = 'r3'
-
-            elif s[0] <= 14 and s[1] < 14:
-                regions[(s[0], s[1])] = 'b1'
-
-            elif s[0] <= 14 and s[1] > 14:
-                regions[(s[0], s[1])] = 'b2'
-
-            elif s[0] >= 16:
-                regions[(s[0], s[1])] = 'b3'
-
-        return regions
-
-    def get_region(self, state):
-        return self.regions[(state[0], state[1])]
 
     def generate_costs(self):
         C = np.array([[1.0 for a in range(len(self.actions))] 
@@ -193,7 +172,7 @@ class DeliveryBotDomain():
     def move(self, state, action, statePrime):
         xp, yp = state[0] + action[0], state[1] + action[1]
 
-        if len(state) > 2 and ('closed' in state[3] or state[3] in ['empty', 'light', 'heavy']):
+        if len(state) > 2 and ('closed' in state[3] or state[3] in ['empty', 'light', 'busy']):
             if MAPPING[action] == state[2]:
                 return 1.0 if state == statePrime else 0.0
             else:
@@ -213,7 +192,7 @@ class DeliveryBotDomain():
         return 0.0
 
     def cross(self, state, statePrime):
-        if len(state) > 2 and state[3] in ['empt', 'light', 'heavy']:
+        if len(state) > 2 and state[3] in ['empt', 'light', 'busy']:
             xp, yp = state[0] + REV_MAPPING[state[2]][0], state[1] + REV_MAPPING[state[2]][1]
 
             return 1.0 if (statePrime[0] == xp and statePrime[1] == yp) else 0.0

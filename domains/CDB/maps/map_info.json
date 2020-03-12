@@ -1,0 +1,140 @@
+{
+    "(3, 9)": {
+        "region": "b1",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "brown"
+    },
+    "(4, 3)": {
+        "region": "b1",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "brown"
+    },
+    "(4, 5)": {
+        "region": "b1",
+        "obstacle": "door",
+        "doortype": "medium",
+        "doorcolor": "black"
+    },
+    "(4, 8)": {
+        "region": "b1",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "brown"
+    },
+    "(5, 11)": {
+        "region": "b1",
+        "obstacle": "door",
+        "doortype": "heavy",
+        "doorcolor": "blue"
+    },
+    "(6, 5)": {
+        "region": "b1",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "brown"
+    },
+    "(7, 4)": {
+        "region": "b1",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "brown"
+    },
+    "(8, 9)": {
+        "region": "b1",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "brown"
+    },
+    "(9, 11)": {
+        "region": "b1",
+        "obstacle": "door",
+        "doortype": "heavy",
+        "doorcolor": "blue"
+    },
+    "(10, 6)": {
+        "region": "b1",
+        "obstacle": "door",
+        "doortype": "medium",
+        "doorcolor": "black"
+    },
+    "(10, 9)": {
+        "region": "b1",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "brown"
+    },
+    "(11, 4)": {
+        "region": "b1",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "brown"
+    },
+    "(11, 10)": {
+        "region": "b1",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "brown"
+    },
+    "(3, 18)": {
+        "region": "b2",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "red"
+    },
+    "(3, 23)": {
+        "region": "b2",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "blue"
+    },
+    "(6, 17)": {
+        "region": "b2",
+        "obstacle": "door",
+        "doortype": "heavy",
+        "doorcolor": "red"
+    },
+    "(6, 19)": {
+        "region": "b2",
+        "obstacle": "door",
+        "doortype": "medium",
+        "doorcolor": "black"
+    },
+    "(6, 22)": {
+        "region": "b2",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "red"
+    },
+    "(6, 24)": {
+        "region": "b2",
+        "obstacle": "door",
+        "doortype": "heavy",
+        "doorcolor": "blue"
+    },
+    "(9, 18)": {
+        "region": "b2",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "brown"
+    },
+    "(9, 23)": {
+        "region": "b2",
+        "obstacle": "door",
+        "doortype": "light",
+        "doorcolor": "blue"
+    },
+    "(6, 14)": {
+        "region": "r1",
+        "obstacle": "crosswalk",
+        "visibility": "high",
+        "streettype": "two_way"
+    },
+    "(12, 14)": {
+        "region": "r1",
+        "obstacle": "crosswalk",
+        "visibility": "low",
+        "streettype": "two_way"
+    }
+}

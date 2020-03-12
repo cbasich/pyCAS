@@ -142,6 +142,9 @@ class CAS():
         return T
 
     def T(self, s, a):
+        """
+
+        """
         return self.transitions[s][a]
 
     def compute_costs(self):
@@ -284,14 +287,13 @@ class CAS():
 
                 for level_index in np.argsort(-1.0 * np.array([self.potential[s][a][l] for l in L])):
                     if np.random.uniform() <= self.potential[s][a][L[level_index]]:
-                        # TODO insert level update logic here
                         if L[level_index] == 3 and len(state) > 2:
                             if ((state[3] == 'door-closed' and action == 'open'
-                                and (self.DM.helper.get_doortype(state) == 'heavy'
-                                    or (self.DM.helper.get_doortype(state) == 'medium'
-                                    and self.DM.helper.get_region(state) == 'b2')))
+                                and (self.DM.helper.get_state_feature_value(state, 'doortype') == 'heavy'
+                                    or (self.DM.helper.get_state_feature_value(state, 'doortype') == 'medium'
+                                    and self.DM.helper.get_state_feature_value(state, 'region') == 'b2')))
                             or (state[3] == 'busy' or (state[3] == 'light'
-                                and self.DM.get_visibility(state) == 'low')
+                                and self.DM.helper.get_state_feature_value(state, 'visibility') == 'low')
                                 and action == 'cross')):
                                 break
 

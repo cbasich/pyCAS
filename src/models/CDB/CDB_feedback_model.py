@@ -94,7 +94,7 @@ class FeedbackModel():
 
     def rho(self, state, action):
         if action[1] == 0:
-            return 10
+            return 5
         elif action[1] == 1:
             return 2
         elif action[1] == 2:
@@ -222,6 +222,8 @@ class FeedbackModel():
         D_train = D.sample(frac=0.75)
         D_test = D.drop(D_train.index)
 
+        embed()
+
         return self.test_discriminators(D_train, D_test, D.columns.drop(np.append(unused_features, 'feedback')), discriminators)
  
     def test_discriminators(self, D_train, D_test, used_features, discriminators):
@@ -254,6 +256,8 @@ class FeedbackModel():
         # embed()
         X = D_test[np.append(used_features, discriminator)]
         y = D_test['feedback'] == 'yes'
+
+        embed()
 
         X_ = np.array([[lambda_map[f] for f in x] for x in X.values])
 

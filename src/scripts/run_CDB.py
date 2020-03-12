@@ -39,7 +39,7 @@ def main(grid_file, N, generate):
         # while end == start:
         #     end = offices[np.random.randint(len(offices))]
 
-        start = 'h'
+        start = 'f'
         end = 'm'
 
         print("Building environment...")
@@ -51,8 +51,6 @@ def main(grid_file, N, generate):
         HM = CDB_feedback_model.FeedbackModel(DM, AM, ['+', '-', '/', None], ['cross', 'open'])
         print("Building CAS...")
         environment = CAS(DM, AM, HM, persistence=0.75)
-
-        embed()
 
         print("Solving mdp...")
         solver = 'FVI'
@@ -69,7 +67,7 @@ def main(grid_file, N, generate):
         cost_file.write(str(cost) + '\n')
 
         print("Updating parameters...")
-        environment.update_kappa()
+        # environment.update_kappa()
         environment.save_kappa()
 
         print("Identifying candidates...")
@@ -145,9 +143,9 @@ def execute_policy(CAS, M, i):
                         f1.append(state[0][4])
 
                     f2 = []
-                    if 'doortype' in unused_features:
+                    if 'doortype' not in unused_features:
                         f2.append(CAS.DM.helper.get_door_type(state[0]))
-                    if 'visibility' in unused_features:
+                    if 'visibility' not in unused_features:
                         f2.append(CAS.DM.helper.get_visibility(state[0]))
 
                     updateData(action[0], f1, f2, feedback)
@@ -204,12 +202,12 @@ def updateData(action, used_features, unused_features, feedback):
 def init_cross_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross.data'), 'a+') as f:
         f.write('level,region,obstacle,feedback')
-        for level in ['1','2']:
-            for region in ['r1','r2','r3']:
-                for obstacle in ['empty', 'light', 'busy']:
-                    for feedback in ['yes','no']:
-                        entry = level + ',' + region + ',' + obstacle + ',' + feedback
-                        f.write('\n' + entry)
+        # for level in ['1','2']:
+        #     for region in ['r1','r2','r3']:
+        #         for obstacle in ['empty', 'light', 'busy']:
+        #             for feedback in ['yes','no']:
+        #                 entry = level + ',' + region + ',' + obstacle + ',' + feedback
+        #                 f.write('\n' + entry)
 
 def init_full_cross_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data'), 'a+') as f:
@@ -225,13 +223,13 @@ def init_full_cross_data():
 def init_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
         f.write('level,region,obstacle,feedback')
-        for level in ['1','2']:
-            for region in ['b1','b2','b3']:
-                # for obstacle in ['light-closed', 'medium-closed', 'heavy-closed']:
-                for obstacle in ['door-open', 'door-closed']:
-                    for feedback in ['yes','no']:
-                        entry = level + ',' + region + ',' + obstacle + ',' + feedback
-                        f.write('\n' + entry)
+        # for level in ['1','2']:
+        #     for region in ['b1','b2','b3']:
+        #         # for obstacle in ['light-closed', 'medium-closed', 'heavy-closed']:
+        #         for obstacle in ['door-open', 'door-closed']:
+        #             for feedback in ['yes','no']:
+        #                 entry = level + ',' + region + ',' + obstacle + ',' + feedback
+        #                 f.write('\n' + entry)
 
 def init_full_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'a+') as f:

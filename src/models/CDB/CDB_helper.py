@@ -73,6 +73,7 @@ def load_gams():
 class CampusDeliveryBotHelper():
     def __init__(self, DM):
         self.DM = DM
+        self.map_info = self.DM.map_info
         build_gams()
         self.cross_GAM, self.open_GAM, self.cross_GAM_map, self.open_GAM_map = load_gams()
 
@@ -120,38 +121,19 @@ class CampusDeliveryBotHelper():
         else:
             return -1.
 
-    def get_door_type(self, state):
-        """
-            params:
-                state - The state we are looking up the door type for.
-
-            returns:
-                The type of door in state or None if state has no door.
-        """
-        x, y = state[0], state[1]
-        if self.DM.grid[x][y] == 'L':
-            return 'light'
-        elif self.DM.grid[x][y] == 'M':
-            return 'medium'
-        elif self.DM.grid[x][y] == 'H':
-            return 'heavy'
-        else:
-            return None
-
-    def get_visibility(self, state):
+    def get_state_feature(self, state, feature):
         """
             params:
                 state - The state we are looking up the visibility condition for.
+                feature - The feature *set* (i.e. 'doortype', 'visibility') of the state.
 
             returns:
-                The visibility condition in state or None if state is not a crosswalk.
+                The feature *value* (i.e. 'heavy', 'high') of the state, or None if the state
+                does not contain this feature.
         """
-        x, y = state[0], state[1]
-        if self.DM.grid[x][y] == 'c':
-            return 'low'
-        elif self.DM.grid[x][y] == 'C':
-            return 'high'
-        else:
+        try:
+            return self.map_info[str((state[0], state[1]))][feature]
+        except Exception:
             return None
 
     def add_feature(self, feature, candidate):
