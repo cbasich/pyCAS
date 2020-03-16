@@ -1,1 +1,4 @@
 level,region,obstacle,visibility,feedback
+1,r1,light,high,yes
+2,r2,light,high,yes
+2,r2,light,high,yes

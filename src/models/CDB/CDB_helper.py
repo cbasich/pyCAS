@@ -76,7 +76,7 @@ class CampusDeliveryBotHelper():
         self.map_info = self.DM.map_info
         build_gams()
         self.cross_GAM, self.open_GAM, self.cross_GAM_map, self.open_GAM_map = load_gams()
-
+        
     def extract_state_features(self, state):
         """
             params:
@@ -94,10 +94,10 @@ class CampusDeliveryBotHelper():
                 function will need to be updated.
 
         """
-        regions = self.DM.regions
-        f1 = regions[(state[0], state[1])]
-        f = [f1] + list(state[3:])
-        return f
+        with open( os.path.join(PARAM_PATH, 'used_features.txt')) as F:
+            used_features = F.readline().split(',')
+
+        return [self.get_state_feature_value(state, feature) for feature in used_features if self.get_state_feature_value(state, feature) != None]
 
     def predict(self, state, action, level):
         """
@@ -113,7 +113,9 @@ class CampusDeliveryBotHelper():
         """
         if len(state) == 2 or 'open' in state[3]:
             return 1.
+
         features = [level] + self.extract_state_features(state)
+
         if action == 'open' and 'door' in state[3]:
             return self.open_GAM.predict_mu([[self.open_GAM_map[f] for f in features]])
         elif action == 'cross' and 'door' not in state[3]:
@@ -121,7 +123,7 @@ class CampusDeliveryBotHelper():
         else:
             return -1.
 
-    def get_state_feature(self, state, feature):
+    def get_state_feature_value(self, state, feature):
         """
             params:
                 state - The state we are looking up the visibility condition for.

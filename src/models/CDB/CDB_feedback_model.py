@@ -94,7 +94,7 @@ class FeedbackModel():
 
     def rho(self, state, action):
         if action[1] == 0:
-            return 5
+            return 6
         elif action[1] == 1:
             return 2
         elif action[1] == 2:
@@ -148,7 +148,7 @@ class FeedbackModel():
                 for level in self.lambda_[state][action].keys():
 
                     # Get the count for thist (s, a, l) tuple in the relevant datafile.
-                    dic = {'level': level, 'region': self.DM.get_region(state), 'obstacle': state[3]}
+                    dic = {'level': level, 'region': self.DM.helper.get_state_feature_value(state, 'region'), 'obstacle': state[3]}
                     if action == 'open':
                         count = np.sum(pd.DataFrame([open_df[k] == v for k,v in dic.items()]).all())
                     elif action == 'cross':
@@ -221,8 +221,6 @@ class FeedbackModel():
 
         D_train = D.sample(frac=0.75)
         D_test = D.drop(D_train.index)
-
-        embed()
 
         return self.test_discriminators(D_train, D_test, D.columns.drop(np.append(unused_features, 'feedback')), discriminators)
  

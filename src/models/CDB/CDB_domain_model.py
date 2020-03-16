@@ -72,9 +72,9 @@ class DeliveryBotDomain():
             elif self.grid[x][y] == 'C':
                 features = []
                 if 'visibility' in used_features:
-                    features.append(map_info[str((x,y))]['visibility'])
+                    features.append(self.map_info[str((x,y))]['visibility'])
                 if 'streettype' in used_features:
-                    features.append(map_info[str((x,y))]['streettype'])
+                    features.append(self.map_info[str((x,y))]['streettype'])
 
                 if len(features) > 0:
                     tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], features))
@@ -92,9 +92,9 @@ class DeliveryBotDomain():
             elif self.grid[x][y] == 'D':
                 features = []
                 if 'doortype' in used_features:
-                    features.append(map_info[str((x,y))]['doortype'])
+                    features.append(self.map_info[str((x,y))]['doortype'])
                 if 'doorcolor' in used_features:
-                    features.append(map_info[str((x,y))]['doorcolor'])
+                    features.append(self.map_info[str((x,y))]['doorcolor'])
 
                 if len(features) > 0:
                     tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed'], features))
