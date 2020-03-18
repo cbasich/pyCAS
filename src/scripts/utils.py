@@ -3,7 +3,6 @@ import os, sys, pickle
 import numpy as np
 import pandas as pd
 
-from numba import jit
 from IPython import embed
 
 from pygam.terms import Term, TermList
@@ -69,6 +68,7 @@ def build_gam(df, distr='binomial', link='logit', input_classifier=None):
             values that the GAM requires.
 
     """
+
     # First get all of the features (Xv) and convert into the dataframe identifiers
     Xv = df.values[:,:-1]
     X = np.unique(df.values[:,0:1], return_inverse=True)[1].reshape(-1,1)

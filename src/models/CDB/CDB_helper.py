@@ -29,7 +29,12 @@ def build_gams():
     """
 
     # Build and save the gam and gam_map for the action 'open'
-    open_gam, open_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'open.data')))
+    try:
+        open_gam, open_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'open.data')))
+    except Exception:           # THIS IS A TOTAL HACK RIGHT NOW
+        with open(os.path.join(FEEDBACK_PATH, 'open.data'), mode='a+') as d:
+            d.write('\n1,b1,fill,light,no')
+        open_gam, open_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'open.data')))
 
     gam_map_file = open(os.path.join(PARAM_PATH, 'open_gam_map.pkl'), mode = 'wb')
     pickle.dump(open_gam_map, gam_map_file, protocol=pickle.HIGHEST_PROTOCOL)
@@ -159,14 +164,13 @@ class CampusDeliveryBotHelper():
 
         with open( os.path.join(PARAM_PATH, 'used_features.txt'), mode='a+') as f:
             f.write("," + str(feature))
-
+        with open( os.path.join(PARAM_PATH, 'used_features.txt'), mode='r+') as f:
+            used_features = f.readline().split(',')
 
         df = pd.read_csv( open(os.path.join(FEEDBACK_PATH, action+'.data')))
         df_full = pd.read_csv( open(os.path.join(FEEDBACK_PATH, action+'_full.data')))
 
-        X = df.drop('feedback', axis = 1)
-        X.index = range(len(X))
-        X[feature] = df_full[feature]
+        X = df_full[used_features]
         X['feedback'] = df_full['feedback']
 
         X.to_csv(os.path.join(FEEDBACK_PATH, action+'.data'),index=False)

@@ -35,13 +35,13 @@ def main(grid_file, N, generate):
     offices = ['a','b','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t'] #,'u','v','w','y','z']
 
     for i in range(N):
-        start = offices[np.random.randint(len(offices))]
-        end = offices[np.random.randint(len(offices))]
-        while end == start:
-            end = offices[np.random.randint(len(offices))]
+        # start = offices[np.random.randint(len(offices))]
+        # end = offices[np.random.randint(len(offices))]
+        # while end == start:
+        #     end = offices[np.random.randint(len(offices))]
 
-        # start = 'b'
-        # end = 'h'
+        start = 'a'
+        end = 'g'
 
         print("Building environment...")
         print("Building domain model...")
@@ -145,7 +145,7 @@ def execute_policy(CAS, M, i):
             feedback = None
             if action[1] == 1 or action[1] == 2:
                 feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))])
-                if i == M-1:
+                if j == M-1:
                     f1 = [action[1], CAS.DM.helper.get_state_feature_value(state[0], 'region'), state[0][3]]
                     if f1[2] == 'door-closed':
                         f1[2] = 'door'
@@ -197,7 +197,7 @@ def interfaceWithHuman(state, action, info, automate=True):
                 feedback = 'no'
 
         elif info['obstacle'] == 'crosswalk':
-            if state[3] == 'light' or (info['visibility'] == 'high' and state[3] == 'light'):
+            if state[3] == 'empty' or (info['visibility'] == 'high' and state[3] == 'light'):
                 feedback = 'yes'
             else:
                 feedback = 'no'
@@ -209,6 +209,7 @@ def interfaceWithHuman(state, action, info, automate=True):
 
 def updateData(action, used_features, unused_features, feedback):
     if feedback is None:
+        print("Feedback is NONE")
         pass
     data_string = ",".join([str(f) for f in used_features])
     full_data_string = data_string + "," + ",".join([str(f) for f in unused_features])
@@ -217,24 +218,28 @@ def updateData(action, used_features, unused_features, feedback):
         filepath = os.path.join(FEEDBACK_DATA_PATH, 'cross.data')
         with open(filepath, mode='a+') as f:
             f.write('\n' + data_string + ',' + str(feedback))
+            f.flush()
         if len(unused_features) > 0:
             filepath = os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data')
             with open(filepath, mode='a+') as f:
                 f.write('\n' + full_data_string + ',' + str(feedback))
+                f.flush()
     elif action == 'open':
         filepath = os.path.join(FEEDBACK_DATA_PATH, 'open.data')
         with open(filepath, mode='a+') as f:
             f.write('\n' + data_string + ',' + str(feedback))
+            f.flush()
         if len(unused_features) > 0:
             filepath = os.path.join(FEEDBACK_DATA_PATH, 'open_full.data')
             with open(filepath, mode='a+') as f:
                 f.write('\n' + full_data_string + ',' + str(feedback))
+                f.flush()
 
 def init_cross_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross.data'), 'a+') as f:
         f.write('level,region,obstacle,feedback')
         for level in ['1','2']:
-            for region in ['r1','r2','r3']:
+            for region in ['r1','r2']:
                 for obstacle in ['empty', 'light', 'busy']:
                     for feedback in ['yes','no']:
                         entry = level + ',' + region + ',' + obstacle + ',' + feedback
@@ -278,4 +283,4 @@ if __name__ == '__main__':
     # N = int(sys.argv[2])
     # generate = int(sys.argv[3])
     # main(grid_file, N, generate)
-    main('map_1.txt', 20, 0)
+    main('map_1.txt', 100, 0)

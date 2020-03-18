@@ -161,7 +161,7 @@
         "doortype": "light",
         "doorcolor": "red"
     },
-    "(25, 15)": {
+    "(25, 14)": {
         "region": "b3",
         "obstacle": "door",
         "doortype": "light",
@@ -215,7 +215,7 @@
         "doortype": "light",
         "doorcolor": "black"
     },
-    "(29, 15)": {
+    "(29, 14)": {
         "region": "b3",
         "obstacle": "door",
         "doortype": "light",

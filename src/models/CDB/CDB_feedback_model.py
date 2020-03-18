@@ -1,4 +1,4 @@
-import os, sys, time, random, pickle
+import os, sys, time, random, pickle, json
 import numpy as np
 import pandas as pd
 import itertools as it
@@ -10,7 +10,10 @@ sys.path.append(os.path.join(current_file_path, '..'))
 
 from scripts.utils import build_gam
 
-FEEDBACK_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB', 'feedback')
+DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB')
+FEEDBACK_PATH = os.path.join(DOMAIN_PATH, 'feedback')
+PARAM_PATH = os.path.join(DOMAIN_PATH, 'params')
+MAP_PATH = os.path.join(DOMAIN_PATH, 'maps')
 
 class FeedbackModel():
     def __init__(self, DM, AM, Sigma, flagged):
@@ -94,7 +97,7 @@ class FeedbackModel():
 
     def rho(self, state, action):
         if action[1] == 0:
-            return 6
+            return 10
         elif action[1] == 1:
             return 2
         elif action[1] == 2:
@@ -142,17 +145,23 @@ class FeedbackModel():
         cross_df = pd.read_csv(cross_path)
         open_df = pd.read_csv(open_path)
 
+        with open(os.path.join(MAP_PATH, 'map_info.json')) as F:
+            map_info = json.load(F)
+
+        with open(os.path.join(PARAM_PATH, 'used_features.txt')) as F:
+            used_features = F.readline().split(',')
+
         candidates = []
         for state in self.lambda_.keys():
             for action in self.lambda_[state].keys():
                 for level in self.lambda_[state][action].keys():
 
                     # Get the count for thist (s, a, l) tuple in the relevant datafile.
-                    dic = {'level': level, 'region': self.DM.helper.get_state_feature_value(state, 'region'), 'obstacle': state[3]}
+                    dic = map_info[str((state[0], state[1]))]
                     if action == 'open':
-                        count = np.sum(pd.DataFrame([open_df[k] == v for k,v in dic.items()]).all())
+                        count = np.sum(pd.DataFrame([open_df[k] == v for k,v in dic.items() if k in open_df.columns.values]).all())
                     elif action == 'cross':
-                        count = np.sum(pd.DataFrame([cross_df[k] == v for k,v in dic.items()]).all())
+                        count = np.sum(pd.DataFrame([cross_df[k] == v for k,v in dic.items() if k in cross_df.columns.values]).all())
 
                     # If we have not seen this (s, a, l) a sufficient number of times, skip it.
                     if count < thresh: 
@@ -251,11 +260,8 @@ class FeedbackModel():
         return (gam, gam_map)
 
     def test_lambda(self, lambda_, lambda_map, D_test, used_features, discriminator):
-        # embed()
         X = D_test[np.append(used_features, discriminator)]
         y = D_test['feedback'] == 'yes'
-
-        embed()
 
         X_ = np.array([[lambda_map[f] for f in x] for x in X.values])
 

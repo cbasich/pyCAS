@@ -192,7 +192,7 @@ class DeliveryBotDomain():
         return 0.0
 
     def cross(self, state, statePrime):
-        if len(state) > 2 and state[3] in ['empt', 'light', 'busy']:
+        if len(state) > 2 and state[3] in ['empty', 'light', 'busy']:
             xp, yp = state[0] + REV_MAPPING[state[2]][0], state[1] + REV_MAPPING[state[2]][1]
 
             return 1.0 if (statePrime[0] == xp and statePrime[1] == yp) else 0.0
@@ -208,7 +208,6 @@ class DeliveryBotDomain():
                 return 1.0
 
         return 0.0
-
 
     def wait(self, state, statePrime):
         if (len(state) > 2 and state[3] in ['empty', 'light', 'busy'] and
