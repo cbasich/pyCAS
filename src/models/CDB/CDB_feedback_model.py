@@ -161,6 +161,7 @@ class FeedbackModel():
                     if action == 'open':
                         count = np.sum(pd.DataFrame([open_df[k] == v for k,v in dic.items() if k in open_df.columns.values]).all())
                     elif action == 'cross':
+                        dic['obstacle'] = state[3]
                         count = np.sum(pd.DataFrame([cross_df[k] == v for k,v in dic.items() if k in cross_df.columns.values]).all())
 
                     # If we have not seen this (s, a, l) a sufficient number of times, skip it.

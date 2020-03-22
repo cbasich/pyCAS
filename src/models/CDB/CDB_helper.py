@@ -102,7 +102,10 @@ class CampusDeliveryBotHelper():
         with open( os.path.join(PARAM_PATH, 'used_features.txt')) as F:
             used_features = F.readline().split(',')
 
-        return [self.get_state_feature_value(state, feature) for feature in used_features if self.get_state_feature_value(state, feature) != None]
+        features = [self.get_state_feature_value(state, feature) for feature in used_features if self.get_state_feature_value(state, feature) != None]
+        if 'crosswalk' in features:
+            features[features.index('crosswalk')] = state[3]
+        return features
 
     def predict(self, state, action, level):
         """
@@ -170,7 +173,7 @@ class CampusDeliveryBotHelper():
         df = pd.read_csv( open(os.path.join(FEEDBACK_PATH, action+'.data')))
         df_full = pd.read_csv( open(os.path.join(FEEDBACK_PATH, action+'_full.data')))
 
-        X = df_full[used_features]
+        X = df_full[[f for f in used_features if f in df_full.columns.values]]
         X['feedback'] = df_full['feedback']
 
         X.to_csv(os.path.join(FEEDBACK_PATH, action+'.data'),index=False)

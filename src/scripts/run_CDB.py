@@ -35,13 +35,13 @@ def main(grid_file, N, generate):
     offices = ['a','b','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t'] #,'u','v','w','y','z']
 
     for i in range(N):
-        # start = offices[np.random.randint(len(offices))]
-        # end = offices[np.random.randint(len(offices))]
-        # while end == start:
-        #     end = offices[np.random.randint(len(offices))]
+        start = offices[np.random.randint(len(offices))]
+        end = offices[np.random.randint(len(offices))]
+        while end == start:
+            end = offices[np.random.randint(len(offices))]
 
-        start = 'a'
-        end = 'g'
+        # start = 'a'
+        # end = 'g'
 
         print("Building environment...")
         print("Building domain model...")
@@ -58,6 +58,9 @@ def main(grid_file, N, generate):
         print(environment.solve(solver=solver))
         if solver == 'FVI':
             expected_cost_file.write(str(environment.V[environment.states.index(environment.init)]) + '\n')
+
+        # embed()
+        # quit()
 
         print("Beginning simulation...")
         if solver == 'FVI':

@@ -248,25 +248,25 @@
     "(6, 14)": {
         "region": "r1",
         "obstacle": "crosswalk",
-        "visibility": "high",
+        "visibility": "low",
         "streettype": "two_way"
     },
     "(12, 14)": {
         "region": "r1",
         "obstacle": "crosswalk",
-        "visibility": "low",
+        "visibility": "high",
         "streettype": "two_way"
     },
     "(15, 6)": {
         "region": "r2",
         "obstacle": "crosswalk",
-        "visibility": "low",
+        "visibility": "high",
         "streettype": "one_way"
     },
     "(15, 21)": {
         "region": "r2",
         "obstacle": "crosswalk",
-        "visibility": "high",
+        "visibility": "low",
         "streettype": "one_way"
     }
 }
