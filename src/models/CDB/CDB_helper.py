@@ -29,12 +29,16 @@ def build_gams():
     """
 
     # Build and save the gam and gam_map for the action 'open'
-    try:
-        open_gam, open_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'open.data')))
-    except Exception:           # THIS IS A TOTAL HACK RIGHT NOW
-        with open(os.path.join(FEEDBACK_PATH, 'open.data'), mode='a+') as d:
-            d.write('\n1,b1,fill,light,no')
-        open_gam, open_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'open.data')))
+    check = False
+    while not check:
+        try:
+            open_gam, open_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'open.data')))
+            check = True
+        except Exception:           # THIS IS A TOTAL HACK RIGHT NOW
+            with open(os.path.join(FEEDBACK_PATH, 'open.data'), mode='a+') as d:
+                tmp1 = ['b1', 'b2', 'b3'][np.random.randint(3)]
+                tmp2 = ['light', 'medium', 'heavy'][np.random.randint(3)]
+                d.write('\n1,'+str(tmp1)+',fill,'+str(tmp2)+',no')
 
     gam_map_file = open(os.path.join(PARAM_PATH, 'open_gam_map.pkl'), mode = 'wb')
     pickle.dump(open_gam_map, gam_map_file, protocol=pickle.HIGHEST_PROTOCOL)
@@ -45,7 +49,16 @@ def build_gams():
     gam_file.close()
 
     # Build and save the gam and gam_map for the action 'cross'
-    cross_gam, cross_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'cross.data')))
+    check = False
+    while not check:
+        try:
+            cross_gam, cross_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'cross.data')))
+            check = True
+        except Exception:
+            with open(os.path.join(FEEDBACK_PATH, 'cross.data'), mode='a+') as d:
+                tmp1 = ['r1', 'r2'][np.random.randint(2)]
+                tmp2 = ['empty', 'light', 'busy'][np.random.randint(3)]
+                d.write('\n1,'+str(tmp1)+','+str(tmp2)+',fill,no')
 
     gam_map_file = open(os.path.join(PARAM_PATH, 'cross_gam_map.pkl'), mode = 'wb')
     pickle.dump(cross_gam_map, gam_map_file, protocol=pickle.HIGHEST_PROTOCOL)
@@ -81,6 +94,31 @@ class CampusDeliveryBotHelper():
         self.map_info = self.DM.map_info
         build_gams()
         self.cross_GAM, self.open_GAM, self.cross_GAM_map, self.open_GAM_map = load_gams()
+
+    def level_optimal(self, state, action):
+        """
+            params:
+                state  - The state that we are checking the level optimality for.
+                action - The action that we are checking the level optimality for.
+
+            returns:
+                True if the action is being taken at the optimal level in state. 
+        """
+        state = state[0]        # This is a HACK. TODO: Remove when level matters for states
+        level = action[1]
+
+        if len(state) < 3:
+            return level == 3
+
+        if ((state[3] == 'door-closed' and action[0] == 'open'
+            and (self.DM.helper.get_state_feature_value(state, 'doortype') == 'heavy'
+                or (self.DM.helper.get_state_feature_value(state, 'doortype') == 'medium'
+                and self.DM.helper.get_state_feature_value(state, 'region') == 'b2')))
+        or (action[0] == 'cross' and (state[3] == 'busy' or (state[3] == 'light'
+            and self.DM.helper.get_state_feature_value(state, 'visibility') == 'low')))):
+            return level == 0
+
+        return level == 3
         
     def extract_state_features(self, state):
         """

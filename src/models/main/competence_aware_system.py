@@ -60,9 +60,11 @@ class CAS():
         self.goals = list(it.product(self.DM.goals, self.AM.L))
         self.transitions = self.compute_transitions()
         self.transitions_base = self.transitions.copy()
-        self.check_validity()
         self.costs = self.compute_costs()
 
+        self.check_validity()
+
+        self.flags = [[False for a in range(len(self.DM.actions))] for s in range(len(self.states))]
         self.potential = np.array([[[0.0 for l in self.AM.L] for a in self.DM.actions] for s in self.DM.states])
 
         self.pi = None
@@ -277,10 +279,8 @@ class CAS():
                     continue
 
                 level = self.AM.kappa[state][action]
-                if level == 0:
-                    L = [level, level + 1]
-                elif level == max(self.AM.L):
-                    L = [level - 1, level]
+                if level == 0 or level == max(self.AM.L):
+                    continue
                 else:
                     L = [level-1, level, level+1]
                 self.update_potential(state, s, action, a, L)
@@ -290,15 +290,29 @@ class CAS():
                         if L[level_index] == 3 and len(state) > 2:
                             if ((state[3] == 'door-closed' and action == 'open'
                                 and (self.DM.helper.get_state_feature_value(state, 'doortype') == 'heavy'
-                                    or (self.DM.helper.get_state_feature_value(state, 'doortype') == 'medium'
-                                    and self.DM.helper.get_state_feature_value(state, 'region') == 'b2')))
-                            or (state[3] == 'busy' or (state[3] == 'light'
-                                and self.DM.helper.get_state_feature_value(state, 'visibility') == 'low')
-                                and action == 'cross')):
+                                 or (self.DM.helper.get_state_feature_value(state, 'doortype') == 'medium'
+                                 and self.DM.helper.get_state_feature_value(state, 'region') == 'b2')))
+                            or (action[0] == 'cross' and (state[3] == 'busy' or (state[3] == 'light'
+                                and self.DM.helper.get_state_feature_value(state, 'visibility') == 'low')))
+                            or self.HM.lambda_[state][action][2] < 0.9):
+                                break
+
+                        if L[level_index] == 0 and len(state) > 2:
+                            if ((state[3] == 'door-closed' and action == 'open'
+                                and (self.DM.helper.get_state_feature_value(state, 'doortype') == 'light'
+                                 or (self.DM.helper.get_state_feature_value(state, 'doortype') == 'medium'
+                                 and self.DM.helper.get_state_feature_value(state, 'region') != 'b2')))
+                            or (state[3] == 'empty' or state[3] == 'light'
+                                and (self.DM.helper.get_state_feature_value(state, 'visibility') == 'high')
+                                and action == 'cross')
+                            or self.HM.lambda_[state][action][1] > 0.35):
                                 break
 
                         self.AM.kappa[state][action] = L[level_index]
                         self.potential[s][a][L[level_index]] = 0.0
+
+                        if L[1] == 1 and L[level_index] == 2:
+                            self.flags[s][a] = True
                         break
 
     def save_kappa(self):
@@ -378,3 +392,19 @@ class CAS():
             a = self.actions.index((action[0], i))
             self.transitions[s][a] *= 0.0
             self.transitions[s][a][s] = 1.0
+
+    def check_level_optimality(self):
+        """
+            params: None
+
+            returns: The percent of states for which the policy is level-optimal.
+        """
+        total, correct = 0., 0.
+        for s, state in enumerate(self.states):
+            if len(state[0]) < 3 or 'open' in state[0][3]:
+                continue
+            total += 1
+            action = self.pi[s]
+            correct = correct + self.DM.helper.level_optimal(state, action)
+
+        return correct/total

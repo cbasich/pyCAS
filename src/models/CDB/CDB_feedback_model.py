@@ -153,15 +153,16 @@ class FeedbackModel():
 
         candidates = []
         for state in self.lambda_.keys():
+            dic = map_info[str((state[0], state[1]))]
+            if dic["obstacle"] == "crosswalk":
+                dic["obstacle"] = state[3]
             for action in self.lambda_[state].keys():
                 for level in self.lambda_[state][action].keys():
 
                     # Get the count for thist (s, a, l) tuple in the relevant datafile.
-                    dic = map_info[str((state[0], state[1]))]
                     if action == 'open':
                         count = np.sum(pd.DataFrame([open_df[k] == v for k,v in dic.items() if k in open_df.columns.values]).all())
                     elif action == 'cross':
-                        dic['obstacle'] = state[3]
                         count = np.sum(pd.DataFrame([cross_df[k] == v for k,v in dic.items() if k in cross_df.columns.values]).all())
 
                     # If we have not seen this (s, a, l) a sufficient number of times, skip it.
@@ -195,6 +196,7 @@ class FeedbackModel():
 
         # First, for a given candidate, procure its unused features.
         unused_features = self.get_unused_features(state, action)
+
         if len(unused_features) == 0:
             return None
             

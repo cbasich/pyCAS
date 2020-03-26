@@ -85,10 +85,10 @@ class DeliveryBotDomain():
                     if tmp not in self.kappa.keys():
                         self.kappa[tmp] = {}
                         for a in self.actions:
-                            if a == 'wait':
-                                self.kappa[tmp][a] = 3
-                            else:
+                            if a == 'cross':
                                 self.kappa[tmp][a] = 1
+                            else:
+                                self.kappa[tmp][a] = 3
             elif self.grid[x][y] == 'D':
                 features = []
                 if 'doortype' in used_features:
