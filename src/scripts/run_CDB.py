@@ -101,6 +101,8 @@ def main(grid_file, N, generate):
         else:
             print("No candidates...")
 
+        embed()
+
         visited_level_optimality, feedback_count = process_results(environment)
         graph_results(all_level_optimality, visited_level_optimality, feedback_count)
 
@@ -354,7 +356,7 @@ def process_results(CAS):
         # reachable_level_optimality.append(np.mean(reachable_avg))
 
     feedback_count = []
-    f = open( os.path.join(OUTPUT_PATH, 'execution_trace.txt.'), mode='r+')
+    f = open( os.path.join(OUTPUT_PATH, 'execution_trace.txt'), mode='r+')
     count = 0
     for line in f.readlines():
         if 'BEGINNING EPISODE' in line:
@@ -398,4 +400,4 @@ if __name__ == '__main__':
     # N = int(sys.argv[2])
     # generate = int(sys.argv[3])
     # main(grid_file, N, generate)
-    main('map_1.txt', 250, 0)
+    main('map_1.txt', 1, 0)
