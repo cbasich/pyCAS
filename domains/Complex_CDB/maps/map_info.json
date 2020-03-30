@@ -1,0 +1,313 @@
+{
+    "(3, 9)": {
+        "region": "b1",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "brown",
+        "door_type": "pull"
+    },
+    "(4, 3)": {
+        "region": "b1",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "brown",
+        "door_type": "pull"
+    },
+    "(4, 5)": {
+        "region": "b1",
+        "obstacle": "door",
+        "door_size": "medium",
+        "door_color": "black",
+        "door_type": "push"
+    },
+    "(4, 8)": {
+        "region": "b1",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "brown",
+        "door_type": "push"
+    },
+    "(5, 11)": {
+        "region": "b1",
+        "obstacle": "door",
+        "door_size": "large",
+        "door_color": "blue",
+        "door_type": "push"
+    },
+    "(6, 5)": {
+        "region": "b1",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "brown",
+        "door_type": "pull"
+    },
+    "(7, 4)": {
+        "region": "b1",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "brown",
+        "door_type": "push"
+    },
+    "(8, 9)": {
+        "region": "b1",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "brown",
+        "door_type": "pull"
+    },
+    "(9, 11)": {
+        "region": "b1",
+        "obstacle": "door",
+        "door_size": "large",
+        "door_color": "blue",
+        "door_type": "push"
+    },
+    "(10, 6)": {
+        "region": "b1",
+        "obstacle": "door",
+        "door_size": "medium",
+        "door_color": "black",
+        "door_type": "push"
+    },
+    "(10, 9)": {
+        "region": "b1",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "brown",
+        "door_type": "push"
+    },
+    "(11, 4)": {
+        "region": "b1",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "brown",
+        "door_type": "pull"
+    },
+    "(11, 10)": {
+        "region": "b1",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "brown",
+        "door_type": "pull"
+    },
+    "(3, 18)": {
+        "region": "b2",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "red",
+        "door_type": "pull"
+    },
+    "(3, 23)": {
+        "region": "b2",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "blue",
+        "door_type": "pull"
+    },
+    "(6, 17)": {
+        "region": "b2",
+        "obstacle": "door",
+        "door_size": "large",
+        "door_color": "red",
+        "door_type": "push"
+    },
+    "(6, 19)": {
+        "region": "b2",
+        "obstacle": "door",
+        "door_size": "medium",
+        "door_color": "black",
+        "door_type": "push"
+    },
+    "(6, 22)": {
+        "region": "b2",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "red",
+        "door_type": "push"
+    },
+    "(6, 24)": {
+        "region": "b2",
+        "obstacle": "door",
+        "door_size": "large",
+        "door_color": "blue",
+        "door_type": "push"
+    },
+    "(9, 18)": {
+        "region": "b2",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "brown",
+        "door_type": "pull"
+    },
+    "(9, 23)": {
+        "region": "b2",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "blue",
+        "door_type": "pull"
+    },
+    "(18, 21)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "large",
+        "door_color": "brown",
+        "door_type": "push"
+    },
+    "(21, 20)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "blue",
+        "door_type": "pull"
+    },
+    "(23, 22)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "red",
+        "door_type": "pull"
+    },
+    "(24, 12)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "large",
+        "door_color": "brown",
+        "door_type": "push"
+    },
+    "(24, 19)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "medium",
+        "door_color": "black",
+        "door_type": "push"
+    },
+    "(24, 23)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "red",
+        "door_type": "push"
+    },
+    "(25, 14)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "red",
+        "door_type": "push"
+    },
+    "(25, 24)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "large",
+        "door_color": "brown",
+        "door_type": "push"
+    },
+    "(26, 13)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "blue",
+        "door_type": "pull"
+    },
+    "(26, 17)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "black",
+        "door_type": "pull"
+    },
+    "(26, 21)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "red",
+        "door_type": "pull"
+    },
+    "(27, 15)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "medium",
+        "door_color": "black",
+        "door_type": "push"
+    },
+    "(28, 7)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "red",
+        "door_type": "pull"
+    },
+    "(28, 11)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "blue",
+        "door_type": "pull"
+    },
+    "(28, 19)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "black",
+        "door_type": "pull"
+    },
+    "(29, 14)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "blue",
+        "door_type": "push"
+    },
+    "(30, 6)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "red",
+        "door_type": "pull"
+    },
+    "(30, 13)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "blue",
+        "door_type": "pull"
+    },
+    "(30, 19)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "small",
+        "door_color": "brown",
+        "door_type": "pull"
+    },
+    "(32, 9)": {
+        "region": "b3",
+        "obstacle": "door",
+        "door_size": "large",
+        "door_color": "brown",
+        "door_type": "push"
+    },
+    "(6, 14)": {
+        "region": "r1",
+        "obstacle": "crosswalk",
+        "visibility": "low",
+        "street_type": "two_way"
+    },
+    "(12, 14)": {
+        "region": "r1",
+        "obstacle": "crosswalk",
+        "visibility": "high",
+        "street_type": "two_way"
+    },
+    "(15, 6)": {
+        "region": "r2",
+        "obstacle": "crosswalk",
+        "visibility": "high",
+        "street_type": "one_way"
+    },
+    "(15, 21)": {
+        "region": "r2",
+        "obstacle": "crosswalk",
+        "visibility": "low",
+        "street_type": "one_way"
+    }
+}
