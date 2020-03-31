@@ -50,6 +50,9 @@ def main(grid_file, N, generate):
         while end == start:
             end = offices[np.random.randint(len(offices))]
 
+        # start = 'b'
+        # end = 't'
+
         print("Building environment...")
         print("Building domain model...")
         DM = CDB_domain_model.DeliveryBotDomain(grid_file, start, end)
@@ -75,7 +78,7 @@ def main(grid_file, N, generate):
 
         print("Beginning simulation...")
         if solver == 'FVI':
-            cost = execute_policy(environment, 1, i)
+            cost = execute_policy(environment, 10, i)
         elif solver == 'LRTDP':
             cost = execute_LRTDP(environment)
         print(cost)
@@ -183,8 +186,8 @@ def execute_policy(CAS, M, i):
                     flagged = (action[1] == 1 and CAS.flags[CAS.states.index(state)][CAS.DM.actions.index(action[0])] == False)
 
                     updateData(action[0], f1, f2, feedback, flagged)
-            if feedback is not None:
-                execution_trace_file.write("Feedback: " + feedback + "\n")
+                    if feedback is not None:
+                        execution_trace_file.write("Feedback: " + feedback + "\n")
             if feedback == 'no':
                 CAS.remove_transition(state, action)
                 CAS.solve()
@@ -284,11 +287,11 @@ def init_cross_data():
 
 def init_full_cross_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data'), 'a+') as f:
-        f.write('level,region,obstacle,visibility,feedback')
+        f.write('level,region,obstacle,visibility,streettypefeedback')
 
 def init_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
-        f.write('level,region,obstacle,feedback')
+        f.write('level,region,obstacle,doortype,doorcolorfeedback')
         for level in ['1','2']:
             for region in ['b1','b2','b3']:
                 for obstacle in ['door']:
@@ -354,7 +357,7 @@ def process_results(CAS):
         # reachable_level_optimality.append(np.mean(reachable_avg))
 
     feedback_count = []
-    f = open( os.path.join(OUTPUT_PATH, 'execution_trace.txt.'), mode='r+')
+    f = open( os.path.join(OUTPUT_PATH, 'execution_trace.txt'), mode='r+')
     count = 0
     for line in f.readlines():
         if 'BEGINNING EPISODE' in line:
@@ -388,7 +391,8 @@ def graph_results(alo, vlo, fc):
     lines2, labels2 = ax2.get_legend_handles_labels()
     ax2.legend(lines + lines2, labels + labels2, loc=4, fontsize=14)
 
-    plt.savefig('competence_graph.png')
+    filepath = os.path.join(OUTPUT_PATH, 'competence_graph.png')
+    plt.savefig(filepath)
     plt.clf()
 
     plt.close(fig)
@@ -398,4 +402,4 @@ if __name__ == '__main__':
     # N = int(sys.argv[2])
     # generate = int(sys.argv[3])
     # main(grid_file, N, generate)
-    main('map_1.txt', 250, 0)
+    main('map_1.txt', 350, 0)
