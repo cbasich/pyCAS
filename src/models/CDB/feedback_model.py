@@ -138,6 +138,7 @@ class FeedbackModel():
             thresh - Defines the datacount threshold needed for (s,a) to be a candidate
                      if it does not meet the probability threshold.
         """
+        init_state_candidate_count = 0
 
         # Load the relevant data files
         cross_path = os.path.join(FEEDBACK_PATH, 'cross.data')
@@ -177,10 +178,13 @@ class FeedbackModel():
                     for sigma in self.Sigma:
                         if self.predict_feedback_probability(state, action, sigma) > 1 - delta:
                             candidate = False
+
                     if candidate:
                         candidates.append((state, action, level))
+                        if len(state) == 4:
+                            init_state_candidate_count += 1
 
-        return candidates
+        return candidates, init_state_candidate_count
 
     def get_most_likely_discriminator(self, candidate, k):
         """y
@@ -253,7 +257,14 @@ class FeedbackModel():
         lambdas = [(self.build_lambda(D_train, used_features, discriminator), discriminator) for discriminator in discriminators]
         accuracies = [self.test_lambda(lambda_, lambda_map, D_test, used_features, discriminator) for (lambda_, lambda_map), discriminator in lambdas]
 
-        return discriminators[np.argmax(accuracies)]
+        # embed()
+
+        d = discriminators[np.argmax(accuracies)]
+
+        if np.max(accuracies) < 0.95:
+            return None
+
+        return d
 
     def build_lambda(self, D_train, used_features, discriminator):
         train = D_train[np.append(used_features, [discriminator, 'feedback'])]
@@ -270,6 +281,6 @@ class FeedbackModel():
 
         predictions = lambda_.predict(X_) > 0.5
 
-        accuracy = np.sum( predictions == y )
+        accuracy = np.sum( predictions == y ) / len(y)
 
         return accuracy

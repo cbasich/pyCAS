@@ -4,9 +4,7 @@ from copy import deepcopy
 from collections import defaultdict
 from IPython import embed
 
-# from matplotlib import cm
 from matplotlib import pyplot as plt
-# from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
 import numpy as np
 import itertools as it
@@ -16,13 +14,12 @@ sys.path.append(os.path.join(current_file_path, '..'))
 
 import process_data
 
-from models.CDB.competence_aware_system import CAS
-from models.CDB import autonomy_model, feedback_model, domain_model
+from models.Complex_CDB import autonomy_model, feedback_model, domain_model, domain_helper, competence_aware_system
 
-OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB')
-FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'feedback')
-PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'params')
-MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
+OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'Complex_CDB')
+FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'Complex_CDB', 'feedback')
+PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'Complex_CDB', 'params')
+MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'Complex_CDB', 'maps')
 
 
 def main(grid_file, N, generate):
@@ -45,13 +42,10 @@ def main(grid_file, N, generate):
     offices = ['a','b','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t']
 
     for i in range(N):
-        # start = offices[np.random.randint(len(offices))]
-        # end = offices[np.random.randint(len(offices))]
-        # while end == start:
-        #     end = offices[np.random.randint(len(offices))]
-
-        start = 'b'
-        end = 't'
+        start = offices[np.random.randint(len(offices))]
+        end = offices[np.random.randint(len(offices))]
+        while end == start:
+            end = offices[np.random.randint(len(offices))]
 
         print("Building environment...")
         print("Building domain model...")
@@ -61,7 +55,7 @@ def main(grid_file, N, generate):
         print("Building feedback model...")
         HM = feedback_model.FeedbackModel(DM, AM, ['+', '-', '/', None], ['cross', 'open'])
         print("Building CAS...")
-        environment = CAS(DM, AM, HM, persistence=0.75)
+        environment = competence_aware_system.CAS(DM, AM, HM, persistence=0.75)
 
         solver = 'FVI'
         print("Solving mdp...")
@@ -78,7 +72,7 @@ def main(grid_file, N, generate):
 
         print("Beginning simulation...")
         if solver == 'FVI':
-            cost = execute_policy(environment, 10, i)
+            cost = execute_policy(environment, 1, i)
         elif solver == 'LRTDP':
             cost = execute_LRTDP(environment)
         print(cost)
@@ -90,33 +84,21 @@ def main(grid_file, N, generate):
         environment.save_kappa()
 
         print("Identifying candidates...")
-        candidates, init_state_candidate_count = environment.HM.find_candidates()
+        candidates = environment.HM.find_candidates()
         if len(candidates) > 0:
             candidate = candidates[np.random.randint(len(candidates))]
 
-            print(candidate)
-            # embed()
-
             print("Identifying potential discriminators...")
-            try:
-                print("Check 1")
-                discriminator = environment.HM.get_most_likely_discriminator(candidate, 1)
-            except Exception:
-                print("Check 2")
-                discriminator = None
+            discriminator = environment.HM.get_most_likely_discriminator(candidate, 1)
             if discriminator == None:
                 print("No discriminator found")
             else:
-                print("Found discriminator " + str(discriminator) + ".\n")
                 environment.DM.helper.add_feature(discriminator, candidate)
+                print(discriminator)
         else:
             print("No candidates...")
 
-        with open(os.path.join(OUTPUT_PATH, 'candidate_count.txt'), mode = 'a+') as f:
-            f.write(str(len(candidates)) + ",")
-
-        with open(os.path.join(OUTPUT_PATH, 'init_state_candidate_count.txt'), mode = 'a+') as f:
-            f.write(str(init_state_candidate_count) + ",")
+        embed()
 
         visited_level_optimality, feedback_count = process_results(environment)
         graph_results(all_level_optimality, visited_level_optimality, feedback_count)
@@ -187,12 +169,15 @@ def execute_policy(CAS, M, i):
             if action[1] == 1 or action[1] == 2:
                 feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))])
                 if j == M-1:
-                    f1 = [action[1], CAS.DM.helper.get_state_feature_value(state[0], 'region'), state[0][3]]
-                    if f1[2] == 'door-closed':
+                    f1 = [action[1], CAS.DM.helper.get_state_feature_value(state[0], 'region'), state[0][5]]
+                    if f1[2] == 'door_closed':
                         f1[2] = 'door'
-                    if (('doortype' in used_features and 'door' in state[0][3])
-                     or ('visibility' in used_features and state[0][3] in ['empty', 'light', 'busy'])):
-                        f1.append(state[0][4])
+
+                    for feature in used_features:
+                        if feature != 'obstacle':
+                            feature_value = CAS.DM.helper.get_state_feature_value(state[0], feature)
+                            if feature_value != None:
+                                f1.append(feature + "_" + feature_value)
 
                     f2 = [CAS.DM.helper.get_state_feature_value(state[0], f) for f in unused_features 
                           if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
@@ -200,8 +185,8 @@ def execute_policy(CAS, M, i):
                     flagged = (action[1] == 1 and CAS.flags[CAS.states.index(state)][CAS.DM.actions.index(action[0])] == False)
 
                     updateData(action[0], f1, f2, feedback, flagged)
-                    if feedback is not None:
-                        execution_trace_file.write("Feedback: " + feedback + "\n")
+            if feedback is not None:
+                execution_trace_file.write("Feedback: " + feedback + "\n")
             if feedback == 'no':
                 CAS.remove_transition(state, action)
                 CAS.solve()
@@ -294,14 +279,14 @@ def init_cross_data():
         f.write('level,region,obstacle,feedback')
         for level in ['1','2']:
             for region in ['r1','r2']:
-                for obstacle in ['empty', 'light', 'heavy']:
+                for obstacle in ['traffic_none', 'traffic_light', 'traffic_heavy']:
                     for feedback in ['yes','no']:
                         entry = level + "," + region + "," + obstacle + "," + feedback
                         f.write("\n" + entry)
 
 def init_full_cross_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data'), 'a+') as f:
-        f.write('level,region,obstacle,visibility,streettype,feedback')
+        f.write('level,region,obstacle,visibility,feedback')
 
 def init_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
@@ -315,7 +300,7 @@ def init_open_data():
 
 def init_full_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'a+') as f:
-        f.write('level,region,obstacle,doortype,doorcolor,feedback')
+        f.write('level,region,obstacle,doortype,feedback')
 
 def process_results(CAS):
     policies = pickle.load( open(os.path.join(OUTPUT_PATH, 'policies.pkl'), mode='rb'), encoding='bytes')
@@ -405,8 +390,7 @@ def graph_results(alo, vlo, fc):
     lines2, labels2 = ax2.get_legend_handles_labels()
     ax2.legend(lines + lines2, labels + labels2, loc=4, fontsize=14)
 
-    filepath = os.path.join(OUTPUT_PATH, 'competence_graph.png')
-    plt.savefig(filepath)
+    plt.savefig('competence_graph.png')
     plt.clf()
 
     plt.close(fig)
@@ -416,4 +400,4 @@ if __name__ == '__main__':
     # N = int(sys.argv[2])
     # generate = int(sys.argv[3])
     # main(grid_file, N, generate)
-    main('map_1.txt', 200, 0)
+    main('map_1.txt', 1, 0)

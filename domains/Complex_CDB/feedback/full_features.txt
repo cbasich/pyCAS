@@ -1,0 +1,1 @@
+level,region,obstacle,time_of_day,weather,door_size,door_color,door_type,visibility,street_type

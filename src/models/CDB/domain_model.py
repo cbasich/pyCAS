@@ -8,7 +8,7 @@ import itertools as it
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..', '..'))
 
-from CDB.CDB_helper import CampusDeliveryBotHelper
+from CDB.domain_helper import CampusDeliveryBotHelper
 from scripts.utils import FVI
 
 DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB')
@@ -70,16 +70,20 @@ class DeliveryBotDomain():
                     for a in self.actions:
                         self.kappa[s][a] = 3
             elif self.grid[x][y] == 'C':
-                features = []
-                if 'visibility' in used_features:
-                    features.append(self.map_info[str((x,y))]['visibility'])
-                if 'streettype' in used_features:
-                    features.append(self.map_info[str((x,y))]['streettype'])
-
-                if len(features) > 0:
-                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], features))
+                tmp_states = set()
+                if 'visibility' in used_features and 'streettype' in used_features:
+                    f1 = self.map_info[str((x,y))]['visibility']
+                    f2 = self.map_info[str((x,y))]['streettype']
+                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], [f1], [f2]))
+                elif 'visibility' in used_features:
+                    f = self.map_info[str((x,y))]['visibility']
+                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], [f]))
+                elif 'streettype' in used_features:
+                    f = self.map_info[str((x,y))]['streettype']
+                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], [f]))
                 else:
                     tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy']))
+
                 states = states.union(tmp_states)
                 for tmp in tmp_states:
                     if tmp not in self.kappa.keys():
@@ -90,16 +94,20 @@ class DeliveryBotDomain():
                             else:
                                 self.kappa[tmp][a] = 3
             elif self.grid[x][y] == 'D':
-                features = []
-                if 'doortype' in used_features:
-                    features.append(self.map_info[str((x,y))]['doortype'])
-                if 'doorcolor' in used_features:
-                    features.append(self.map_info[str((x,y))]['doorcolor'])
-
-                if len(features) > 0:
-                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed'], features))
+                tmp_states = set()
+                if 'doortype' in used_features and 'doorcolor' in used_features:
+                    f1 = self.map_info[str((x,y))]['doortype']
+                    f2 = self.map_info[str((x,y))]['doorcolor']
+                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed'], [f1], [f2]))
+                elif 'doortype' in used_features:
+                    f = self.map_info[str((x,y))]['doortype']
+                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed'], [f]))
+                elif 'doorcolor' in used_features:
+                    f = self.map_info[str((x,y))]['doorcolor']
+                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed'], [f]))
                 else:
                     tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed']))
+                    
                 states = states.union(tmp_states)
                 for tmp in tmp_states:
                     if tmp not in self.kappa.keys():
