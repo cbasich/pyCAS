@@ -3,6 +3,7 @@ import os, sys
 import numpy as np
 
 from matplotlib import pyplot as plt
+from IPython import embed
 
 OUTPUT_PATH = os.path.join('..','..','output','CDB')
 
@@ -13,18 +14,24 @@ def generate_cost_graphs():
     costs, expected_costs = [], []
 
     for line in cost_file.readlines():
-        costs.append(float(line))
+        tmp = [float(x) for x in line.split(',')[:-1]]
+        costs.append(tmp)
 
     for line in expected_cost_file.readlines():
         expected_costs.append(float(line))
 
-    diffs = 100.0 * ((np.array(costs) - np.array(expected_costs))/np.array(expected_costs))
+    costs = np.array(costs)
+    expected_costs = np.array(expected_costs).reshape(-1,1)
+
+    diffs = 100 * (costs - expected_costs)/expected_costs
+    avgs = np.mean(diffs, axis = 1)
+    stes = np.sqrt(np.std(diffs, axis = 1))
 
     fig, ax1 = plt.subplots()
     ax1.set_xlabel('Episode', fontsize=14)
     ax1.set_ylabel('Percent Error in Cost Prediction', fontsize=14)
 
-    ax1.plot(diffs, color = 'steelblue')
+    ax1.errorbar(x = np.arange(len(diffs)), y = avgs, yerr = stes, color='steelblue', ecolor='orange')
     ax1.tick_params(axis='y')
 
     fig.tight_layout()

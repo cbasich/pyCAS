@@ -49,6 +49,8 @@ def main(grid_file, N, generate):
         # end = offices[np.random.randint(len(offices))]
         # while end == start:
         #     end = offices[np.random.randint(len(offices))]
+        # with open(os.path.join(OUTPUT_PATH, 'tasks.txt'), mode='a+') as f:
+        #     f.write(state + end + ',')
 
         start = 'b'
         end = 't'
@@ -78,12 +80,14 @@ def main(grid_file, N, generate):
 
         print("Beginning simulation...")
         if solver == 'FVI':
-            cost = execute_policy(environment, 10, i)
+            costs = execute_policy(environment, 10, i)
         elif solver == 'LRTDP':
             cost = execute_LRTDP(environment)
-        print(cost)
+
         with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), mode = 'a+') as cost_file:
-            cost_file.write(str(cost) + "\n")
+            for cost in costs:
+                cost_file.write(str(cost) + ",")
+            cost_file.write("\n")
 
         print("Updating parameters...")
         environment.update_kappa()
@@ -93,22 +97,20 @@ def main(grid_file, N, generate):
         candidates, init_state_candidate_count = environment.HM.find_candidates()
         if len(candidates) > 0:
             candidate = candidates[np.random.randint(len(candidates))]
-
             print(candidate)
-            # embed()
 
             print("Identifying potential discriminators...")
             try:
-                print("Check 1")
                 discriminator = environment.HM.get_most_likely_discriminator(candidate, 1)
             except Exception:
-                print("Check 2")
                 discriminator = None
             if discriminator == None:
                 print("No discriminator found")
             else:
                 print("Found discriminator " + str(discriminator) + ".\n")
                 environment.DM.helper.add_feature(discriminator, candidate)
+                with open(os.path.join(OUTPUT_PATH, 'execution_trace.txt'), mode = 'a+') as f:
+                    f.write("Discriminator added: " + str(discriminator) + "\n")
         else:
             print("No candidates...")
 
@@ -148,7 +150,7 @@ def execute_LRTDP(CAS):
 def execute_policy(CAS, M, i):
     pi_base = CAS.pi
     transitions_base = CAS.transitions
-    total_returns = 0
+    total_returns = []
 
     execution_trace_file = open(os.path.join(OUTPUT_PATH, 'execution_trace.txt'), mode = 'a+')
 
@@ -179,7 +181,7 @@ def execute_policy(CAS, M, i):
 
             action = pi[CAS.state_map[state]]
             execution_trace_file.write(str(state) + " | " + str(action) + "\n")
-            print(state, "  ,  ", action)
+            # print(state, "  ,  ", action)
 
             r += CAS.costs[CAS.state_map[state]][CAS.actions.index(action)]
 
@@ -212,12 +214,12 @@ def execute_policy(CAS, M, i):
             else:
                 state = CAS.generate_successor(state, action)
 
-        total_returns += r
+        total_returns.append(r)
         CAS.transitions = transitions_base
 
     execution_trace_file.close()
 
-    return total_returns/M
+    return total_returns
 
 def interfaceWithHuman(state, action, info, automate=True):
     feedback = None
@@ -234,10 +236,13 @@ def interfaceWithHuman(state, action, info, automate=True):
 
     else:
         if info['obstacle'] == 'door':
-            if info['doortype'] == 'light' or (info['doortype'] == 'medium' and info['region'] == 'b1'):
-                feedback = 'yes'
-            else:
+            if info['doortype'] == 'pull':
                 feedback = 'no'
+            else:
+                if info['doorsize'] == 'small' or (info['doorsize'] == 'medium' and info['region'] == 'b1'):
+                    feedback = 'yes'
+                else:
+                    feedback = 'no'
 
         elif info['obstacle'] == 'crosswalk':
             if state[3] == 'empty' or (info['visibility'] == 'high' and state[3] == 'light'):
@@ -395,7 +400,7 @@ def graph_results(alo, vlo, fc):
 
     ax2 = ax1.twinx()
     ax2.set_ylabel('Number of Feedback Signals', fontsize=14)
-    ax2.plot(fc, color = 'black', label = 'CUmulative Signals')
+    ax2.plot(fc, color = 'black', label = 'Cumulative Signals')
     ax2.tick_params(axis = 'y')
 
     fig.tight_layout()

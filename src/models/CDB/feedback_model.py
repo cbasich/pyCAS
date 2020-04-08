@@ -225,6 +225,7 @@ class FeedbackModel():
         # doing this by taking the max over all feature-values, and then summing
         # over each feature value's max correlation with the feedback for the
         # relevant Feature.
+
         _disc = {f: 0 for f in unused_features}
         for row_name in _corr.axes[0].values:
             try:
@@ -232,6 +233,10 @@ class FeedbackModel():
                 _disc[f] += np.max(_corr.loc[row_name])
             except:
                 _disc[row_name] += np.max(_corr.loc[row_name])
+
+        indices = list(_corr.index.values)
+        for f in _disc.keys():
+            _disc[f] /= len([v for v in indices if f in v])
 
         discriminators = unused_features[np.argpartition(_disc, -k)[-k:]]
 
