@@ -39,7 +39,7 @@ def get_visited_states(execution_trace_file_path):
     visited_states = []
 
     for line in f.readlines():
-        if 'BEGINNING' in line or 'Feedback' in line:
+        if 'BEGINNING' in line or 'Feedback' in line or 'Discriminator' in line:
             continue
 
         line_split = line.split('|')
