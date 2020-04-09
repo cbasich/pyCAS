@@ -25,7 +25,7 @@ PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'para
 MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
 
 
-def main(grid_file, N, generate):
+def main(grid_file, N, update):
     if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'cross.data') ):
         init_cross_data()
     if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open.data') ):
@@ -45,15 +45,15 @@ def main(grid_file, N, generate):
     offices = ['a','b','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t']
 
     for i in range(N):
-        # start = offices[np.random.randint(len(offices))]
-        # end = offices[np.random.randint(len(offices))]
-        # while end == start:
-        #     end = offices[np.random.randint(len(offices))]
-        # with open(os.path.join(OUTPUT_PATH, 'tasks.txt'), mode='a+') as f:
-        #     f.write(state + end + ',')
+        start = offices[np.random.randint(len(offices))]
+        end = offices[np.random.randint(len(offices))]
+        while end == start:
+            end = offices[np.random.randint(len(offices))]
+        with open(os.path.join(OUTPUT_PATH, 'tasks.txt'), mode='a+') as f:
+            f.write(start + end + ',')
 
-        start = 'b'
-        end = 't'
+        # start = 'b'
+        # end = 't'
 
         print("Building environment...")
         print("Building domain model...")
@@ -93,35 +93,49 @@ def main(grid_file, N, generate):
         environment.update_kappa()
         environment.save_kappa()
 
-        print("Identifying candidates...")
-        candidates, init_state_candidate_count = environment.HM.find_candidates()
-        if len(candidates) > 0:
-            candidate = candidates[np.random.randint(len(candidates))]
-            print(candidate)
+        if update:
+            print("Identifying candidates...")
+            candidates, init_state_candidate_count = environment.HM.find_candidates()
+            if len(candidates) > 0:
+                candidate = candidates[np.random.randint(len(candidates))]
+                print(candidate)
 
-            print("Identifying potential discriminators...")
-            try:
-                discriminator = environment.HM.get_most_likely_discriminator(candidate, 1)
-            except Exception:
-                discriminator = None
-            if discriminator == None:
-                print("No discriminator found")
+                print("Identifying potential discriminators...")
+                try:
+                    discriminator = environment.HM.get_most_likely_discriminator(candidate, 1)
+                except Exception:
+                    discriminator = None
+
+                if discriminator == None:
+                    print("No discriminator found...")
+                else:
+                    _mod_state = (tuple(list(candidate[0][0]).append(environment.DM.helper.get_state_feature_value(candidate[0][0], discriminator))), candidate[0][1])
+                    for sigma in environment.HM.Sigma:
+                        if environment.HM.predict_feedback_probability(_mod_state, candidate[1][0], sigma) > 0.9:
+                            print("Found discriminator " + str(discriminator) + ".\n")
+                            environment.DM.helper.add_feature(discriminator, candidate)
+                            with open(os.path.join(OUTPUT_PATH, 'execution_trace.txt'), mode = 'a+') as f:
+                                f.write("Discriminator added: " + str(discriminator) + "\n")
+                            break
+                    print("No discriminator found...")
             else:
-                print("Found discriminator " + str(discriminator) + ".\n")
-                environment.DM.helper.add_feature(discriminator, candidate)
-                with open(os.path.join(OUTPUT_PATH, 'execution_trace.txt'), mode = 'a+') as f:
-                    f.write("Discriminator added: " + str(discriminator) + "\n")
-        else:
-            print("No candidates...")
+                print("No candidates...")
 
-        with open(os.path.join(OUTPUT_PATH, 'candidate_count.txt'), mode = 'a+') as f:
-            f.write(str(len(candidates)) + ",")
+            with open(os.path.join(OUTPUT_PATH, 'candidate_count.txt'), mode = 'a+') as f:
+                f.write(str(len(candidates)) + ",")
 
-        with open(os.path.join(OUTPUT_PATH, 'init_state_candidate_count.txt'), mode = 'a+') as f:
-            f.write(str(init_state_candidate_count) + ",")
+            with open(os.path.join(OUTPUT_PATH, 'init_state_candidate_count.txt'), mode = 'a+') as f:
+                f.write(str(init_state_candidate_count) + ",")
 
-        visited_level_optimality, feedback_count = process_results(environment)
-        graph_results(all_level_optimality, visited_level_optimality, feedback_count)
+        # visited_level_optimality, feedback_count = process_results(environment)
+        # graph_results(all_level_optimality, visited_level_optimality, feedback_count)
+
+    tmp_dic = {}
+    visited_level_optimality, feedback_count = process_results(environment)
+    tmp_dic["visited_LO"] = visited_level_optimality
+    tmp_dic["feedback_count"] = feedback_count
+    with open(os.path.join(OUTPUT_PATH, "competence_graph_info.pkl"), 'wb') as f:
+        pickle.dump(tmp_dic, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def execute_LRTDP(CAS):
@@ -326,29 +340,15 @@ def process_results(CAS):
     policies = pickle.load( open(os.path.join(OUTPUT_PATH, 'policies.pkl'), mode='rb'), encoding='bytes')
     execution_trace_file = os.path.join(OUTPUT_PATH, 'execution_trace.txt')
 
-    # all_states = CAS.states
     visited_states = process_data.get_visited_states(execution_trace_file)
-    # reachable_states = process_data.get_reachable_states(policies, CAS)
 
-    all_level_optimality, visited_level_optimality, reachable_level_optimality = [], [], []
+    all_level_optimality, visited_level_optimality = [], []
 
     for i in range(len(policies.keys())):
         pi = policies[i]['policy']
         state_map = policies[i]['state_map']
 
-        all_avg, visited_avg, reachable_avg = [], [], []
-
-        # for state in all_states:
-        #     if len(state[0]) < 3 or 'open' in state[0][3]:
-        #         continue
-        #     try:
-        #         action = pi[state_map[state]]
-        #     except Exception:
-        #         # print("Error check 1")
-        #         # embed()
-        #         tmp = (state[0][:-1], state[1])
-        #         action = pi[state_map[tmp]]
-        #     all_avg.append(int(CAS.DM.helper.level_optimal(state,action)))
+        all_avg, visited_avg = [], []
 
         for state in visited_states:
             if len(state[0]) < 3 or 'open' in state[0][3]:
@@ -358,22 +358,7 @@ def process_results(CAS):
                 visited_avg.append(int(CAS.DM.helper.level_optimal(state,action)))
             except Exception:
                 continue
-
-        # for state in reachable_states[i]:
-        #     if len(state[0]) < 3 or 'open' in state[0][3]:
-        #         continue
-        #     try:
-        #         action = pi[state_map[state]]
-        #     except Exception:
-        #         # print("Error check 3")
-        #         # embed()
-        #         tmp = (state[0][:-1], state[1])
-        #         action = pi[state_map[tmp]]
-        #     reachable_avg.append(int(CAS.DM.helper.level_optimal(state,action)))
-
-        # all_level_optimality.append(np.mean(all_avg) * 100.0)
         visited_level_optimality.append(np.mean(visited_avg) * 100.0)
-        # reachable_level_optimality.append(np.mean(reachable_avg))
 
     feedback_count = []
     f = open( os.path.join(OUTPUT_PATH, 'execution_trace.txt'), mode='r+')
@@ -387,38 +372,9 @@ def process_results(CAS):
 
     return visited_level_optimality, feedback_count
 
-def graph_results(alo, vlo, fc):
-    fig, ax1 = plt.subplots()
-    ax1.set_xlabel('Episode', fontsize=14)
-    ax1.set_ylabel('% Policy at Competence', fontsize=14)
-    ax1.set_ylim(top=100)
-
-    ax1.plot(alo, color = 'steelblue', label = 'All States')
-    ax1.plot(vlo, color = 'darkkhaki', label = 'Visited States')
-    # ax1.plot(rlo, color = 'indianred', label = 'Reachable States')
-    ax1.tick_params(axis='y')
-
-    ax2 = ax1.twinx()
-    ax2.set_ylabel('Number of Feedback Signals', fontsize=14)
-    ax2.plot(fc, color = 'black', label = 'Cumulative Signals')
-    ax2.tick_params(axis = 'y')
-
-    fig.tight_layout()
-    plt.grid(False)
-
-    lines, labels = ax1.get_legend_handles_labels()
-    lines2, labels2 = ax2.get_legend_handles_labels()
-    ax2.legend(lines + lines2, labels + labels2, loc=4, fontsize=14)
-
-    filepath = os.path.join(OUTPUT_PATH, 'competence_graph.png')
-    plt.savefig(filepath)
-    plt.clf()
-
-    plt.close(fig)
-
 if __name__ == '__main__':
     # grid_file = sys.argv[1]
     # N = int(sys.argv[2])
     # generate = int(sys.argv[3])
     # main(grid_file, N, generate)
-    main('map_1.txt', 200, 0)
+    main('map_1.txt', 300, 1)

@@ -262,12 +262,16 @@ class FeedbackModel():
         lambdas = [(self.build_lambda(D_train, used_features, discriminator), discriminator) for discriminator in discriminators]
         accuracies = [self.test_lambda(lambda_, lambda_map, D_test, used_features, discriminator) for (lambda_, lambda_map), discriminator in lambdas]
 
-        # embed()
-
         d = discriminators[np.argmax(accuracies)]
 
-        if np.max(accuracies) < 0.95:
-            return None
+        if D_train['obstacle'] == 'door':
+            curr_acc = test_lambda(self.DM.helper.open_GAM, self.DM.helper.open_GAM_map, D_test, used_features, discriminator = None)
+            if np.max(accuracies) - curr_acc < 0.1:
+                return None
+        else:
+            curr_acc = test_lambda(self.DM.helper.cross_GAM, self.DM.helper.cross_GAM_map, D_test, used_features, discriminator = None)
+            if np.max(accuracies) - curr_acc < 0.1:
+                return None
 
         return d
 
@@ -279,7 +283,10 @@ class FeedbackModel():
         return (gam, gam_map)
 
     def test_lambda(self, lambda_, lambda_map, D_test, used_features, discriminator):
-        X = D_test[np.append(used_features, discriminator)]
+        if discriminator == None:
+            X = D_test[used_features]
+        else:
+            X = D_test[np.append(used_features, discriminator)]
         y = D_test['feedback'] == 'yes'
 
         X_ = np.array([[lambda_map[f] for f in x] for x in X.values])
