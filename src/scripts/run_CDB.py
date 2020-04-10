@@ -44,13 +44,27 @@ def main(grid_file, N, update):
 
     offices = ['a','b','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t']
 
+    if update == 0:
+        with open(os.path.join(OUTPUT_PATH, 'tasks.txt'), mode='r+') as f:
+            tasks = f.readline().split(',')
+            starts = [task[0] for task in tasks]
+            ends = [task[1] for task in tasks]
+
+        N = len(tasks)
+
     for i in range(N):
-        start = offices[np.random.randint(len(offices))]
-        end = offices[np.random.randint(len(offices))]
-        while end == start:
+        if update == 1:
+            start = offices[np.random.randint(len(offices))]
             end = offices[np.random.randint(len(offices))]
-        with open(os.path.join(OUTPUT_PATH, 'tasks.txt'), mode='a+') as f:
-            f.write(start + end + ',')
+            while end == start:
+                end = offices[np.random.randint(len(offices))]
+        elif update == 0:
+            start = starts[i]
+            end = ends[i]
+
+        if update == 1:
+            with open(os.path.join(OUTPUT_PATH, 'tasks.txt'), mode='a+') as f:
+                f.write(start + end + ',')
 
         # start = 'b'
         # end = 't'
@@ -109,15 +123,10 @@ def main(grid_file, N, update):
                 if discriminator == None:
                     print("No discriminator found...")
                 else:
-                    _mod_state = (tuple(list(candidate[0][0]).append(environment.DM.helper.get_state_feature_value(candidate[0][0], discriminator))), candidate[0][1])
-                    for sigma in environment.HM.Sigma:
-                        if environment.HM.predict_feedback_probability(_mod_state, candidate[1][0], sigma) > 0.9:
-                            print("Found discriminator " + str(discriminator) + ".\n")
-                            environment.DM.helper.add_feature(discriminator, candidate)
-                            with open(os.path.join(OUTPUT_PATH, 'execution_trace.txt'), mode = 'a+') as f:
-                                f.write("Discriminator added: " + str(discriminator) + "\n")
-                            break
-                    print("No discriminator found...")
+                    print("Found discriminator " + str(discriminator) + ".\n")
+                    environment.DM.helper.add_feature(discriminator, candidate)
+                    with open(os.path.join(OUTPUT_PATH, 'execution_trace.txt'), mode = 'a+') as f:
+                        f.write("Discriminator added: " + str(discriminator) + "\n")
             else:
                 print("No candidates...")
 
@@ -203,12 +212,10 @@ def execute_policy(CAS, M, i):
             if action[1] == 1 or action[1] == 2:
                 feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))])
                 if j == M-1:
-                    f1 = [action[1], CAS.DM.helper.get_state_feature_value(state[0], 'region'), state[0][3]]
-                    if f1[2] == 'door-closed':
-                        f1[2] = 'door'
-                    if (('doortype' in used_features and 'door' in state[0][3])
-                     or ('visibility' in used_features and state[0][3] in ['empty', 'light', 'busy'])):
-                        f1.append(state[0][4])
+                    f1 = [action[1]] + [CAS.DM.helper.get_state_feature_value(state[0], f) for f in used_features
+                            if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
+                    if f1[2] == 'crosswalk':
+                        f1[2] = state[0][3]
 
                     f2 = [CAS.DM.helper.get_state_feature_value(state[0], f) for f in unused_features 
                           if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
@@ -334,7 +341,7 @@ def init_open_data():
 
 def init_full_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'a+') as f:
-        f.write('level,region,obstacle,doortype,doorcolor,feedback')
+        f.write('level,region,obstacle,doorsize,doorcolor,doortype,feedback')
 
 def process_results(CAS):
     policies = pickle.load( open(os.path.join(OUTPUT_PATH, 'policies.pkl'), mode='rb'), encoding='bytes')
@@ -377,4 +384,4 @@ if __name__ == '__main__':
     # N = int(sys.argv[2])
     # generate = int(sys.argv[3])
     # main(grid_file, N, generate)
-    main('map_1.txt', 300, 1)
+    main('map_1.txt', 50, 1)
