@@ -143,11 +143,14 @@ class CAS():
                             embed()
         return T
 
-    def T(self, s, a):
+    def T(self, s, a, sp):
         """
 
         """
-        return self.transitions[s][a]
+        if sp is None:
+            return self.transitions[s][a]
+        else:
+            return self.transitions[s][a][sp]
 
     def compute_costs(self):
         """

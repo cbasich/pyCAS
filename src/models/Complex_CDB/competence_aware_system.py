@@ -87,6 +87,12 @@ class CAS():
                                                                             # removing L, and pretending just one l
         return list(it.product(self.DM.states, [3]))
 
+    def states(self):
+        return self.states
+
+    def start_state_function(self, state):
+        return float(state = self.init)
+
     def generate_actions(self):
         """
             params:
@@ -97,6 +103,9 @@ class CAS():
                 of a domain action a and a level of autonomy l.
         """
         return list(it.product(self.DM.actions, self.AM.L))
+
+    def actions(self):
+        return self.actions
 
     def compute_transitions(self):
         """
@@ -147,6 +156,9 @@ class CAS():
         """
         return self.transitions[s][a]
 
+    def transition_function(self, s, a, sp):
+        return self.transitions[s][a][sp]
+
     def compute_costs(self):
         """
             params:
@@ -180,6 +192,9 @@ class CAS():
 
     def C(self, s, a):
         return self.costs[s][a]
+
+    def reward_function(self, s, a):
+        return -1.*self.costs[s][a] + 11
 
     def check_validity(self):
         """

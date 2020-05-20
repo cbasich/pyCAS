@@ -57,6 +57,9 @@ def main(grid_file, N, generate):
         print("Building CAS...")
         environment = competence_aware_system.CAS(DM, AM, HM, persistence=0.75)
 
+        embed()
+        quit()
+
         solver = 'FVI'
         print("Solving mdp...")
         print(environment.solve(solver=solver))
