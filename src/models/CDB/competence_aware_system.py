@@ -292,23 +292,25 @@ class CAS():
                     if np.random.uniform() <= self.potential[s][a][L[level_index]]:
                         if L[level_index] == 3 and len(state) > 2:
                             if ((state[3] == 'door-closed' and action == 'open'
-                                and (self.DM.helper.get_state_feature_value(state, 'doortype') == 'heavy'
-                                 or (self.DM.helper.get_state_feature_value(state, 'doortype') == 'medium'
+                                and (self.DM.helper.get_state_feature_value(state,'doortype') == 'pull'
+                                 or self.DM.helper.get_state_feature_value(state, 'doorsize') == 'heavy'
+                                 or (self.DM.helper.get_state_feature_value(state, 'doorsize') == 'medium'
                                  and self.DM.helper.get_state_feature_value(state, 'region') == 'b2')))
                             or (action[0] == 'cross' and (state[3] == 'busy' or (state[3] == 'light'
                                 and self.DM.helper.get_state_feature_value(state, 'visibility') == 'low')))
-                            or self.HM.lambda_[state][action][2] < 0.9):
+                            or self.HM.lambda_[state][action][2] < 0.95):
                                 break
 
                         if L[level_index] == 0 and len(state) > 2:
                             if ((state[3] == 'door-closed' and action == 'open'
-                                and (self.DM.helper.get_state_feature_value(state, 'doortype') == 'light'
-                                 or (self.DM.helper.get_state_feature_value(state, 'doortype') == 'medium'
+                                and self.DM.helper.get_state_feature_value(state, 'doortype') == 'push'
+                                and (self.DM.helper.get_state_feature_value(state, 'doorsize') == 'light'
+                                 or (self.DM.helper.get_state_feature_value(state, 'doorsize') == 'medium'
                                  and self.DM.helper.get_state_feature_value(state, 'region') != 'b2')))
                             or (state[3] == 'empty' or state[3] == 'light'
                                 and (self.DM.helper.get_state_feature_value(state, 'visibility') == 'high')
                                 and action == 'cross')
-                            or self.HM.lambda_[state][action][1] > 0.35):
+                            or self.HM.lambda_[state][action][1] > 0.25):
                                 break
 
                         self.AM.kappa[state][action] = L[level_index]

@@ -90,12 +90,11 @@ def build_gam(df, distr='binomial', link='logit', input_classifier=None):
 
     terms = s(0)
     for i in range(df.shape[1]-1):
-        terms += s(i)
         for j in range(i+1, df.shape[1]-1):
             terms += te(i,j)
 
     # Build the GAM now. By default use a Logistic GAM.
     # Use gridsearch to determine optimal parameters.
-    gam = GAM(terms, distribution=distr, link=link).fit(X,y)
+    gam = GAM(terms, distribution=distr, link=link).gridsearch(X,y)
 
     return gam, gam_map
