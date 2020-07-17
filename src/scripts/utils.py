@@ -95,6 +95,6 @@ def build_gam(df, distr='binomial', link='logit', input_classifier=None):
 
     # Build the GAM now. By default use a Logistic GAM.
     # Use gridsearch to determine optimal parameters.
-    gam = GAM(terms, distribution=distr, link=link).gridsearch(X,y)
+    gam = GAM(terms, distribution=distr, link=link).fit(X,y)
 
     return gam, gam_map

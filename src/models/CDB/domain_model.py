@@ -56,7 +56,7 @@ class DeliveryBotDomain():
 
         used_features = open(os.path.join(PARAM_PATH, "used_features.txt")).readline().split(",")
 
-        print(used_features)
+        # print(used_features)
 
         states, goals = set(), set()
 

@@ -1,12 +1,9 @@
-import os, sys, time, json, random, copy, pickle
+import os, sys, time, json, random, copy, pickle, argparse
 
 from copy import deepcopy
 from collections import defaultdict
 from IPython import embed
-
-# from matplotlib import cm
 from matplotlib import pyplot as plt
-# from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
 import numpy as np
 import itertools as it
@@ -25,7 +22,7 @@ PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'para
 MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
 
 
-def main(grid_file, N, update):
+def main(grid_file, N, update, interact, logging, start=None, end=None):
     if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'cross.data') ):
         init_cross_data()
     if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open.data') ):
@@ -44,30 +41,13 @@ def main(grid_file, N, update):
 
     offices = ['a','b','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t']
 
-    if update == 0:
-        with open(os.path.join(OUTPUT_PATH, 'tasks.txt'), mode='r+') as f:
-            tasks = f.readline().split(',')
-            starts = [task[0] for task in tasks]
-            ends = [task[1] for task in tasks]
-
-        N = len(tasks)
-
     for i in range(N):
-        if update == 1:
+        if start == None:
             start = offices[np.random.randint(len(offices))]
+        if end == None:
             end = offices[np.random.randint(len(offices))]
-            while end == start:
-                end = offices[np.random.randint(len(offices))]
-        elif update == 0:
-            start = starts[i]
-            end = ends[i]
-
-        if update == 1:
-            with open(os.path.join(OUTPUT_PATH, 'tasks.txt'), mode='a+') as f:
-                f.write(start + end + ',')
-
-        # start = 'b'
-        # end = 't'
+        while end == start:
+            end = offices[np.random.randint(len(offices))]
 
         print("Building environment...")
         print("Building domain model...")
@@ -83,24 +63,23 @@ def main(grid_file, N, update):
         print("Solving mdp...")
         print(environment.solve(solver=solver))
 
-        with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'), mode='a+') as expected_cost_file:
-            expected_cost_file.write(str(environment.V[environment.states.index(environment.init)]) + "\n")
+        if logging:
+            with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'), mode='a+') as expected_cost_file:
+                expected_cost_file.write(str(environment.V[environment.states.index(environment.init)]) + "\n")
 
-        alo_value = environment.check_level_optimality() * 100.0
-        all_level_optimality.append(alo_value)
+            alo_value = environment.check_level_optimality() * 100.0
+            all_level_optimality.append(alo_value)
 
-        with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_alo.txt'), mode = 'a+') as all_level_optimality_file:
-            all_level_optimality_file.write("," + str(alo_value))
+            with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_alo.txt'), mode = 'a+') as all_level_optimality_file:
+                all_level_optimality_file.write("," + str(alo_value))
 
         print("Beginning simulation...")
-        if solver == 'FVI':
-            costs = execute_policy(environment, 10, i)
-        elif solver == 'LRTDP':
-            cost = execute_LRTDP(environment)
+        costs = execute_policy(environment, 10, interact)
 
-        with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), mode = 'a+') as cost_file:
-            for cost in costs:
-                cost_file.write(str(cost) + ",")
+        if logging:
+            with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), mode = 'a+') as cost_file:
+                for cost in costs:
+                    cost_file.write(str(cost) + ",")
             cost_file.write("\n")
 
         print("Updating parameters...")
@@ -136,41 +115,16 @@ def main(grid_file, N, update):
             with open(os.path.join(OUTPUT_PATH, 'init_state_candidate_count.txt'), mode = 'a+') as f:
                 f.write(str(init_state_candidate_count) + ",")
 
-        # visited_level_optimality, feedback_count = process_results(environment)
-        # graph_results(all_level_optimality, visited_level_optimality, feedback_count)
-
-    tmp_dic = {}
-    visited_level_optimality, feedback_count = process_results(environment)
-    tmp_dic["visited_LO"] = visited_level_optimality
-    tmp_dic["feedback_count"] = feedback_count
-    with open(os.path.join(OUTPUT_PATH, "competence_graph_info.pkl"), 'wb') as f:
-        pickle.dump(tmp_dic, f, protocol=pickle.HIGHEST_PROTOCOL)
+    if logging:
+        tmp_dic = {}
+        visited_level_optimality, feedback_count = process_results(environment)
+        tmp_dic["visited_LO"] = visited_level_optimality
+        tmp_dic["feedback_count"] = feedback_count
+        with open(os.path.join(OUTPUT_PATH, "competence_graph_info.pkl"), 'wb') as f:
+            pickle.dump(tmp_dic, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def execute_LRTDP(CAS):
-    cost = 0.0
-    s = CAS.states.index(CAS.init)
-
-    while not CAS.states[s] in CAS.goals:
-        a, _ = CAS.solver.solve(s)
-        print(CAS.states[s], "  ,  ", CAS.actions[a])
-        cost += CAS.costs[s][a]
-
-        feedback = None
-        state = CAS.states[s]
-        action = CAS.actions[a]
-        if action[1] in [1,2]:
-            feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))])
-            updateData(action[0], action[1], CAS.DM.get_region(state[0]), state[0][3], feedback)
-            if feedback == '-' or feedback == '/':
-                CAS.remove_transition(state, action)
-
-        s = CAS.solver.generate_successor(s, a)
-
-    return cost
-
-
-def execute_policy(CAS, M, i):
+def execute_policy(CAS, M, interact):
     pi_base = CAS.pi
     transitions_base = CAS.transitions
     total_returns = []
@@ -210,7 +164,7 @@ def execute_policy(CAS, M, i):
 
             feedback = None
             if action[1] == 1 or action[1] == 2:
-                feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))])
+                feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))], automate=interact)
                 if j == M-1:
                     f1 = [action[1]] + [CAS.DM.helper.get_state_feature_value(state[0], f) for f in used_features
                             if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
@@ -242,10 +196,10 @@ def execute_policy(CAS, M, i):
 
     return total_returns
 
-def interfaceWithHuman(state, action, info, automate=True):
+def interfaceWithHuman(state, action, info, interact=True):
     feedback = None
 
-    if not automate:
+    if interact:
         if action[1] == 1:
             feedback = input('\nCan I take action --' + str(action[0]) + '-- in state ' + str(info) +'?\n\n')
         else:
@@ -380,8 +334,14 @@ def process_results(CAS):
     return visited_level_optimality, feedback_count
 
 if __name__ == '__main__':
-    # grid_file = sys.argv[1]
-    # N = int(sys.argv[2])
-    # generate = int(sys.argv[3])
-    # main(grid_file, N, generate)
-    main('map_1.txt', 50, 1)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m', '--map_file', type=str, default='map_2.txt')
+    parser.add_argument('-n', '--num_runs', type=int, default=1)
+    parser.add_argument('-u', '--update', type=int, default=0)
+    parser.add_argument('-i', '--interact', type=int, default=0)
+    parser.add_argument('-l', '--logging', type=int, default=0)
+    parser.add_argument('-s', '--start', type=str, default=None)
+    parser.add_argument('-e', '--end', type=str, default=None)
+    args = parser.parse_args()
+
+    main(args.map_file, args.num_runs, args.update, args.interact, args.logging, args.start, args.end)

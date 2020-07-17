@@ -196,7 +196,6 @@ class FeedbackModel():
             returns:
                 discriminators - A list of features.
         """
-        print("Check 1")
         state, action, level = candidate
 
         # First, for a given candidate, procure its unused features
@@ -215,7 +214,6 @@ class FeedbackModel():
         #       whereas the other features have a correlation for each 'feature-value'.
         #       This may present problems below when calculating the discriminator matrix.
         #       The real todo is check if that is the case or not.
-        print("Check 2")
         D = pd.read_csv(os.path.join(FEEDBACK_PATH, action + "_full.data"))
         _corr = pd.get_dummies( D[np.append(unused_features, 'feedback')] ).corr()
         _corr = _corr[[c for c in _corr.columns.values if 'feedback' in c]]
@@ -227,7 +225,6 @@ class FeedbackModel():
         # doing this by taking the max over all feature-values, and then summing
         # over each feature value's max correlation with the feedback for the
         # relevant Feature.
-        print("Check 4")
         _disc = {f: 0 for f in unused_features}
         for row_name in _corr.axes[0].values:
             try:
@@ -239,14 +236,10 @@ class FeedbackModel():
         indices = list(_corr.index.values)
         for f in _disc.keys():
             _disc[f] /= len([v for v in indices if f in v])
-        print("Check 5")
-        # embed()
         discriminators = unused_features[np.argpartition(np.array(list(_disc.values())), -k)[-k:]]
 
         D_train = D.sample(frac=0.75)
         D_test = D.drop(D_train.index)
-
-        # embed()
 
         return self.test_discriminators(D_train, D_test, D.columns.drop(np.append(unused_features, 'feedback')), discriminators)
  
@@ -264,25 +257,18 @@ class FeedbackModel():
                 d*             - The discriminator which produced the classifier with the highest
                                  performance on the test data.
         """
-        print("Check check")
         lambdas = [(self.build_lambda(D_train, used_features, discriminator), discriminator) for discriminator in discriminators]
         accuracies = [self.test_lambda(lambda_, lambda_map, D_test, used_features, discriminator) for (lambda_, lambda_map), discriminator in lambdas]
-        embed()
         d = discriminators[np.argmax(accuracies)]
 
         print("Checking discriminator " + str(d) + "...")
-        # embed()
 
         if 'door' in D_train['obstacle'].values:
-            # embed()
             curr_acc = self.test_lambda(self.DM.helper.open_GAM, self.DM.helper.open_GAM_map, D_test, used_features, discriminator = None)
-            print(np.max(accuracies) - curr_acc)
             if np.max(accuracies) - curr_acc < 0.1:
                 return None
         else:
-            # embed()
             curr_acc = self.test_lambda(self.DM.helper.cross_GAM, self.DM.helper.cross_GAM_map, D_test, used_features, discriminator = None)
-            print(np.max(accuracies) - curr_acc)
             if np.max(accuracies) - curr_acc < 0.1:
                 return None
 

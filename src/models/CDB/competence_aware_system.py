@@ -11,7 +11,6 @@ current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
 from scripts.utils import FVI
-from scripts.LRTDP import LRTDPSolver
 
 PARAM_PATH = os.path.join('..', 'data', 'model parameters')
 
@@ -83,9 +82,7 @@ class CAS():
                 domain state s and a level of autonomy l, where l is the
                 level that the previous action was performed in.
         """
-        # return list(it.product(self.DM.states, self.AM.L))                # For testing to speed things up we are
-                                                                            # removing L, and pretending just one l
-        return list(it.product(self.DM.states, [3]))
+        return list(it.product(self.DM.states, self.AM.L))
 
     def generate_actions(self):
         """
@@ -109,12 +106,9 @@ class CAS():
                 when taking action a in state s. T is a function of the domain state 
                 transition function as well as the feedback model's tau and T_H functions.
         """
-        T = np.array([[[0.0 for sp in range(len(self.states))]
-                            for a in range(len(self.actions))]
-                            for s in range(len(self.states))])
+        T = np.zeros((len(self.states), len(self.actions), len(self.states)))
 
-        # L = len(self.AM.L)
-        L = 1                                                   # Removing for testing to speed things up.
+        L = len(self.AM.L)
 
         for s, state in enumerate(self.DM.states):
             for l1 in range(L):
@@ -127,14 +121,17 @@ class CAS():
                             continue
                         for sp, statePrime in enumerate(self.DM.states):
                             for l3 in range(L):
-                                # if l3 != l2:                  # State Prime level must match action level
-                                #     continue
+                                if l3 != l2:                    # State Prime level must match action level
+                                    continue
                                 sp_bar = L * sp + l3            # Set index in T
                                 if l2 == 0:
                                     if action in self.HM.flagged: 
                                         T[s_bar][a_bar][sp_bar] = self.HM.T_H[s][a][sp]
                                     else:
-                                        T[s_bar][a_bar][sp_bar] = self.DM.transitions[s][a][sp]
+                                        try:
+                                            T[s_bar][a_bar][sp_bar] = self.DM.transitions[s][a][sp]
+                                        except:
+                                            embed()
                                 else:
                                     T[s_bar][a_bar][sp_bar] = self.HM.tau(s, state, l1, a, action, l2, sp, statePrime)
                         if np.sum(T[s_bar][a_bar]) == 0.:
@@ -338,14 +335,9 @@ class CAS():
                     V - The value function in matrix form over states.
                     Q - The q-value funciton in matrix for over state action pairs.
         """
-        if solver == 'LRTDP':
-            self.solver = LRTDPSolver(mdp = self, max_trials = 100)
-            return
-
-        if solver == 'FVI':
-            start_time = time.time()
-            mdp_info = FVI(self)
-            end_time = time.time()
+        start_time = time.time()
+        mdp_info = FVI(self)
+        end_time = time.time()
 
         self.pi = mdp_info['pi']
         self.state_map = mdp_info['state map']
