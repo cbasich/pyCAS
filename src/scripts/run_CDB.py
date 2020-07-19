@@ -11,6 +11,7 @@ import itertools as it
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
+import utils
 import process_data
 
 from models.CDB.competence_aware_system import CAS
@@ -39,7 +40,13 @@ def main(grid_file, N, update, interact, logging, start=None, end=None):
     except Exception:
         pass
 
-    offices = ['a','b','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t']
+    non_offices = set(['.', '.\n', '\n', 'X', 'C', 'D'])
+    offices = []
+
+    with open(os.path.join(MAP_PATH, grid_file), 'r') as f:
+        for line in f.readlines():
+            chars = line.split(' ')
+            offices += [ele for ele in chars if ele not in non_offices]
 
     for i in range(N):
         if start == None:
@@ -74,7 +81,7 @@ def main(grid_file, N, update, interact, logging, start=None, end=None):
                 all_level_optimality_file.write("," + str(alo_value))
 
         print("Beginning simulation...")
-        costs = execute_policy(environment, 10, interact)
+        costs = execute_policy(environment, 10, i, interact)
 
         if logging:
             with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), mode = 'a+') as cost_file:
@@ -124,7 +131,7 @@ def main(grid_file, N, update, interact, logging, start=None, end=None):
             pickle.dump(tmp_dic, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def execute_policy(CAS, M, interact):
+def execute_policy(CAS, M, i, interact):
     pi_base = CAS.pi
     transitions_base = CAS.transitions
     total_returns = []
@@ -158,13 +165,15 @@ def execute_policy(CAS, M, interact):
 
             action = pi[CAS.state_map[state]]
             execution_trace_file.write(str(state) + " | " + str(action) + "\n")
-            # print(state, "  ,  ", action)
+            print(state, "  ,  ", action)
 
             r += CAS.costs[CAS.state_map[state]][CAS.actions.index(action)]
 
             feedback = None
             if action[1] == 1 or action[1] == 2:
-                feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))], automate=interact)
+                if len(state[0]) == 2:
+                    embed()
+                feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))], interact=interact)
                 if j == M-1:
                     f1 = [action[1]] + [CAS.DM.helper.get_state_feature_value(state[0], f) for f in used_features
                             if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
@@ -335,7 +344,7 @@ def process_results(CAS):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--map_file', type=str, default='map_2.txt')
+    parser.add_argument('-m', '--map_file', type=str, default='small_campus.txt')
     parser.add_argument('-n', '--num_runs', type=int, default=1)
     parser.add_argument('-u', '--update', type=int, default=0)
     parser.add_argument('-i', '--interact', type=int, default=0)

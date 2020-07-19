@@ -32,7 +32,6 @@ def FVI(mdp, eps = 0.001):
             V = tmp
             break
         V = tmp
-    V *= -1.0
 
     v = {s: V[s] for s in range(len(states))}
     pi = {s: actions[np.argmax(Q[s])] for s in range(len(states))}
@@ -46,6 +45,7 @@ def FVI(mdp, eps = 0.001):
     }
 
     return results
+
 
 def build_gam(df, distr='binomial', link='logit', input_classifier=None):
     """
