@@ -59,7 +59,6 @@ class CAS():
         self._goals = list(it.product(self.DM.goals, self.AM.L))
         self._transitions = self.compute_transitions()
         self._costs = self.compute_costs()
-        # embed()
 
         self.transitions_base = self.transitions.copy()
         self.check_validity()
@@ -73,6 +72,7 @@ class CAS():
         self.Q = None
         self.solver = None
 
+
     def generate_states(self):
         """
             params:
@@ -83,19 +83,23 @@ class CAS():
                 domain state s and a level of autonomy l, where l is the
                 level that the previous action was performed in.
         """
-        return list(it.product(self.DM.states, self.AM.L))
+        return list(it.product(self.DM.states, [3]))
+
 
     @property
     def states(self):
         return self._states
 
+
     @property
     def init(self):
         return self._init
-    
+
+
     @property
     def goals(self):
         return self._goals
+
 
     def generate_actions(self):
         """
@@ -108,11 +112,12 @@ class CAS():
         """
         return list(it.product(self.DM.actions, self.AM.L))
 
+
     @property
     def actions(self):
         return self._actions
-    
 
+    
     def compute_transitions(self):
         """
             params:
@@ -126,30 +131,28 @@ class CAS():
         """
         T = np.zeros((len(self.states), len(self.actions), len(self.states)))
 
-        L = len(self.AM.L)
+        # L = len(self.AM.L)
+        L = 1                                                   # Removing for testing to speed things up.
 
         for s, state in enumerate(self.DM.states):
             for l1 in range(L):
                 s_bar = L * s + l1                              # Set index in T
                 for a, action in enumerate(self.DM.actions):
                     for l2 in range(len(self.AM.L)):
-                        a_bar = L * a + l2                      # Set index in T
+                        a_bar = len(self.AM.L) * a + l2                      # Set index in T
                         if l2 > self.AM.kappa[state][action]:
                             T[s_bar][a_bar][s_bar] = 1.         # Disallow levels above kappa(s,a)
                             continue
                         for sp, statePrime in enumerate(self.DM.states):
                             for l3 in range(L):
-                                if l3 != l2:                    # State Prime level must match action level
-                                    continue
+                                # if l3 != l2:                  # State Prime level must match action level
+                                #     continue
                                 sp_bar = L * sp + l3            # Set index in T
                                 if l2 == 0:
                                     if action in self.HM.flagged: 
                                         T[s_bar][a_bar][sp_bar] = self.HM.T_H[s][a][sp]
                                     else:
-                                        try:
-                                            T[s_bar][a_bar][sp_bar] = self.DM.transitions[s][a][sp]
-                                        except:
-                                            embed()
+                                        T[s_bar][a_bar][sp_bar] = self.DM.transitions[s][a][sp]
                                 else:
                                     T[s_bar][a_bar][sp_bar] = self.HM.tau(s, state, l1, a, action, l2, sp, statePrime)
                         if np.sum(T[s_bar][a_bar]) == 0.:
@@ -158,9 +161,15 @@ class CAS():
                             embed()
         return T
 
+
     @property
     def transitions(self):
         return self._transitions
+    
+
+    @transitions.setter
+    def set_transitions(self, transitions):
+        self._transitions = transitions
     
 
     def T(self, s, a, sp):
@@ -171,6 +180,7 @@ class CAS():
             return self.transitions[s][a]
         else:
             return self.transitions[s][a][sp]
+
 
     def compute_costs(self):
         """
@@ -204,13 +214,15 @@ class CAS():
                 C[s][a] += self.HM.rho(state, action)
         return C
 
+
     @property
     def costs(self):
         return self._costs
-    
+
 
     def C(self, s, a):
         return self.costs[s][a]
+
 
     def check_validity(self):
         """
@@ -232,6 +244,7 @@ class CAS():
                     print("Error @ state " + str(self.states[s]) + " and action " + str(self.actions[a]))
                     embed()
                     quit()
+
 
     def q(self, state, s, action, a, l):
         """
@@ -259,6 +272,7 @@ class CAS():
         q = self.costs[sbar][abar] + np.sum(np.array(self.V * T))
         return q
 
+
     def update_potential(self, state, s, action, a, L):
         """
             params:
@@ -282,6 +296,7 @@ class CAS():
         for l in range(len(L)):
             self.potential[s][a][L[l]] += self.persistence * softmax[l]
         self.potential[s][a] = np.clip(self.potential[s][a], a_min = 0, a_max = 1)
+
 
     def update_kappa(self):
         """
@@ -345,8 +360,10 @@ class CAS():
                             self.flags[s][a] = True
                         break
 
+
     def save_kappa(self):
         self.AM.save_kappa()
+
 
     def solve(self, solver='FVI'):
         """
@@ -374,6 +391,7 @@ class CAS():
 
         return (end_time - start_time)
 
+
     def generate_successor(self, state, action):
         """
             params:
@@ -396,6 +414,7 @@ class CAS():
             if rand <= thresh:
                 return self.states[sp]
 
+
     def remove_transition(self, state, action):
         """
             params:
@@ -417,6 +436,7 @@ class CAS():
             a = self.actions.index((action[0], i))
             self.transitions[s][a] *= 0.0
             self.transitions[s][a][s] = 1.0
+
 
     def check_level_optimality(self):
         """

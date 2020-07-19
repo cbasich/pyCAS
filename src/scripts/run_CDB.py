@@ -81,7 +81,7 @@ def main(grid_file, N, update, interact, logging, start=None, end=None):
                 all_level_optimality_file.write("," + str(alo_value))
 
         print("Beginning simulation...")
-        costs = execute_policy(environment, 10, i, interact)
+        costs = execute_policy(environment, 1, i, interact)
 
         if logging:
             with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), mode = 'a+') as cost_file:
@@ -199,7 +199,7 @@ def execute_policy(CAS, M, i, interact):
                 state = CAS.generate_successor(state, action)
 
         total_returns.append(r)
-        CAS.transitions = transitions_base
+        CAS.set_transitions(transitions_base)
 
     execution_trace_file.close()
 
@@ -236,6 +236,8 @@ def interfaceWithHuman(state, action, info, interact=True):
 
         if np.random.uniform() <= 0.05:
             feedback = ['yes', 'no'][np.random.randint(2)]
+
+    print(feedback, info)
 
     return feedback
 
