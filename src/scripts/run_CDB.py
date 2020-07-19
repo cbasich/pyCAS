@@ -23,7 +23,7 @@ PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'para
 MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
 
 
-def main(grid_file, N, update, interact, logging, start=None, end=None):
+def main(grid_file, N, update=False, interact=False, logging=False, verbose=True, start=None, end=None):
     if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'cross.data') ):
         init_cross_data()
     if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open.data') ):
@@ -81,7 +81,7 @@ def main(grid_file, N, update, interact, logging, start=None, end=None):
                 all_level_optimality_file.write("," + str(alo_value))
 
         print("Beginning simulation...")
-        costs = execute_policy(environment, 1, i, interact)
+        costs = execute_policy(environment, 1, i, interact, verbose=verbose)
 
         if logging:
             with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), mode = 'a+') as cost_file:
@@ -131,9 +131,9 @@ def main(grid_file, N, update, interact, logging, start=None, end=None):
             pickle.dump(tmp_dic, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def execute_policy(CAS, M, i, interact):
+def execute_policy(CAS, M, i, interact, verbose=True):
     pi_base = CAS.pi
-    transitions_base = CAS.transitions
+    transitions_base = CAS.transitions.copy()
     total_returns = []
 
     execution_trace_file = open(os.path.join(OUTPUT_PATH, 'execution_trace.txt'), mode = 'a+')
@@ -165,14 +165,13 @@ def execute_policy(CAS, M, i, interact):
 
             action = pi[CAS.state_map[state]]
             execution_trace_file.write(str(state) + " | " + str(action) + "\n")
-            print(state, "  ,  ", action)
+            if verbose:
+                print(state, "  ,  ", action)
 
             r += CAS.costs[CAS.state_map[state]][CAS.actions.index(action)]
 
             feedback = None
             if action[1] == 1 or action[1] == 2:
-                if len(state[0]) == 2:
-                    embed()
                 feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))], interact=interact)
                 if j == M-1:
                     f1 = [action[1]] + [CAS.DM.helper.get_state_feature_value(state[0], f) for f in used_features
@@ -204,6 +203,7 @@ def execute_policy(CAS, M, i, interact):
     execution_trace_file.close()
 
     return total_returns
+
 
 def interfaceWithHuman(state, action, info, interact=True):
     feedback = None
@@ -237,9 +237,8 @@ def interfaceWithHuman(state, action, info, interact=True):
         if np.random.uniform() <= 0.05:
             feedback = ['yes', 'no'][np.random.randint(2)]
 
-    print(feedback, info)
-
     return feedback
+
 
 def updateData(action, used_features, unused_features, feedback, flagged):
     if feedback is None:
@@ -280,6 +279,7 @@ def updateData(action, used_features, unused_features, feedback, flagged):
             if flagged:
                 f.write("\n" + full_data_string_copy + "," + str(feedback))
 
+
 def init_cross_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross.data'), 'a+') as f:
         f.write('level,region,obstacle,feedback')
@@ -290,9 +290,11 @@ def init_cross_data():
                         entry = level + "," + region + "," + obstacle + "," + feedback
                         f.write("\n" + entry)
 
+
 def init_full_cross_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data'), 'a+') as f:
         f.write('level,region,obstacle,visibility,streettype,feedback')
+
 
 def init_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
@@ -304,9 +306,11 @@ def init_open_data():
                         entry = level + "," + region + "," + obstacle + "," + feedback
                         f.write("\n" + entry)
 
+
 def init_full_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'a+') as f:
         f.write('level,region,obstacle,doorsize,doorcolor,doortype,feedback')
+
 
 def process_results(CAS):
     policies = pickle.load( open(os.path.join(OUTPUT_PATH, 'policies.pkl'), mode='rb'), encoding='bytes')
@@ -344,6 +348,7 @@ def process_results(CAS):
 
     return visited_level_optimality, feedback_count
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--map_file', type=str, default='small_campus.txt')
@@ -351,8 +356,10 @@ if __name__ == '__main__':
     parser.add_argument('-u', '--update', type=int, default=0)
     parser.add_argument('-i', '--interact', type=int, default=0)
     parser.add_argument('-l', '--logging', type=int, default=0)
+    parser.add_argument('-v', '--verbose', type=int, default=1)
     parser.add_argument('-s', '--start', type=str, default=None)
     parser.add_argument('-e', '--end', type=str, default=None)
     args = parser.parse_args()
 
-    main(args.map_file, args.num_runs, args.update, args.interact, args.logging, args.start, args.end)
+    main(args.map_file, args.num_runs, args.update, args.interact, 
+         args.logging, args.verbose,args.start, args.end)

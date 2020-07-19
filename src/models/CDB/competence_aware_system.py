@@ -165,9 +165,8 @@ class CAS():
     @property
     def transitions(self):
         return self._transitions
-    
 
-    @transitions.setter
+
     def set_transitions(self, transitions):
         self._transitions = transitions
     

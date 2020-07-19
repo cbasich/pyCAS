@@ -3,8 +3,6 @@ import os, sys, pickle
 import numpy as np
 import pandas as pd
 
-from IPython import embed
-
 from pygam.terms import Term, TermList
 from pygam import GAM, te, s, f, l
 
@@ -19,8 +17,8 @@ def FVI(mdp, eps = 0.001):
     states, actions = list(mdp.states), list(mdp.actions)
     R, T, gamma = -1.0*np.array(mdp.costs).astype('float32'), np.array(mdp.transitions).astype('float32'), mdp.gamma
 
-    V = np.array([0.0 for s in range(len(states))]).astype('float32').reshape(-1, 1)
-    Q = np.array([[0.0 for a in range(len(actions))] for s in range(len(states))]).astype('float32')
+    V = np.zeros((len(states))).astype('float32').reshape(-1,1)
+    Q = np.zeros((len(states), len(actions))).astype('float32')
 
     dim_array = np.ones((1, T.ndim), int).ravel()
     dim_array[2] = -1
