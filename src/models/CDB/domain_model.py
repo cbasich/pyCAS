@@ -27,7 +27,7 @@ def read_gw_map(filename):
     return grid
 
 class DeliveryBotDomain():
-    def __init__(self, filename, init, destination, gamma=1.0):
+    def __init__(self, filename, start, destination, gamma=1.0):
         self.gamma = gamma
         self.grid = read_gw_map(os.path.join(MAP_PATH, filename))
         with open(os.path.join(MAP_PATH, 'map_info.json')) as F:
@@ -44,14 +44,14 @@ class DeliveryBotDomain():
         self.init = None
 
         self.actions = DIRECTIONS + ['cross', 'open', 'wait']
-        self.states, self.goals = self.generate_states(init, destination)
+        self.states, self.goals = self.generate_states(start, destination)
         self.transitions = self.generate_transitions()
         self.costs = self.generate_costs()
 
         self.check_validity()
         self.helper = CampusDeliveryBotHelper(self)
 
-    def generate_states(self, init, destination):
+    def generate_states(self, start, destination):
         S = set(it.product(range(self.rows), range(self.cols)))
 
         used_features = open(os.path.join(PARAM_PATH, "used_features.txt")).readline().split(",")
@@ -62,14 +62,7 @@ class DeliveryBotDomain():
 
         for s in S:
             x,y = s[0],s[1]
-            if self.grid[x][y] == 'S':
-                states.add(s)
-                init = s
-                if s not in self.kappa.keys():
-                    self.kappa[s] = {}
-                    for a in self.actions:
-                        self.kappa[s][a] = 3
-            elif self.grid[x][y] == 'C':
+            if self.grid[x][y] == 'C':
                 tmp_states = set()
                 if 'visibility' in used_features and 'streettype' in used_features:
                     f1 = self.map_info[str((x,y))]['visibility']
@@ -124,11 +117,10 @@ class DeliveryBotDomain():
                     for a in self.actions:
                         self.kappa[s][a] = 3
             elif not self.grid[x][y] == 'X':
-                if init == self.grid[x][y]:
+                if start == self.grid[x][y]:
                     self.init = s
                 elif destination == self.grid[x][y]:
                     goals.add(s)
-
                 states.add(s)
                 if s not in self.kappa.keys():
                     self.kappa[s] = {}

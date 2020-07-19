@@ -53,14 +53,15 @@ class CAS():
         self.persistence = persistence
         self.gamma = self.DM.gamma
 
-        self.states = self.generate_states()
-        self.actions = self.generate_actions()
-        self.init = (self.DM.init, 3)
-        self.goals = list(it.product(self.DM.goals, self.AM.L))
-        self.transitions = self.compute_transitions()
-        self.transitions_base = self.transitions.copy()
-        self.costs = self.compute_costs()
+        self._states = self.generate_states()
+        self._actions = self.generate_actions()
+        self._init = (self.DM.init, 3)
+        self._goals = list(it.product(self.DM.goals, self.AM.L))
+        self._transitions = self.compute_transitions()
+        self._costs = self.compute_costs()
+        # embed()
 
+        self.transitions_base = self.transitions.copy()
         self.check_validity()
 
         self.flags = [[False for a in range(len(self.DM.actions))] for s in range(len(self.states))]
@@ -84,6 +85,18 @@ class CAS():
         """
         return list(it.product(self.DM.states, self.AM.L))
 
+    @property
+    def states(self):
+        return self._states
+
+    @property
+    def init(self):
+        return self._init
+    
+    @property
+    def goals(self):
+        return self._goals
+
     def generate_actions(self):
         """
             params:
@@ -94,6 +107,11 @@ class CAS():
                 of a domain action a and a level of autonomy l.
         """
         return list(it.product(self.DM.actions, self.AM.L))
+
+    @property
+    def actions(self):
+        return self._actions
+    
 
     def compute_transitions(self):
         """
@@ -115,7 +133,7 @@ class CAS():
                 s_bar = L * s + l1                              # Set index in T
                 for a, action in enumerate(self.DM.actions):
                     for l2 in range(len(self.AM.L)):
-                        a_bar = len(self.AM.L) * a + l2                      # Set index in T
+                        a_bar = L * a + l2                      # Set index in T
                         if l2 > self.AM.kappa[state][action]:
                             T[s_bar][a_bar][s_bar] = 1.         # Disallow levels above kappa(s,a)
                             continue
@@ -139,6 +157,11 @@ class CAS():
                         if np.sum(T[s_bar][a_bar]) != 1.:
                             embed()
         return T
+
+    @property
+    def transitions(self):
+        return self._transitions
+    
 
     def T(self, s, a, sp):
         """
@@ -180,6 +203,11 @@ class CAS():
                 # Add the human cost penalty
                 C[s][a] += self.HM.rho(state, action)
         return C
+
+    @property
+    def costs(self):
+        return self._costs
+    
 
     def C(self, s, a):
         return self.costs[s][a]
