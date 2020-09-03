@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<launch>
+  <node pkg="pyCAS" type="CDB_execution_node.py" name="CDB_execution_node" output="screen">
+    <param name="wait_duration" value="1" />
+    <param name="timeout_duration" value="1000" />
+  </node>
+
+  <node pkg="pyCAS" type="robot_status_monitor.py" name="robot_status_monitor" output="screen">
+    <param name="rate" value="10" />
+  </node>
+  
+  <node pkg="pyCAS" type="door_monitor.py" name="door_monitor" output="screen">
+    <param name="rate" value="10" />
+  </node>
+</launch>
