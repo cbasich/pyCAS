@@ -1,2 +1,2 @@
 Header header
-String door_type
+string door_type
