@@ -12,10 +12,7 @@ CURRENT_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 # Publishers #
 ##############
 
-NAVIGATION_ACTION_PUBLISHER = rospy.Publisher("orb_nav/goal", NavGoal, queue_size=1)
-INTERFACE_ACTION_PUBLISHER = rospy.Publisher("task_execution/interface_action", InterfaceAction, queue_size=1)
-ROBOT_STATUS_PUBLISHER = rospy.Publisher("monitor/robot_status", RobotStatus, queue_size=1)
-TASK_STATUS_PUBLISHER = rospy.Publisher("monitor/task_status", TaskStatus, queue_size=1)
+SSP_ACTION_PUBLISHER = rospy.Publisher("robot/robot_action", RobotAction.msg, queue_size=1)
 
 #############
 # CALLBACKS #
@@ -25,18 +22,53 @@ ssp_state_message = None
 
 def ssp_state_callback(message):
     global ssp_state_message
-    delivery_mdp_state_message = message
+    ssp_state_message = message
+    state = task_handler.get_state_from_message(ssp_state_message)
+    action = task_handler.get_action(state)
+    if action is None:
+        return
+    ssp_action_message = SSPAction()
+    # TODO: populate action message
+    SSP_ACTION_PUBLISHER.publish(ssp_action_message)
 
 
-def execute():
-    pass
+def execute(message):
+    wait_duration = rospy.get_param('/CDB_execution_node/wait_duration')
+    timeout_duration = rospy.get_param('/CDB_execution_node/timeout_duration')
 
+    action = message.action
+    level = message.level
+
+    # TODO: Populate action logic here.
+    #       Should have logic for each of 4 LoA
+
+
+def instantiate(message):
+    world_map = json.load()
+    end = message.goal
+    start = task_handler.get_state_from_message(ssp_state_message)
+
+    rospy.loginfo("Info[CDB_execution_node.instantiate]: Instantiating the domain model...")
+    DM = CDB_domain_model.DeliveryBotDomain(world_map, start, end)
+
+    rospy.loginfo("Info[CDB_execution_node.instantiate]: Instantiating the autonomy model...")
+    AM = CDB_autonomy_model.AutonomyModel(DM, [0,1,2,3,])
+
+    rospy.loginfo("Info[CDB_execution_node.instantiate]: Instantiating the feedback model...")
+    HM = CDB_feedback_model.FeedbackModel(DM, AM, ['+', '-', '/', None], ['open'])
+
+    rospy.loginfo("Info[CDB_execution_node.instantiate]: Instanaitating the CAS model...")
+    CAS = competence_aware_system.CAS(DM, AM, HM, persistence = 0.75)
+
+    CAS.solve()
 
 def main():
     rospy.loginfo("Info[CDB_execution_node.main]: Instantiating the CDB_execution node...")
     rospy.init_node("CDB_execution_node", anonymous=True)
 
     rospy.Subscriber("monitor/ssp_state_monitor", SSPState, ssp_state_callback, queue_size=1)
+    rospy.Subscriber("robot/robot_action", RobotAction, execute, queue_size=1)
+    rospy.Subscriber("robot/robot_goal", RobotGoal, instantiate, queue_size=1)
 
     rospy.loginfo("Info[CDB_execution_node.main]: Spinning...")
     rospy.spin()
