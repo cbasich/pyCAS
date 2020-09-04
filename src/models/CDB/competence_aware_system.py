@@ -11,7 +11,6 @@ current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
 from scripts.utils import FVI
-from scripts.LRTDP import LRTDPSolver
 
 PARAM_PATH = os.path.join('..', 'data', 'model parameters')
 
@@ -54,15 +53,17 @@ class CAS():
         self.persistence = persistence
         self.gamma = self.DM.gamma
 
-        self.states = self.generate_states()
-        self.actions = self.generate_actions()
-        self.init = (self.DM.init, self.AM.L[0])
-        self.goals = list(it.product(self.DM.goals, self.AM.L))
-        self.transitions = self.compute_transitions()
+        self._states = self.generate_states()
+        self._actions = self.generate_actions()
+        self._init = (self.DM.init, 3)
+        self._goals = list(it.product(self.DM.goals, self.AM.L))
+        self._transitions = self.compute_transitions()
+        self._costs = self.compute_costs()
+
         self.transitions_base = self.transitions.copy()
         self.check_validity()
-        self.costs = self.compute_costs()
 
+        self.flags = [[False for a in range(len(self.DM.actions))] for s in range(len(self.states))]
         self.potential = np.array([[[0.0 for l in self.AM.L] for a in self.DM.actions] for s in self.DM.states])
 
         self.pi = None
@@ -70,6 +71,7 @@ class CAS():
         self.V = None
         self.Q = None
         self.solver = None
+
 
     def generate_states(self):
         """
@@ -81,7 +83,23 @@ class CAS():
                 domain state s and a level of autonomy l, where l is the
                 level that the previous action was performed in.
         """
-        return list(it.product(self.DM.states, self.AM.L))
+        return list(it.product(self.DM.states, [3]))
+
+
+    @property
+    def states(self):
+        return self._states
+
+
+    @property
+    def init(self):
+        return self._init
+
+
+    @property
+    def goals(self):
+        return self._goals
+
 
     def generate_actions(self):
         """
@@ -94,6 +112,12 @@ class CAS():
         """
         return list(it.product(self.DM.actions, self.AM.L))
 
+
+    @property
+    def actions(self):
+        return self._actions
+
+    
     def compute_transitions(self):
         """
             params:
@@ -105,40 +129,57 @@ class CAS():
                 when taking action a in state s. T is a function of the domain state 
                 transition function as well as the feedback model's tau and T_H functions.
         """
-        T = np.array([[[0.0 for sp in range(len(self.states))]
-                            for a in range(len(self.actions))]
-                            for s in range(len(self.states))])
+        T = np.zeros((len(self.states), len(self.actions), len(self.states)))
 
-        L = len(self.AM.L)
+        # L = len(self.AM.L)
+        L = 1                                                   # Removing for testing to speed things up.
 
         for s, state in enumerate(self.DM.states):
             for l1 in range(L):
                 s_bar = L * s + l1                              # Set index in T
                 for a, action in enumerate(self.DM.actions):
-                    for l2 in range(L):
-                        a_bar = L * a + l2                      # Set index in T
+                    for l2 in range(len(self.AM.L)):
+                        a_bar = len(self.AM.L) * a + l2                      # Set index in T
                         if l2 > self.AM.kappa[state][action]:
                             T[s_bar][a_bar][s_bar] = 1.         # Disallow levels above kappa(s,a)
                             continue
                         for sp, statePrime in enumerate(self.DM.states):
                             for l3 in range(L):
-                                if l3 != l2:                    # State Prime level must match action level
-                                    continue
+                                # if l3 != l2:                  # State Prime level must match action level
+                                #     continue
                                 sp_bar = L * sp + l3            # Set index in T
                                 if l2 == 0:
-                                    if action in self.HM.flagged:   # Then use 
+                                    if action in self.HM.flagged: 
                                         T[s_bar][a_bar][sp_bar] = self.HM.T_H[s][a][sp]
                                     else:
                                         T[s_bar][a_bar][sp_bar] = self.DM.transitions[s][a][sp]
                                 else:
-                                    T[s_bar][a_bar][sp_bar] = (self.DM.transitions[s][a][sp]
-                                        * self.HM.tau(state, l1, action, l2,  statePrime))
+                                    T[s_bar][a_bar][sp_bar] = self.HM.tau(s, state, l1, a, action, l2, sp, statePrime)
                         if np.sum(T[s_bar][a_bar]) == 0.:
                             T[s_bar][a_bar][s_bar] = 1.
+                        if np.sum(T[s_bar][a_bar]) != 1.:
+                            embed()
         return T
 
-    def T(self, s, a):
-        return self.transitions[s][a]
+
+    @property
+    def transitions(self):
+        return self._transitions
+
+
+    def set_transitions(self, transitions):
+        self._transitions = transitions
+    
+
+    def T(self, s, a, sp):
+        """
+
+        """
+        if sp is None:
+            return self.transitions[s][a]
+        else:
+            return self.transitions[s][a][sp]
+
 
     def compute_costs(self):
         """
@@ -172,8 +213,15 @@ class CAS():
                 C[s][a] += self.HM.rho(state, action)
         return C
 
+
+    @property
+    def costs(self):
+        return self._costs
+
+
     def C(self, s, a):
         return self.costs[s][a]
+
 
     def check_validity(self):
         """
@@ -196,6 +244,7 @@ class CAS():
                     embed()
                     quit()
 
+
     def q(self, state, s, action, a, l):
         """
             params:
@@ -216,11 +265,12 @@ class CAS():
                 case, we should in fact build kkappa in here rather than leaving it to the DM to 
                 save on computation. This would be less efficient in general but more *correct*.
         """
-        sbar = self.states.index((state, 0))
+        sbar = self.states.index((state, 3))
         abar = self.actions.index((self.DM.actions[a], l))
         T = self.transitions[sbar][abar]
-        q = self.costs[sbar][abar] - self.AM.mu(0, l) + np.sum(np.array(self.V * T))
+        q = self.costs[sbar][abar] + np.sum(np.array(self.V * T))
         return q
+
 
     def update_potential(self, state, s, action, a, L):
         """
@@ -240,11 +290,12 @@ class CAS():
                 the persistence times the softmax over the q values of q(s, a, l) for
                 each l in L. 
         """ 
-        X = np.array([self.q(s, state, a, action, l) for l in L])
+        X = np.array([self.q(state, s, action, a, l) for l in L])
         softmax = (np.exp(-1.0 * X)/np.sum(np.exp(-1.0 * X)))
         for l in range(len(L)):
             self.potential[s][a][L[l]] += self.persistence * softmax[l]
         self.potential[s][a] = np.clip(self.potential[s][a], a_min = 0, a_max = 1)
+
 
     def update_kappa(self):
         """
@@ -266,21 +317,52 @@ class CAS():
         """
         for s, state in enumerate(self.DM.states):
             for a, action in enumerate(self.DM.actions):
+                if action not in self.HM.flagged:
+                    continue
+
                 level = self.AM.kappa[state][action]
-                if level == 0:
-                    L = [level, level + 1]
-                elif level == max(self.AM.L):
-                    L = [level - 1, level]
+                if level == 0 or level == max(self.AM.L):
+                    continue
                 else:
                     L = [level-1, level, level+1]
-                self.update_potential(s, state, a, action, L)
+                self.update_potential(state, s, action, a, L)
 
                 for level_index in np.argsort(-1.0 * np.array([self.potential[s][a][l] for l in L])):
                     if np.random.uniform() <= self.potential[s][a][L[level_index]]:
-                        # TODO insert level update logic here
-                        self.AM.kappa[state][action] = L[level]
-                        self.potential[s][a][L[level]] = 0.0
+                        if L[level_index] == 3 and len(state) > 2:
+                            if ((state[3] == 'door-closed' and action == 'open'
+                                and (self.DM.helper.get_state_feature_value(state,'doortype') == 'pull'
+                                 or self.DM.helper.get_state_feature_value(state, 'doorsize') == 'heavy'
+                                 or (self.DM.helper.get_state_feature_value(state, 'doorsize') == 'medium'
+                                 and self.DM.helper.get_state_feature_value(state, 'region') == 'b2')))
+                            or (action[0] == 'cross' and (state[3] == 'busy' or (state[3] == 'light'
+                                and self.DM.helper.get_state_feature_value(state, 'visibility') == 'low')))
+                            or self.HM.lambda_[state][action][2] < 0.95):
+                                break
+
+                        if L[level_index] == 0 and len(state) > 2:
+                            if ((state[3] == 'door-closed' and action == 'open'
+                                and self.DM.helper.get_state_feature_value(state, 'doortype') == 'push'
+                                and (self.DM.helper.get_state_feature_value(state, 'doorsize') == 'light'
+                                 or (self.DM.helper.get_state_feature_value(state, 'doorsize') == 'medium'
+                                 and self.DM.helper.get_state_feature_value(state, 'region') != 'b2')))
+                            or (state[3] == 'empty' or state[3] == 'light'
+                                and (self.DM.helper.get_state_feature_value(state, 'visibility') == 'high')
+                                and action == 'cross')
+                            or self.HM.lambda_[state][action][1] > 0.25):
+                                break
+
+                        self.AM.kappa[state][action] = L[level_index]
+                        self.potential[s][a][L[level_index]] = 0.0
+
+                        if L[1] == 1 and L[level_index] == 2:
+                            self.flags[s][a] = True
                         break
+
+
+    def save_kappa(self):
+        self.AM.save_kappa()
+
 
     def solve(self, solver='FVI'):
         """
@@ -297,14 +379,9 @@ class CAS():
                     V - The value function in matrix form over states.
                     Q - The q-value funciton in matrix for over state action pairs.
         """
-        if solver == 'LRTDP':
-            self.solver = LRTDPSolver(mdp = self, max_trials = 100)
-            return
-
-        if solver == 'FVI':
-            start_time = time.time()
-            mdp_info = FVI(self)
-            end_time = time.time()
+        start_time = time.time()
+        mdp_info = FVI(self)
+        end_time = time.time()
 
         self.pi = mdp_info['pi']
         self.state_map = mdp_info['state map']
@@ -312,6 +389,7 @@ class CAS():
         self.Q = mdp_info['Q']
 
         return (end_time - start_time)
+
 
     def generate_successor(self, state, action):
         """
@@ -335,7 +413,8 @@ class CAS():
             if rand <= thresh:
                 return self.states[sp]
 
-    def remove_transitions(self, state, action):
+
+    def remove_transition(self, state, action):
         """
             params:
                 state - The state we are removing the transition for.
@@ -353,6 +432,23 @@ class CAS():
         s = self.states.index(state)
 
         for i in np.arange(1, len(self.AM.L)):
-            a = self.actions.index((action, i))
+            a = self.actions.index((action[0], i))
             self.transitions[s][a] *= 0.0
             self.transitions[s][a][s] = 1.0
+
+
+    def check_level_optimality(self):
+        """
+            params: None
+
+            returns: The percent of states for which the policy is level-optimal.
+        """
+        total, correct = 0., 0.
+        for s, state in enumerate(self.states):
+            if len(state[0]) < 3 or 'open' in state[0][3]:
+                continue
+            total += 1
+            action = self.pi[s]
+            correct = correct + self.DM.helper.level_optimal(state, action)
+
+        return correct/total
