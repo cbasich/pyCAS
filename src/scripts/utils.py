@@ -77,13 +77,13 @@ def build_gam(df, distr='binomial', link='logit', input_classifier=None):
     # Second get the labels and convert to the dataframe identifiers
     y = np.unique(df.values[:,-1], return_inverse=True)[1]
 
-    gam_map = {}                # We will need this for the model. This let's us map semantics into
-                                # dataframe identifiers for calling predict.
+    gam_map = {}                        # We will need this for the model. This let's us map semantics into
+                                        # dataframe identifiers for calling predict.
     for i in range(df.shape[1]-1):      # Iterate through the number of features
         for key in np.unique(Xv[:,i]):  # Iterate through each value of feature
-            try:                # Try to add the key if it doesn't exist yet
+            try:                        # Try to add the key if it doesn't exist yet
                 gam_map[key] = X[:,i][np.where(Xv[:,i] == key)[0]][0]
-            except Exception:   # Deal with shaping issues
+            except Exception:           # Deal with shaping issues
                 X = X.reshape(-1,1)
                 gam_map[key] = X[:,i][np.where(Xv[:,i] == key)[0]][0]
 
