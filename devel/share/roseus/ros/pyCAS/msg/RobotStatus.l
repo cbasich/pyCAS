@@ -1,0 +1,111 @@
+;; Auto-generated. Do not edit!
+
+
+(when (boundp 'pyCAS::RobotStatus)
+  (if (not (find-package "PYCAS"))
+    (make-package "PYCAS"))
+  (shadow 'RobotStatus (find-package "PYCAS")))
+(unless (find-package "PYCAS::ROBOTSTATUS")
+  (make-package "PYCAS::ROBOTSTATUS"))
+
+(in-package "ROS")
+;;//! \htmlinclude RobotStatus.msg.html
+(if (not (find-package "STD_MSGS"))
+  (ros::roseus-add-msgs "std_msgs"))
+
+
+(defclass pyCAS::RobotStatus
+  :super ros::object
+  :slots (_header _x_coord _y_coord ))
+
+(defmethod pyCAS::RobotStatus
+  (:init
+   (&key
+    ((:header __header) (instance std_msgs::Header :init))
+    ((:x_coord __x_coord) 0)
+    ((:y_coord __y_coord) 0)
+    )
+   (send-super :init)
+   (setq _header __header)
+   (setq _x_coord (round __x_coord))
+   (setq _y_coord (round __y_coord))
+   self)
+  (:header
+   (&rest __header)
+   (if (keywordp (car __header))
+       (send* _header __header)
+     (progn
+       (if __header (setq _header (car __header)))
+       _header)))
+  (:x_coord
+   (&optional __x_coord)
+   (if __x_coord (setq _x_coord __x_coord)) _x_coord)
+  (:y_coord
+   (&optional __y_coord)
+   (if __y_coord (setq _y_coord __y_coord)) _y_coord)
+  (:serialization-length
+   ()
+   (+
+    ;; std_msgs/Header _header
+    (send _header :serialization-length)
+    ;; int8 _x_coord
+    1
+    ;; int8 _y_coord
+    1
+    ))
+  (:serialize
+   (&optional strm)
+   (let ((s (if strm strm
+              (make-string-output-stream (send self :serialization-length)))))
+     ;; std_msgs/Header _header
+       (send _header :serialize s)
+     ;; int8 _x_coord
+       (write-byte _x_coord s)
+     ;; int8 _y_coord
+       (write-byte _y_coord s)
+     ;;
+     (if (null strm) (get-output-stream-string s))))
+  (:deserialize
+   (buf &optional (ptr- 0))
+   ;; std_msgs/Header _header
+     (send _header :deserialize buf ptr-) (incf ptr- (send _header :serialization-length))
+   ;; int8 _x_coord
+     (setq _x_coord (sys::peek buf ptr- :char)) (incf ptr- 1)
+     (if (> _x_coord 127) (setq _x_coord (- _x_coord 256)))
+   ;; int8 _y_coord
+     (setq _y_coord (sys::peek buf ptr- :char)) (incf ptr- 1)
+     (if (> _y_coord 127) (setq _y_coord (- _y_coord 256)))
+   ;;
+   self)
+  )
+
+(setf (get pyCAS::RobotStatus :md5sum-) "825108100d13b9d7ed8f8cb19cd32973")
+(setf (get pyCAS::RobotStatus :datatype-) "pyCAS/RobotStatus")
+(setf (get pyCAS::RobotStatus :definition-)
+      "Header header
+int8 x_coord
+int8 y_coord
+
+================================================================================
+MSG: std_msgs/Header
+# Standard metadata for higher-level stamped data types.
+# This is generally used to communicate timestamped data 
+# in a particular coordinate frame.
+# 
+# sequence ID: consecutively increasing ID 
+uint32 seq
+#Two-integer timestamp that is expressed as:
+# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
+# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
+# time-handling sugar is provided by the client library
+time stamp
+#Frame this data is associated with
+string frame_id
+
+")
+
+
+
+(provide :pyCAS/RobotStatus "825108100d13b9d7ed8f8cb19cd32973")
+
+

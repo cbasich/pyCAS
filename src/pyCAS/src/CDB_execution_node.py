@@ -3,8 +3,11 @@ import json
 import os
 import rospy
 import roslib
+import actionlib
+from geometry_msgs.msg import Point, Pose, Quaternion
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
-from msg import RobotStatus, DoorStatus, SSPState
+from pyCAS.msg import RobotStatus, DoorStatus, SSPState, RobotAction, RobotGoal
 
 CURRENT_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -12,7 +15,11 @@ CURRENT_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 # Publishers #
 ##############
 
-SSP_ACTION_PUBLISHER = rospy.Publisher("robot/robot_action", RobotAction.msg, queue_size=1)
+# TODO: add the RobotAction message - or change this to be an interaction message??
+#SSP_ACTION_PUBLISHER = rospy.Publisher("robot/robot_action", RobotAction.msg, queue_size=1)
+# this is necessary to know the base of the robot and to set the new location for the robot to move 
+# NAVIGATION_SERVICE.send_goal(next_location)
+NAVIGATION_SERVICE = actionlib.SimpleActionClient('move_base', MoveBaseAction)
 
 #############
 # CALLBACKS #
@@ -69,6 +76,8 @@ def main():
     rospy.Subscriber("monitor/ssp_state_monitor", SSPState, ssp_state_callback, queue_size=1)
     rospy.Subscriber("robot/robot_action", RobotAction, execute, queue_size=1)
     rospy.Subscriber("robot/robot_goal", RobotGoal, instantiate, queue_size=1)
+
+    NAVIGATION_SERVICE.wait_for_server()
 
     rospy.loginfo("Info[CDB_execution_node.main]: Spinning...")
     rospy.spin()

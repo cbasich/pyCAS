@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 import rospy
-from msg import SSPState
+from pyCAS.msg import SSPState
 
 
 def main():
     rospy.loginfo("Info[ssp_state_monitor.main]: Instantiating the ssp_state_monitor node...")
     rospy.init_node("ssp_state_monitor", anonymous=True)
 
-    publisher = rospy.Publisher("monitorssp_state_status", SSPState)
+    publisher = rospy.Publisher("monitorssp_state_status", SSPState, queue_size=10)
     rate = rospy.Rate(rospy.get_param("/ssp_state_monitor/rate"))
 
     while not rospy.is_shutdown():

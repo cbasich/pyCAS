@@ -16,6 +16,8 @@ add_message_files(
   RobotStatus.msg
   DoorStatus.msg
   SSPState.msg
+  RobotAction.msg
+  RobotGoal.msg
 )
 
 generate_messages(

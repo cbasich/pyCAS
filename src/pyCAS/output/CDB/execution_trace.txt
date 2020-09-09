@@ -1,0 +1,41 @@
+BEGINNING EPISODE0
+BEGINNING TRIAL
+((10, 23), 3) | ((-1, 0), 3)
+((9, 23, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((9, 23, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((9, 23, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((8, 23), 3) | ((-1, 0), 3)
+((7, 23), 3) | ((-1, 0), 3)
+((6, 23), 3) | ((0, -1), 3)
+((6, 22, 'WEST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((6, 22, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 21), 3) | ((0, -1), 3)
+((6, 20), 3) | ((0, -1), 3)
+((6, 19, 'WEST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((6, 19, 'WEST', 'door-closed'), 3) | ('open', 0)
+((6, 19, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 18), 3) | ((0, -1), 3)
+((6, 17, 'WEST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((6, 17, 'WEST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 16), 3) | ((0, -1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'empty'), 3) | ('cross', 1)
+Feedback: yes
+((6, 13), 3) | ((0, -1), 3)
+((6, 12), 3) | ((-1, 0), 3)
+((5, 12), 3) | ((0, -1), 3)
+((5, 11, 'WEST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((5, 11, 'WEST', 'door-closed'), 3) | ('open', 0)
+((5, 11, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((5, 10), 3) | ((-1, 0), 3)
+((4, 10), 3) | ((0, -1), 3)
+((4, 9), 3) | ((-1, 0), 3)
+((3, 9, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((3, 9, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)

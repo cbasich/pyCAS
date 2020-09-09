@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import rospy
-from msg import RobotStatus
+from pyCAS.msg import RobotStatus
 
 # TODO: Implement this function
 def get_location():
@@ -11,7 +11,7 @@ def main():
     rospy.loginfo("Info[robot_status_monitor.main]: Instantiating the robot_status_monitor node...")
     rospy.init_node("robot_status_monitor", anonymous=True)
 
-    publisher = rospy.Publisher("monitor/robot_status", RobotStatus)
+    publisher = rospy.Publisher("monitor/robot_status", RobotStatus, queue_size=10)
     rate = rospy.Rate(rospy.get_param("/robot_status_monitor/rate"))
 
     while not rospy.is_shutdown():
@@ -19,7 +19,7 @@ def main():
 
         # TODO: Populate the message.
 
-        rospy.loginfo(message)
+        #rospy.loginfo(message)
         publisher.publish(message)
 
         rate.sleep()
