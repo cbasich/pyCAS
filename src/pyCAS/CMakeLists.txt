@@ -14,10 +14,12 @@ include_directories(
 add_message_files(
   FILES
   RobotStatus.msg
-  DoorStatus.msg
+  ObstacleStatus.msg
   SSPState.msg
-  RobotAction.msg
+  Interaction.msg
   RobotGoal.msg
+  TaskRequest.msg
+  Location.msg
 )
 
 generate_messages(

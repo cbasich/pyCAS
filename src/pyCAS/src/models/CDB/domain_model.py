@@ -117,7 +117,7 @@ class DeliveryBotDomain():
                     for a in self.actions:
                         self.kappa[s][a] = 3
             elif not self.grid[x][y] == 'X':
-                if start == self.grid[x][y]:
+                if start == (x, y):
                     self.init = s
                 elif destination == self.grid[x][y]:
                     goals.add(s)
