@@ -7,7 +7,7 @@ import actionlib
 from geometry_msgs.msg import Point, Pose, Quaternion
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal'
 
-from pyCAS.msg import RobotStatus, DoorStatus, SSPState, Interaction, RobotGoal
+from pyCAS.msg import RobotStatus, ObstacleStatus, SSPState, TaskRequest
 from task_handler import CASTaskHandler
 
 CURRENT_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
