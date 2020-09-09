@@ -19,7 +19,6 @@ add_message_files(
   Interaction.msg
   RobotGoal.msg
   TaskRequest.msg
-  Location.msg
 )
 
 generate_messages(

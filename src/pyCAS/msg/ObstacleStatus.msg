@@ -1,2 +1,2 @@
 Header header
-string obstacle_type
+string obstacle_data

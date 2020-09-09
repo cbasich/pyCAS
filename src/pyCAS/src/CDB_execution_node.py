@@ -6,7 +6,6 @@ import roslib
 import actionlib
 from geometry_msgs.msg import Point, Pose, Quaternion
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal'
-from nav_msgs.msg import Odometry
 
 from pyCAS.msg import RobotStatus, DoorStatus, SSPState, Interaction, RobotGoal
 from task_handler import CASTaskHandler
@@ -28,7 +27,6 @@ NAVIGATION_SERVICE = actionlib.SimpleActionClient('move_base', MoveBaseAction)
 #############
 
 ssp_state_message = None
-goal_message = None
 
 
 def ssp_state_callback(message):
@@ -42,15 +40,10 @@ def ssp_state_callback(message):
     # # TODO: populate action message
     # SSP_ACTION_PUBLISHER.publish(ssp_action_message)
 
-def goal_callback(message):
-    global goal_message
-    goal_message = message
-
-
 def execute(message):
     wait_duration = rospy.get_param('/CDB_execution_node/wait_duration')
     timeout_duration = rospy.get_param('/CDB_execution_node/timeout_duration')
-    topological_map = rospy.get_param('/CDB_execution_node//topological_map')
+    obstacle_map = rospy.get_param('/CDB_execution_node/obstacle_map')
     task_handler = CASTaskHandler()
     # this has the waypoints that have obstacles  
     world_map = json.load(open(topological_map))
@@ -58,13 +51,14 @@ def execute(message):
     start_x = ssp_state_message.robot_status.x_coord
     start_y = ssp_state_message.robot_status.y_coord
 
-    goal = message.goal
+    goal = (message.goal_x, message.goal_y)
 
     policy = task_handler.get_solution(world_map, (start_x, start_y), goal)
     
     current_state = None
     
     while not task_handler.is_goal(current_state, task_data):
+        # state is in format ((x, y, theta), obstacle_status)
         new_state = task_handler.get_state(ssp_state_message)
         if new_state != current_state:
             current_state = new_state
@@ -132,10 +126,9 @@ def main():
     rospy.loginfo("Info[CDB_execution_node.main]: Instantiating the CDB_execution node...")
     rospy.init_node("CDB_execution_node", anonymous=True)
 
-    rospy.Subscriber('odom', Odometry, odometry_message_callback, queue_size=1)
+    # this will contain the monitor of the current robot location and obstacle detection
     rospy.Subscriber("monitor/ssp_state_monitor", SSPState, ssp_state_callback, queue_size=1)
-    rospy.Subscriber("robot/robot_goal", RobotGoal, goal_callback, queue_size=1)
-    # this will be the topic to tell the robot to start 
+    # this will be the topic to tell the robot the goal and any other task related items 
     rospy.Subscriber("robot/task_request", TaskRequest, execute, queue_size=1)
 
 

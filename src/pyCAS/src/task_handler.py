@@ -5,7 +5,7 @@ from models.CDB.competence_aware_system import CAS
 
 class CASTaskHandler(object):
     def get_state(self, message):
-        return (message.robot_status.x_coord, message.robot_status.y_coord)
+        return ((message.robot_status.x_coord, message.robot_status.y_coord), message.obstacle_status)
 
     def is_goal(self, state, goal):
         return state == goal
