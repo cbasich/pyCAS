@@ -8,7 +8,7 @@ import itertools as it
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..', '..'))
 
-from CDB.domain_helper import CampusDeliveryBotHelper
+from models.CDB.domain_helper import CampusDeliveryBotHelper
 from scripts.utils import FVI
 
 DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB')
