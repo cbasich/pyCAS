@@ -1,0 +1,6 @@
+image: campus_1.png
+resolution: 0.005
+origin: [-0.9, -3.4, 0.0]
+occupied_thresh: 0.65
+free_thresh: 0.195
+negate: 0
