@@ -1,4 +1,4 @@
-import os, sys, time, random, pickle
+import os, sys, time, random, pickle, rospy
 
 import numpy as np
 import itertools as it
@@ -380,7 +380,9 @@ class CAS():
                     Q - The q-value funciton in matrix for over state action pairs.
         """
         start_time = time.time()
+        rospy.loginfo("Info[competence_aware_system.FVI]: starting the FVI solver...")
         mdp_info = FVI(self)
+        rospy.loginfo("Info[utils.FVI]: Ending the FVI solver...")
         end_time = time.time()
 
         self.pi = mdp_info['pi']

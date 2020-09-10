@@ -1,6 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os 
 print(os.getcwd())
+import sys
+import rospy
+
+current_file_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(current_file_path, '..'))
+
 
 from models.CDB.domain_model import DeliveryBotDomain
 from models.CDB.autonomy_model import AutonomyModel
@@ -9,7 +15,13 @@ from models.CDB.competence_aware_system import CAS
 
 class CASTaskHandler(object):
     def get_state(self, message):
+        # have to offset the odom data from the origin: [-0.45, -1.9, 0.0]
         return ((message.robot_status.x_coord, message.robot_status.y_coord), message.obstacle_status)
+
+    def is_start(self, odom_x_coord, odom_y_coord):
+        # have to offset the odom data from the origin: [-0.45, -1.9, 0.0]
+        x_coord = odom_x_coord + 0.45 
+        y_coord = odom_y_coord + 1.9
 
     def is_goal(self, state, goal):
         return state == goal
@@ -19,18 +31,18 @@ class CASTaskHandler(object):
     # end = message.goal
     # start = task_handler.get_state_from_message(ssp_state_message)
 
-        rospy.loginfo("Info[CDB_execution_node.instantiate]: Instantiating the domain model...")
+        rospy.loginfo("Info[task_handler.CASTaskHandler.get_solution]: Instantiating the domain model...")
         DM = DeliveryBotDomain(world_map, start, goal)
 
-        rospy.loginfo("Info[CDB_execution_node.instantiate]: Instantiating the autonomy model...")
+        rospy.loginfo("Info[task_handler.CASTaskHandler.get_solution]: Instantiating the autonomy model...")
         AM = AutonomyModel(DM, [0,1,2,3,])
 
-        rospy.loginfo("Info[CDB_execution_node.instantiate]: Instantiating the feedback model...")
+        rospy.loginfo("Info[task_handler.CASTaskHandler.get_solution]: Instantiating the feedback model...")
         HM = FeedbackModel(DM, AM, ['+', '-', '/', None], ['open'])
 
-        rospy.loginfo("Info[CDB_execution_node.instantiate]: Instanaitating the CAS model...")
+        rospy.loginfo("Info[task_handler.CASTaskHandler.get_solution]: Instanaitating the CAS model...")
         solution = CAS(DM, AM, HM, persistence = 0.75)
-
+        rospy.loginfo("Info[task_handler.CASTaskHandler.get_solution]: Solving the CAS model...")
         solution.solve()
         state_map = solution.state_map
         policy = solution.pi 

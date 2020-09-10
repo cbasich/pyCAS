@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import json
 import os
 import rospy
@@ -17,7 +17,7 @@ CURRENT_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 ##############
 
 # This will be the topic that will command the robot once it hits an area that it needs human interaction  
-SSP_INTERACTION_PUBLISHER = rospy.Publisher("robot/robot_interaction", RobotAction.msg, queue_size=1)
+# SSP_INTERACTION_PUBLISHER = rospy.Publisher("robot/robot_interaction", , queue_size=1)
 # this is necessary to know the base of the robot and to set the new location for the robot to move 
 # NAVIGATION_SERVICE.send_goal(next_location)
 NAVIGATION_SERVICE = actionlib.SimpleActionClient('move_base', MoveBaseAction)
@@ -41,13 +41,20 @@ def ssp_state_callback(message):
     # SSP_ACTION_PUBLISHER.publish(ssp_action_message)
 
 def execute(message):
+    start_x = None
+    start_y = None
     wait_duration = rospy.get_param('/CDB_execution_node/wait_duration')
     timeout_duration = rospy.get_param('/CDB_execution_node/timeout_duration')
     obstacle_map = rospy.get_param('/CDB_execution_node/obstacle_map')
+    grid_map = rospy.get_param('/CDB_execution_node/grid_map')
     task_handler = CASTaskHandler()
     # this has the waypoints that have obstacles  
-    world_map = json.load(open(topological_map))
+    world_map = json.load(open(obstacle_map))
     # start position from odom data
+    while not ssp_state_message:
+        rospy.loginfo('Info[CDB_execution_node.execute]: waiting to get start position...')
+        rospy.sleep(wait_duration)
+   
     start_x = ssp_state_message.robot_status.x_coord
     start_y = ssp_state_message.robot_status.y_coord
 
@@ -55,7 +62,8 @@ def execute(message):
     # TODO state map of states to indeeces 
     # return policy and state map
     # policy is state index : action 
-    policy, state_map = task_handler.get_solution(world_map, (start_x, start_y), goal)
+    policy, state_map = task_handler.get_solution(grid_map, (start_x, start_y), goal)
+    rospy.loginfo("Info[CDB_execution_node.instantiate]: Retrieved solution...")
     
     current_state = None
     

@@ -2,6 +2,9 @@
 import rospy
 from pyCAS.msg import SSPState, RobotStatus, ObstacleStatus, Interaction
 
+robot_status_message = RobotStatus()
+obstacle_status_message = ObstacleStatus()
+
 def robot_status_message_callback(message):
     global robot_status_message
     robot_status_message = message
@@ -23,12 +26,13 @@ def main():
     while not rospy.is_shutdown():
 
         message = SSPState()
-        message.robot_status = robot_status_message
-        message.obstacle_status = obstacle_status_message
+        if robot_status_message and obstacle_status_message:
+            message.robot_status = robot_status_message
+            message.obstacle_status = obstacle_status_message
         #TODO convert the location to x and y coord for SSPState Robot Status
         # TODO: Populate the message.
 
-        publisher.publish(message)
+            publisher.publish(message)
 
         rate.sleep()
 

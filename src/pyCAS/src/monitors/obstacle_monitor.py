@@ -22,11 +22,14 @@ def get_obstacle_status(obstacle_map):
     # set a tolerance to say when we are in the area of an obstacle 
     distance_tolerance = 1.0
     obstacle_location = None
-    obstacle_data = None
+    obstacle_data = 'None'
 
     for obstacle in obstacle_map.keys():
-        obstacle_x = obstacle[0]
-        obstacle_y = obstacle[1]
+        tmp = obstacle.strip('(')
+        tmp_2 = tmp.strip(')')
+        obstacle_strs = tmp_2.split(',')
+        obstacle_x = float(obstacle_strs[0])
+        obstacle_y = float(obstacle_strs[1])
 
         current_location_pose = odometry_message.pose.pose.position
 
