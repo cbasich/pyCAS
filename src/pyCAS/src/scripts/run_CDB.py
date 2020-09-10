@@ -51,13 +51,18 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
     for i in range(N):
         if start == None:
             start = offices[np.random.randint(len(offices))]
+            # TODO will have to make this into coordinates 
+            start = 'S'
         if end == None:
             end = offices[np.random.randint(len(offices))]
+            end = 'E'
         while end == start:
             end = offices[np.random.randint(len(offices))]
 
         print("Building environment...")
         print("Building domain model...")
+        print(start)
+        print(end)
         DM = domain_model.DeliveryBotDomain(grid_file, start, end)
         print("Building autonomy model...")
         AM = autonomy_model.AutonomyModel(DM, [0, 1, 2, 3])
@@ -81,14 +86,14 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
                 all_level_optimality_file.write("," + str(alo_value))
 
         print("Beginning simulation...")
+        print(environment.state_map)
         costs = execute_policy(environment, 1, i, interact, verbose=verbose)
-
+        
         if logging:
             with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), mode = 'a+') as cost_file:
                 for cost in costs:
                     cost_file.write(str(cost) + ",")
             cost_file.write("\n")
-
         print("Updating parameters...")
         environment.update_kappa()
         environment.save_kappa()
@@ -351,7 +356,7 @@ def process_results(CAS):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--map_file', type=str, default='small_campus.txt')
+    parser.add_argument('-m', '--map_file', type=str, default='campus_1.txt')
     parser.add_argument('-n', '--num_runs', type=int, default=1)
     parser.add_argument('-u', '--update', type=int, default=0)
     parser.add_argument('-i', '--interact', type=int, default=0)

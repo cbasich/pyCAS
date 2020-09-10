@@ -1,4 +1,4 @@
-import os, sys, pickle
+import os, sys, pickle, rospy
 
 import numpy as np
 import pandas as pd
@@ -14,7 +14,11 @@ def FVI(mdp, eps = 0.001):
         Additionally, this function requires that C/R and T are given as np arrays
         rather than functions.
     """
+    rospy.loginfo("Info[utils.FVI]: Instantiating the FVI solver...")
     states, actions = list(mdp.states), list(mdp.actions)
+    # rospy.loginfo(states)
+    # rospy.loginfo("\n\n\n------------------------------------------------------------------------\n\n\n")
+    # rospy.loginfo(actions)
     R, T, gamma = -1.0*np.array(mdp.costs).astype('float32'), np.array(mdp.transitions).astype('float32'), mdp.gamma
 
     V = np.zeros((len(states))).astype('float32').reshape(-1,1)
