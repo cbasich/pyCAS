@@ -28,5 +28,6 @@ class CASTaskHandler(object):
         solution = CAS(DM, AM, HM, persistence = 0.75)
 
         solution.solve()
+        state_map = solution.state_map
         policy = solution.pi 
-        return policy
+        return policy, state_map
