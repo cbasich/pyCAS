@@ -5,7 +5,7 @@ import rospy
 import roslib
 import actionlib
 from geometry_msgs.msg import Point, Pose, Quaternion
-from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal'
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
 from pyCAS.msg import RobotStatus, ObstacleStatus, SSPState, TaskRequest
 from task_handler import CASTaskHandler
