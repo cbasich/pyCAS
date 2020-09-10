@@ -8,10 +8,10 @@ import itertools as it
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..', '..'))
 
-from CDB.domain_helper import CampusDeliveryBotHelper
+from CDB_icra.domain_helper import CampusDeliveryBotHelper
 from scripts.utils import FVI
 
-DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB')
+DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB_icra')
 MAP_PATH = os.path.join(DOMAIN_PATH, 'maps')
 PARAM_PATH = os.path.join(DOMAIN_PATH, 'params')
 
@@ -35,7 +35,7 @@ class DeliveryBotDomain():
         self.rows = len(self.grid)
         self.cols = len(self.grid[0])
 
-        self.tod = np.arange(8,17,1)[np.random.randint(8)]
+        self.timeofday = np.random.choice(['morning', 'midday', 'afternoon'])
 
         self.kappa = {}
         try:
@@ -59,9 +59,6 @@ class DeliveryBotDomain():
         S = set(it.product(range(self.rows), range(self.cols)))
 
         used_features = open(os.path.join(PARAM_PATH, "used_features.txt")).readline().split(",")
-
-        # print(used_features)
-
         states, goals = set(), set()
 
         for s in S:
@@ -71,25 +68,25 @@ class DeliveryBotDomain():
                 if 'visibility' in used_features and 'streettype' in used_features:
                     f1 = self.map_info[str((x,y))]['visibility']
                     f2 = self.map_info[str((x,y))]['streettype']
-                    if 'tod' in used_features:
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), [self.tod], ['empty', 'light', 'busy'], [f1], [f2]))
+                    if 'timeofday' in used_features:
+                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), [self.timeofday], ['empty', 'light', 'busy'], [f1], [f2]))
                     else:
                         tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], [f1], [f2]))
                 elif 'visibility' in used_features:
                     f = self.map_info[str((x,y))]['visibility']
-                    if 'tod' in used_features:
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), [self.tod], ['empty', 'light', 'busy'], [f]))
+                    if 'timeofday' in used_features:
+                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), [self.timeofday], ['empty', 'light', 'busy'], [f]))
                     else:
                         tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], [f]))
                 elif 'streettype' in used_features:
                     f = self.map_info[str((x,y))]['streettype']
-                    if 'tod' in used_features:
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), [self.tod], ['empty', 'light', 'busy'], [f]))
+                    if 'timeofday' in used_features:
+                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), [self.timeofday], ['empty', 'light', 'busy'], [f]))
                     else:
                         tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], [f]))
                 else:
-                    if 'tod' in used_features:
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), [self.tod], ['empty', 'light', 'busy']))
+                    if 'timeofday' in used_features:
+                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), [self.timeofday], ['empty', 'light', 'busy']))
                     else:
                         tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy']))
 

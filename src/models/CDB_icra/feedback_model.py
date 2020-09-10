@@ -4,13 +4,14 @@ import pandas as pd
 import itertools as it
 
 from IPython import embed
+from sklearn.metrics import log_loss, f1_score
 
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
 from scripts.utils import build_gam
 
-DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB')
+DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB_icra')
 FEEDBACK_PATH = os.path.join(DOMAIN_PATH, 'feedback')
 PARAM_PATH = os.path.join(DOMAIN_PATH, 'params')
 MAP_PATH = os.path.join(DOMAIN_PATH, 'maps')
@@ -219,7 +220,6 @@ class FeedbackModel():
         _corr = _corr[[c for c in _corr.columns.values if 'feedback' in c]]
         _corr = _corr.drop([c for c in _corr.axes[0].values if 'feedback' in c], axis = 0)
 
-
         # Third, build the discrimantor matrix for each feature or pair
         # of features present in the correlation matrix. Right now we are simply
         # doing this by taking the max over all feature-values, and then summing
@@ -258,18 +258,19 @@ class FeedbackModel():
                                  performance on the test data.
         """
         lambdas = [(self.build_lambda(D_train, used_features, discriminator), discriminator) for discriminator in discriminators]
-        accuracies = [self.test_lambda(lambda_, lambda_map, D_test, used_features, discriminator) for (lambda_, lambda_map), discriminator in lambdas]
-        d = discriminators[np.argmax(accuracies)]
+        scores = [self.test_lambda(lambda_, lambda_map, D_test, used_features, discriminator) for (lambda_, lambda_map), discriminator in lambdas]
+
+        d = discriminators[np.argmax(scores)]
 
         print("Checking discriminator " + str(d) + "...")
 
         if 'door' in D_train['obstacle'].values:
-            curr_acc = self.test_lambda(self.DM.helper.open_GAM, self.DM.helper.open_GAM_map, D_test, used_features, discriminator = None)
-            if np.max(accuracies) - curr_acc < 0.1:
+            curr_score = self.test_lambda(self.DM.helper.open_GAM, self.DM.helper.open_GAM_map, D_test, used_features, discriminator = None) 
+            if np.max(scores) < curr_score:
                 return None
         else:
-            curr_acc = self.test_lambda(self.DM.helper.cross_GAM, self.DM.helper.cross_GAM_map, D_test, used_features, discriminator = None)
-            if np.max(accuracies) - curr_acc < 0.1:
+            curr_score = self.test_lambda(self.DM.helper.cross_GAM, self.DM.helper.cross_GAM_map, D_test, used_features, discriminator = None)
+            if np.max(score) < curr_score:
                 return None
 
         return d
@@ -287,11 +288,10 @@ class FeedbackModel():
         else:
             X = D_test[np.append(used_features, discriminator)]
         y = D_test['feedback'] == 'yes'
-
+        y_true = np.array(y, int)
         X_ = np.array([[lambda_map[f] for f in x] for x in X.values])
 
-        predictions = lambda_.predict(X_) > 0.5
+        predictions = lambda_.predict(X_)
+        y_pred = predictions > 0.5
 
-        accuracy = np.sum( predictions == y ) / len(y)
-
-        return accuracy
+        return f1_score(y_true, y_pred)

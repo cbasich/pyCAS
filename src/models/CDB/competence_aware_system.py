@@ -12,9 +12,6 @@ sys.path.append(os.path.join(current_file_path, '..'))
 
 from scripts.utils import FVI
 
-PARAM_PATH = os.path.join('..', 'data', 'model parameters')
-
-
 class CAS():
     """Competence-Aware System
 

@@ -10,7 +10,7 @@ sys.path.append(os.path.join(current_file_path, '..', '..'))
 
 from scripts.utils import build_gam
 
-DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB')
+DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB_icra')
 FEEDBACK_PATH = os.path.join(DOMAIN_PATH, 'feedback')
 PARAM_PATH = os.path.join(DOMAIN_PATH, 'params')
 
@@ -164,6 +164,8 @@ class CampusDeliveryBotHelper():
                 The feature *value* (i.e. 'heavy', 'high') of the state, or None if the state
                 does not contain this feature.
         """
+        if feature == 'tod':
+            return self.DM.tod
         try:
             return self.map_info[str((state[0], state[1]))][feature]
         except Exception:

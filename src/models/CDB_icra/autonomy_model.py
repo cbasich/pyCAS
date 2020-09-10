@@ -12,7 +12,7 @@ current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
 DOMAIN_PATH = os.path.join('..', '..', 'domains')
-PARAM_PATH = os.path.join(DOMAIN_PATH, 'CDB', 'params')
+PARAM_PATH = os.path.join(DOMAIN_PATH, 'CDB_icra', 'params')
 
 class AutonomyModel():
     def __init__(self, DM, L):

@@ -14,13 +14,13 @@ sys.path.append(os.path.join(current_file_path, '..'))
 import utils
 import process_data
 
-from models.CDB.competence_aware_system import CAS
-from models.CDB import autonomy_model, feedback_model, domain_model
+from models.CDB_icra.competence_aware_system import CAS
+from models.CDB_icra import autonomy_model, feedback_model, domain_model
 
-OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB')
-FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'feedback')
-PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'params')
-MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
+OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB_icra')
+FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_icra', 'feedback')
+PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_icra', 'params')
+MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_icra', 'maps')
 
 
 def main(grid_file, N, update=False, interact=False, logging=False, verbose=True, start=None, end=None):
@@ -70,6 +70,8 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
         print("Solving mdp...")
         print(environment.solve(solver=solver))
 
+        # embed()
+
         if logging:
             with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'), mode='a+') as expected_cost_file:
                 expected_cost_file.write(str(environment.V[environment.states.index(environment.init)]) + "\n")
@@ -99,7 +101,7 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
             if len(candidates) > 0:
                 candidate = candidates[np.random.randint(len(candidates))]
                 print(candidate)
-
+                # embed()
                 print("Identifying potential discriminators...")
                 try:
                     discriminator = environment.HM.get_most_likely_discriminator(candidate, 1)
@@ -172,9 +174,9 @@ def execute_policy(CAS, M, i, interact, verbose=True):
 
             feedback = None
             if action[1] == 1 or action[1] == 2:
-                feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))], interact=interact)
+                feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))], CAS.DM.tod, interact=interact)
                 if j == M-1:
-                    f1 = [action[1]] + CAS.DM.time_of_day + [CAS.DM.helper.get_state_feature_value(state[0], f) 
+                    f1 = [action[1]] + [CAS.DM.helper.get_state_feature_value(state[0], f) 
                             for f in used_features if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
                     if f1[2] == 'crosswalk':
                         f1[2] = state[0][3]
@@ -288,7 +290,7 @@ def init_cross_data():
         f.write('level,region,obstacle,feedback')
         for level in ['1','2']:
             for region in ['r1','r2']:
-                for obstacle in ['empty', 'light', 'heavy']:
+                for obstacle in ['empty', 'light', 'busy']:
                     for feedback in ['yes','no']:
                         entry = level + "," + region + "," + obstacle + "," + feedback
                         f.write("\n" + entry)
@@ -296,7 +298,7 @@ def init_cross_data():
 
 def init_full_cross_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data'), 'a+') as f:
-        f.write('level,region,obstacle,visibility,streettype,feedback')
+        f.write('level,region,obstacle,visibility,streettype,tod,feedback')
 
 
 def init_open_data():
@@ -312,7 +314,7 @@ def init_open_data():
 
 def init_full_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'a+') as f:
-        f.write('level,region,obstacle,doorsize,doorcolor,doortype,feedback')
+        f.write('level,region,obstacle,doorsize,doorcolor,doortype,tod,feedback')
 
 
 def process_results(CAS):
@@ -356,7 +358,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--map_file', type=str, default='small_campus.txt')
     parser.add_argument('-n', '--num_runs', type=int, default=1)
-    parser.add_argument('-u', '--update', type=int, default=0)
+    parser.add_argument('-u', '--update', type=int, default=1)
     parser.add_argument('-i', '--interact', type=int, default=0)
     parser.add_argument('-l', '--logging', type=int, default=0)
     parser.add_argument('-v', '--verbose', type=int, default=1)
