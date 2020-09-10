@@ -52,8 +52,10 @@ def execute(message):
     start_y = ssp_state_message.robot_status.y_coord
 
     goal = (message.goal_x, message.goal_y)
-
-    policy = task_handler.get_solution(world_map, (start_x, start_y), goal)
+    # TODO state map of states to indeeces 
+    # return policy and state map
+    # policy is state index : action 
+    policy, state_map = task_handler.get_solution(world_map, (start_x, start_y), goal)
     
     current_state = None
     
@@ -62,11 +64,15 @@ def execute(message):
         new_state = task_handler.get_state(ssp_state_message)
         if new_state != current_state:
             current_state = new_state
-            current_action = policy[current_state]
+            state_index = state_map[current_state]
+            current_action = policy[state_index]
             # something along this line to get the next state 
             target_state = current_state + current_action
             
             # if there is an obstacle there will be an obstacle type published. if not, None will be published
+            # 0 human 
+            # 1 ask permission
+            # 2 just act 
             if ssp_state_message.obstacle_status.obstacle_type: 
                 # TODO human interaction handling 
                 pass

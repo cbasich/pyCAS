@@ -53,14 +53,16 @@ def main():
     obstacle_map = json.load(open(rospy.get_param('/CDB_execution_node/obstacle_map')))
 
     while not rospy.is_shutdown():
-        _, obstacle_data = get_obstacle_status(obstacle_map)
-        message = ObstacleStatus()
-        message.obstacle_data = obstacle_data
+        if odometry_message:
+            _, obstacle_data = get_obstacle_status(obstacle_map)
 
-        # TODO: Populate the message.
+            message = ObstacleStatus()
+            message.obstacle_data = obstacle_data
 
-        #rospy.loginfo(message)
-        publisher.publish(message)
+            # TODO: Populate the message.
+
+            #rospy.loginfo(message)
+            publisher.publish(message)
 
         rate.sleep()
 

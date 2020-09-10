@@ -8,7 +8,7 @@ import itertools as it
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..', '..'))
 
-from CDB.domain_helper import CampusDeliveryBotHelper
+from models.CDB.domain_helper import CampusDeliveryBotHelper
 from scripts.utils import FVI
 
 DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB')
@@ -117,7 +117,8 @@ class DeliveryBotDomain():
                     for a in self.actions:
                         self.kappa[s][a] = 3
             elif not self.grid[x][y] == 'X':
-                if start == (x, y):
+                # TODO change self.grid[x][y] to (x,y) - will have to do some debugging 
+                if start == self.grid[x][y]:
                     self.init = s
                 elif destination == self.grid[x][y]:
                     goals.add(s)
