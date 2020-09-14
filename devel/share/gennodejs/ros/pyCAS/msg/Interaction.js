@@ -20,7 +20,7 @@ class Interaction {
     if (initObj === null) {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.header = null;
-      this.action = null;
+      this.status = null;
     }
     else {
       if (initObj.hasOwnProperty('header')) {
@@ -29,11 +29,11 @@ class Interaction {
       else {
         this.header = new std_msgs.msg.Header();
       }
-      if (initObj.hasOwnProperty('action')) {
-        this.action = initObj.action
+      if (initObj.hasOwnProperty('status')) {
+        this.status = initObj.status
       }
       else {
-        this.action = '';
+        this.status = '';
       }
     }
   }
@@ -42,8 +42,8 @@ class Interaction {
     // Serializes a message object of type Interaction
     // Serialize message field [header]
     bufferOffset = std_msgs.msg.Header.serialize(obj.header, buffer, bufferOffset);
-    // Serialize message field [action]
-    bufferOffset = _serializer.string(obj.action, buffer, bufferOffset);
+    // Serialize message field [status]
+    bufferOffset = _serializer.string(obj.status, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -53,15 +53,15 @@ class Interaction {
     let data = new Interaction(null);
     // Deserialize message field [header]
     data.header = std_msgs.msg.Header.deserialize(buffer, bufferOffset);
-    // Deserialize message field [action]
-    data.action = _deserializer.string(buffer, bufferOffset);
+    // Deserialize message field [status]
+    data.status = _deserializer.string(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
     let length = 0;
     length += std_msgs.msg.Header.getMessageSize(object.header);
-    length += object.action.length;
+    length += object.status.length;
     return length + 4;
   }
 
@@ -72,14 +72,14 @@ class Interaction {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'b3f74ddb4be40919530023baf4517550';
+    return '5af2dbd9f0f51a7e50dfafa69867ed29';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
     Header header
-    string action
+    string status
     
     ================================================================================
     MSG: std_msgs/Header
@@ -113,11 +113,11 @@ class Interaction {
       resolved.header = new std_msgs.msg.Header()
     }
 
-    if (msg.action !== undefined) {
-      resolved.action = msg.action;
+    if (msg.status !== undefined) {
+      resolved.status = msg.status;
     }
     else {
-      resolved.action = ''
+      resolved.status = ''
     }
 
     return resolved;

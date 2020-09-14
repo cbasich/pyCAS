@@ -1,15 +1,17 @@
 (cl:defpackage pyCAS-msg
   (:use )
   (:export
-   "<DOORSTATUS>"
-   "DOORSTATUS"
-   "<ROBOTACTION>"
-   "ROBOTACTION"
+   "<INTERACTION>"
+   "INTERACTION"
+   "<OBSTACLESTATUS>"
+   "OBSTACLESTATUS"
    "<ROBOTGOAL>"
    "ROBOTGOAL"
    "<ROBOTSTATUS>"
    "ROBOTSTATUS"
    "<SSPSTATE>"
    "SSPSTATE"
+   "<TASKREQUEST>"
+   "TASKREQUEST"
   ))
 

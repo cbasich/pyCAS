@@ -22,6 +22,7 @@ class RobotStatus {
       this.header = null;
       this.x_coord = null;
       this.y_coord = null;
+      this.heading = null;
     }
     else {
       if (initObj.hasOwnProperty('header')) {
@@ -42,6 +43,12 @@ class RobotStatus {
       else {
         this.y_coord = 0;
       }
+      if (initObj.hasOwnProperty('heading')) {
+        this.heading = initObj.heading
+      }
+      else {
+        this.heading = 0.0;
+      }
     }
   }
 
@@ -53,6 +60,8 @@ class RobotStatus {
     bufferOffset = _serializer.int8(obj.x_coord, buffer, bufferOffset);
     // Serialize message field [y_coord]
     bufferOffset = _serializer.int8(obj.y_coord, buffer, bufferOffset);
+    // Serialize message field [heading]
+    bufferOffset = _serializer.float32(obj.heading, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -66,13 +75,15 @@ class RobotStatus {
     data.x_coord = _deserializer.int8(buffer, bufferOffset);
     // Deserialize message field [y_coord]
     data.y_coord = _deserializer.int8(buffer, bufferOffset);
+    // Deserialize message field [heading]
+    data.heading = _deserializer.float32(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
     let length = 0;
     length += std_msgs.msg.Header.getMessageSize(object.header);
-    return length + 2;
+    return length + 6;
   }
 
   static datatype() {
@@ -82,7 +93,7 @@ class RobotStatus {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '825108100d13b9d7ed8f8cb19cd32973';
+    return '47473fc5feb11cdaf545b221dbccb35d';
   }
 
   static messageDefinition() {
@@ -91,7 +102,7 @@ class RobotStatus {
     Header header
     int8 x_coord
     int8 y_coord
-    
+    float32 heading
     ================================================================================
     MSG: std_msgs/Header
     # Standard metadata for higher-level stamped data types.
@@ -136,6 +147,13 @@ class RobotStatus {
     }
     else {
       resolved.y_coord = 0
+    }
+
+    if (msg.heading !== undefined) {
+      resolved.heading = msg.heading;
+    }
+    else {
+      resolved.heading = 0.0
     }
 
     return resolved;

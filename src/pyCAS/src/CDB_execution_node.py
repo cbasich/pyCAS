@@ -7,7 +7,7 @@ import actionlib
 from geometry_msgs.msg import Point, Pose, Quaternion
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
-from pyCAS.msg import RobotStatus, ObstacleStatus, SSPState, TaskRequest
+from pyCAS.msg import RobotStatus, ObstacleStatus, SSPState, TaskRequest, Interaction
 from task_handler import CASTaskHandler
 
 CURRENT_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -16,41 +16,48 @@ CURRENT_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 # Publishers #
 ##############
 
-# This will be the topic that will command the robot once it hits an area that it needs human interaction  
-# SSP_INTERACTION_PUBLISHER = rospy.Publisher("robot/robot_interaction", , queue_size=1)
 # this is necessary to know the base of the robot and to set the new location for the robot to move 
 # NAVIGATION_SERVICE.send_goal(next_location)
 NAVIGATION_SERVICE = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+
+# this is the publish that sends the consequence of the human response depdending on LoA 
+# ex: if LoA is 1, the robot needs permission, if human says yes to proceeding in opening a door, the interaction will send a message "open"
+INTERACTION_PUBLISHER = rospy.Publisher("monitor/interaction", Interaction, queue_size=10)
 
 #############
 # CALLBACKS #
 #############
 
 ssp_state_message = None
-
+interaction_message = None
 
 def ssp_state_callback(message):
     global ssp_state_message
     ssp_state_message = message
-    # state = (message.RobotStatus.x_coord, message.RobotStatus.y_coord) 
-    # action = task_handler.get_action(state)
-    # if action is None:
-    #     return
-    # ssp_action_message = SSPAction()
-    # # TODO: populate action message
-    # SSP_ACTION_PUBLISHER.publish(ssp_action_message)
+
+
+def interaction_callback(message):
+    global interaction_message
+    interaction_message = message
+
+###########
+# EXECUTE #
+###########
 
 def execute(message):
+    # setup parameters 
     start_x = None
     start_y = None
     wait_duration = rospy.get_param('/CDB_execution_node/wait_duration')
     timeout_duration = rospy.get_param('/CDB_execution_node/timeout_duration')
     obstacle_map = rospy.get_param('/CDB_execution_node/obstacle_map')
     grid_map = rospy.get_param('/CDB_execution_node/grid_map')
-    task_handler = CASTaskHandler()
     # this has the waypoints that have obstacles  
     world_map = json.load(open(obstacle_map))
-    # start position from odom data
+    # this handles the CAS model 
+    task_handler = CASTaskHandler()
+    
+    # start position from odom data - wait for the init delay
     while not ssp_state_message:
         rospy.loginfo('Info[CDB_execution_node.execute]: waiting to get start position...')
         rospy.sleep(wait_duration)
@@ -61,7 +68,8 @@ def execute(message):
     start = (start_x, start_y)
     goal = (message.goal_x, message.goal_y)
 
-    policy, state_map = task_handler.get_solution(grid_map, start, goal)
+    model = task_handler.get_problem(grid_map, start, goal)
+    policy, state_map = task_handler.get_solution(model)
     rospy.loginfo("Info[CDB_execution_node.instantiate]: Retrieved solution...")
     
     current_state = None
@@ -69,37 +77,63 @@ def execute(message):
     while not task_handler.is_goal(current_state, goal):
         # state is in format ((x, y, theta), obstacle_status)
         new_state = task_handler.get_state(ssp_state_message)
+        print("This is new state : ")
+        print(new_state)
+        print("This is current state : ")
+        print(current_state)
         if new_state != current_state:
             current_state = new_state
             state_index = state_map[current_state]
             current_action = policy[state_index]
-            # something along this line to get the next state
-            # convert foot to meters * 0.3048
-            print("Current State : ")
-            print(current_state)
-            print("Current Action : ")
-            print(current_action)
-            print("State Index : ")
-            print(state_index)
-            print("State Map : ")
-            print(state_map)
-            print("Policy : ")
-            print(policy)
-            before_transform_target_state = ((current_state[0][0] + current_action[0][0]), (current_state[0][1] + current_action[0][1]))
-            print(before_transform_target_state)
-            is_state_index = state_map[before_transform_target_state]
-            print(is_state_index)
-            target_state = (-1*((current_state[0][0]-1)*0.3048 + current_action[0][0]*0.3048), -1*((current_state[0][1]-1)*0.3048 + current_action[0][1]*0.3048))
-            # if there is an obstacle there will be an obstacle type published. if not, None will be published
-            # 0 human 
-            # 1 ask permission
-            # 2 just act 
-            if ssp_state_message.obstacle_status.obstacle_data != 'None': 
+            
+            # for debug
+            # print(current_state)
+            # print(current_action)
+            
+            if current_action[1] != 3: 
                 # TODO human interaction handling 
-                pass
+                # LoA 0: Human does the action
+                if current_action[1] == 0:
+                    rospy.loginfo("Level 0 Autonomy: Will wait for human interference to remove obstacle... ")
+                    response = input("Have you removed the obstacle? [y/n]: ")
+                    if response[0] == 'y' or response[0] == 'Y':
+                        interaction = Interaction()
+                        interaction.status = 'open'
+                        INTERACTION_PUBLISHER.publish(interaction)
+                    else:
+                        rospy.loginfo("Error: no human interaction to move the obstacle... please try again later")
+                # LoA 1: Robot requests permission
+                elif current_action[1] == 1:
+                    rospy.loginfo("Level 1 Autonomy: Ask permission to remove obstacle... ")
+                    response = input("May I open the door? [y/n]: ")
+                    if response[0] == 'y' or response[0] == 'Y':
+                        input('Press any key to confirm that the door has been opened: ')
+                        interaction = Interaction()
+                        interaction.status = 'open'
+                        INTERACTION_PUBLISHER.publish(interaction)
+                    # request permission
+                    elif response[0] == 'n' or response[0] == 'N':
+                        rospy.loginfo('Forcing robot to turn around... ')
+                    else:
+                        rospy.loginfo("Invalid input")
+                # LoA 2: Robot acts under supervision
+                elif current_action[1] == 2:
+                    response = input('Are you supervising my actions?')
+                    rospy.loginfo('Level 2 Autonomy: Not sure what to do ?')
+                    if response[0] == 'y' or response[0] == 'Y':
+                        interaction = Interaction()
+                        interaction.status = 'open'
+                        INTERACTION_PUBLISHER.publish(interaction)   
             else: 
+                # action is in format of row, col NOT x, y 
+                # adding action to current state = x + action[1], y + action[0]
+                # convert foot to meters * 0.3048
+                target_state = (((current_state[0][1]-1)*0.3048 + current_action[0][1]*0.3048), -1*((current_state[0][0]-1)*0.3048 + current_action[0][0]*0.3048))
                 x = target_state[0]
                 y = target_state[1]
+                # for debugging 
+                # x = 0.3
+                # y = -1.2
                 print(target_state)
                 next_location = MoveBaseGoal()
                 next_location.target_pose.header.frame_id = 'map'
@@ -116,40 +150,6 @@ def execute(message):
         rospy.sleep(wait_duration)
     rospy.loginfo('Info[CDB_execution_node.execute]: Completed the task')
 
-    # TODO get start point from location monitor 
-
-
-    # action = message.action
-    # level = message.level
-
-    # TODO: Populate action logic here.
-    #       Should have logic for each of 4 LoA
-    # TODO: Create if statement logic for when to puiblish an interaction command - this should be points where the robot stops to ask the human
-
-
-
-
-""" def instantiate(message):
-    global goal_message
-    world_map = json.load()
-    end = message.goal
-    goal_message = end
-    start = task_handler.get_state_from_message(ssp_state_message)
-
-    rospy.loginfo("Info[CDB_execution_node.instantiate]: Instantiating the domain model...")
-    DM = CDB_domain_model.DeliveryBotDomain(world_map, start, end)
-
-    rospy.loginfo("Info[CDB_execution_node.instantiate]: Instantiating the autonomy model...")
-    AM = CDB_autonomy_model.AutonomyModel(DM, [0,1,2,3,])
-
-    rospy.loginfo("Info[CDB_execution_node.instantiate]: Instantiating the feedback model...")
-    HM = CDB_feedback_model.FeedbackModel(DM, AM, ['+', '-', '/', None], ['open'])
-
-    rospy.loginfo("Info[CDB_execution_node.instantiate]: Instanaitating the CAS model...")
-    CAS = competence_aware_system.CAS(DM, AM, HM, persistence = 0.75)
-
-    CAS.solve()
-    policy = CAS.pi """
 
 def main():
     rospy.loginfo("Info[CDB_execution_node.main]: Instantiating the CDB_execution node...")
@@ -159,8 +159,7 @@ def main():
     rospy.Subscriber("monitor/ssp_state_monitor", SSPState, ssp_state_callback, queue_size=1)
     # this will be the topic to tell the robot the goal and any other task related items 
     rospy.Subscriber("robot/task_request", TaskRequest, execute, queue_size=1)
-
-
+ 
     NAVIGATION_SERVICE.wait_for_server()
 
     rospy.loginfo("Info[CDB_execution_node.main]: Spinning...")
@@ -169,3 +168,10 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+# TODO: clean up the states and action to either be all x, y or row, col 
+# TODO: fix the paths so clean works before running roslauch 
+# TODO: figure out what you want to do when you tell the robot that it cannot open a door
+# TODO: check that the door status gets cleared when you go to the next state 
+# TODO: object detection with QR codes

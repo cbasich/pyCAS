@@ -21,6 +21,7 @@ class ObstacleStatus {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.header = null;
       this.obstacle_data = null;
+      this.door_status = null;
     }
     else {
       if (initObj.hasOwnProperty('header')) {
@@ -35,6 +36,12 @@ class ObstacleStatus {
       else {
         this.obstacle_data = '';
       }
+      if (initObj.hasOwnProperty('door_status')) {
+        this.door_status = initObj.door_status
+      }
+      else {
+        this.door_status = '';
+      }
     }
   }
 
@@ -44,6 +51,8 @@ class ObstacleStatus {
     bufferOffset = std_msgs.msg.Header.serialize(obj.header, buffer, bufferOffset);
     // Serialize message field [obstacle_data]
     bufferOffset = _serializer.string(obj.obstacle_data, buffer, bufferOffset);
+    // Serialize message field [door_status]
+    bufferOffset = _serializer.string(obj.door_status, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -55,6 +64,8 @@ class ObstacleStatus {
     data.header = std_msgs.msg.Header.deserialize(buffer, bufferOffset);
     // Deserialize message field [obstacle_data]
     data.obstacle_data = _deserializer.string(buffer, bufferOffset);
+    // Deserialize message field [door_status]
+    data.door_status = _deserializer.string(buffer, bufferOffset);
     return data;
   }
 
@@ -62,7 +73,8 @@ class ObstacleStatus {
     let length = 0;
     length += std_msgs.msg.Header.getMessageSize(object.header);
     length += object.obstacle_data.length;
-    return length + 4;
+    length += object.door_status.length;
+    return length + 8;
   }
 
   static datatype() {
@@ -72,7 +84,7 @@ class ObstacleStatus {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '01f13ac50bca8d8a91c4495d3ee892ae';
+    return '9e75ab8483cc66b6625903b6ddb179ba';
   }
 
   static messageDefinition() {
@@ -80,6 +92,7 @@ class ObstacleStatus {
     return `
     Header header
     string obstacle_data
+    string door_status
     
     ================================================================================
     MSG: std_msgs/Header
@@ -118,6 +131,13 @@ class ObstacleStatus {
     }
     else {
       resolved.obstacle_data = ''
+    }
+
+    if (msg.door_status !== undefined) {
+      resolved.door_status = msg.door_status;
+    }
+    else {
+      resolved.door_status = ''
     }
 
     return resolved;

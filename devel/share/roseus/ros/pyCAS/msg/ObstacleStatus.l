@@ -16,17 +16,19 @@
 
 (defclass pyCAS::ObstacleStatus
   :super ros::object
-  :slots (_header _obstacle_data ))
+  :slots (_header _obstacle_data _door_status ))
 
 (defmethod pyCAS::ObstacleStatus
   (:init
    (&key
     ((:header __header) (instance std_msgs::Header :init))
     ((:obstacle_data __obstacle_data) "")
+    ((:door_status __door_status) "")
     )
    (send-super :init)
    (setq _header __header)
    (setq _obstacle_data (string __obstacle_data))
+   (setq _door_status (string __door_status))
    self)
   (:header
    (&rest __header)
@@ -38,6 +40,9 @@
   (:obstacle_data
    (&optional __obstacle_data)
    (if __obstacle_data (setq _obstacle_data __obstacle_data)) _obstacle_data)
+  (:door_status
+   (&optional __door_status)
+   (if __door_status (setq _door_status __door_status)) _door_status)
   (:serialization-length
    ()
    (+
@@ -45,6 +50,8 @@
     (send _header :serialization-length)
     ;; string _obstacle_data
     4 (length _obstacle_data)
+    ;; string _door_status
+    4 (length _door_status)
     ))
   (:serialize
    (&optional strm)
@@ -54,6 +61,8 @@
        (send _header :serialize s)
      ;; string _obstacle_data
        (write-long (length _obstacle_data) s) (princ _obstacle_data s)
+     ;; string _door_status
+       (write-long (length _door_status) s) (princ _door_status s)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -62,15 +71,18 @@
      (send _header :deserialize buf ptr-) (incf ptr- (send _header :serialization-length))
    ;; string _obstacle_data
      (let (n) (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4) (setq _obstacle_data (subseq buf ptr- (+ ptr- n))) (incf ptr- n))
+   ;; string _door_status
+     (let (n) (setq n (sys::peek buf ptr- :integer)) (incf ptr- 4) (setq _door_status (subseq buf ptr- (+ ptr- n))) (incf ptr- n))
    ;;
    self)
   )
 
-(setf (get pyCAS::ObstacleStatus :md5sum-) "01f13ac50bca8d8a91c4495d3ee892ae")
+(setf (get pyCAS::ObstacleStatus :md5sum-) "9e75ab8483cc66b6625903b6ddb179ba")
 (setf (get pyCAS::ObstacleStatus :datatype-) "pyCAS/ObstacleStatus")
 (setf (get pyCAS::ObstacleStatus :definition-)
       "Header header
 string obstacle_data
+string door_status
 
 ================================================================================
 MSG: std_msgs/Header
@@ -92,6 +104,6 @@ string frame_id
 
 
 
-(provide :pyCAS/ObstacleStatus "01f13ac50bca8d8a91c4495d3ee892ae")
+(provide :pyCAS/ObstacleStatus "9e75ab8483cc66b6625903b6ddb179ba")
 
 

@@ -16,19 +16,21 @@
 
 (defclass pyCAS::SSPState
   :super ros::object
-  :slots (_header _robot_status _door_status ))
+  :slots (_header _robot_status _obstacle_status _interaction_status ))
 
 (defmethod pyCAS::SSPState
   (:init
    (&key
     ((:header __header) (instance std_msgs::Header :init))
     ((:robot_status __robot_status) (instance pyCAS::RobotStatus :init))
-    ((:door_status __door_status) (instance pyCAS::DoorStatus :init))
+    ((:obstacle_status __obstacle_status) (instance pyCAS::ObstacleStatus :init))
+    ((:interaction_status __interaction_status) (instance pyCAS::Interaction :init))
     )
    (send-super :init)
    (setq _header __header)
    (setq _robot_status __robot_status)
-   (setq _door_status __door_status)
+   (setq _obstacle_status __obstacle_status)
+   (setq _interaction_status __interaction_status)
    self)
   (:header
    (&rest __header)
@@ -44,13 +46,20 @@
      (progn
        (if __robot_status (setq _robot_status (car __robot_status)))
        _robot_status)))
-  (:door_status
-   (&rest __door_status)
-   (if (keywordp (car __door_status))
-       (send* _door_status __door_status)
+  (:obstacle_status
+   (&rest __obstacle_status)
+   (if (keywordp (car __obstacle_status))
+       (send* _obstacle_status __obstacle_status)
      (progn
-       (if __door_status (setq _door_status (car __door_status)))
-       _door_status)))
+       (if __obstacle_status (setq _obstacle_status (car __obstacle_status)))
+       _obstacle_status)))
+  (:interaction_status
+   (&rest __interaction_status)
+   (if (keywordp (car __interaction_status))
+       (send* _interaction_status __interaction_status)
+     (progn
+       (if __interaction_status (setq _interaction_status (car __interaction_status)))
+       _interaction_status)))
   (:serialization-length
    ()
    (+
@@ -58,8 +67,10 @@
     (send _header :serialization-length)
     ;; pyCAS/RobotStatus _robot_status
     (send _robot_status :serialization-length)
-    ;; pyCAS/DoorStatus _door_status
-    (send _door_status :serialization-length)
+    ;; pyCAS/ObstacleStatus _obstacle_status
+    (send _obstacle_status :serialization-length)
+    ;; pyCAS/Interaction _interaction_status
+    (send _interaction_status :serialization-length)
     ))
   (:serialize
    (&optional strm)
@@ -69,8 +80,10 @@
        (send _header :serialize s)
      ;; pyCAS/RobotStatus _robot_status
        (send _robot_status :serialize s)
-     ;; pyCAS/DoorStatus _door_status
-       (send _door_status :serialize s)
+     ;; pyCAS/ObstacleStatus _obstacle_status
+       (send _obstacle_status :serialize s)
+     ;; pyCAS/Interaction _interaction_status
+       (send _interaction_status :serialize s)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -79,18 +92,21 @@
      (send _header :deserialize buf ptr-) (incf ptr- (send _header :serialization-length))
    ;; pyCAS/RobotStatus _robot_status
      (send _robot_status :deserialize buf ptr-) (incf ptr- (send _robot_status :serialization-length))
-   ;; pyCAS/DoorStatus _door_status
-     (send _door_status :deserialize buf ptr-) (incf ptr- (send _door_status :serialization-length))
+   ;; pyCAS/ObstacleStatus _obstacle_status
+     (send _obstacle_status :deserialize buf ptr-) (incf ptr- (send _obstacle_status :serialization-length))
+   ;; pyCAS/Interaction _interaction_status
+     (send _interaction_status :deserialize buf ptr-) (incf ptr- (send _interaction_status :serialization-length))
    ;;
    self)
   )
 
-(setf (get pyCAS::SSPState :md5sum-) "56ecd69bc6e82bc6e4d2a495fb8db40b")
+(setf (get pyCAS::SSPState :md5sum-) "ab0c5c9508d54efc9d177817d64efe0a")
 (setf (get pyCAS::SSPState :datatype-) "pyCAS/SSPState")
 (setf (get pyCAS::SSPState :definition-)
       "Header header
 RobotStatus robot_status
-DoorStatus door_status
+ObstacleStatus obstacle_status
+Interaction interaction_status
 ================================================================================
 MSG: std_msgs/Header
 # Standard metadata for higher-level stamped data types.
@@ -112,16 +128,22 @@ MSG: pyCAS/RobotStatus
 Header header
 int8 x_coord
 int8 y_coord
+float32 heading
+================================================================================
+MSG: pyCAS/ObstacleStatus
+Header header
+string obstacle_data
+string door_status
 
 ================================================================================
-MSG: pyCAS/DoorStatus
+MSG: pyCAS/Interaction
 Header header
-string door_type
+string status
 
 ")
 
 
 
-(provide :pyCAS/SSPState "56ecd69bc6e82bc6e4d2a495fb8db40b")
+(provide :pyCAS/SSPState "ab0c5c9508d54efc9d177817d64efe0a")
 
 

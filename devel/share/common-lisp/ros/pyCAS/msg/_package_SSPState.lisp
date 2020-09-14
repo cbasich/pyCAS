@@ -3,6 +3,8 @@
           HEADER
           ROBOT_STATUS-VAL
           ROBOT_STATUS
-          DOOR_STATUS-VAL
-          DOOR_STATUS
+          OBSTACLE_STATUS-VAL
+          OBSTACLE_STATUS
+          INTERACTION_STATUS-VAL
+          INTERACTION_STATUS
 ))

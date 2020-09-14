@@ -3,9 +3,16 @@ import os
 print(os.getcwd())
 import sys
 import rospy
+import math
 
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
+sys.path.append(current_file_path)
+
+OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB')
+FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'feedback')
+PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'params')
+MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
 
 
 from models.CDB.domain_model import DeliveryBotDomain
@@ -13,42 +20,88 @@ from models.CDB.autonomy_model import AutonomyModel
 from models.CDB.feedback_model import FeedbackModel
 from models.CDB.competence_aware_system import CAS
 
+from scripts.utils import init_cross_data, init_full_cross_data, init_open_data, init_full_open_data
+
 class CASTaskHandler(object):
     def get_state(self, message):
         # have to offset the odom data from the origin: [-0.45, -1.9, 0.0]
         if message.obstacle_status.obstacle_data != 'None':
-            return ((message.robot_status.x_coord, message.robot_status.y_coord), message.obstacle_status.obstacle_data)
+            obstacle_dict = eval(message.obstacle_status.obstacle_data)
+            if obstacle_dict['obstacle'] == 'door':
+                # set the default door status to closed 
+                door_status = 'door-closed'
+                yaw = message.robot_status.heading
+                # convert yaw from radians to degrees
+                if yaw < 0:
+                    angle_in_degrees = 360 + (yaw * (180/math.pi))  
+                else:
+                    angle_in_degrees= yaw *(180/math.pi)
+                # convert yaw into state representation (NORTH, SOUTH, EAST, WEST)
+                if angle_in_degrees < 45 and angle_in_degrees > 0:
+                    compass = 'EAST'
+                elif angle_in_degrees < 360 and angle_in_degrees > 315:
+                    compass = 'EAST'
+                elif angle_in_degrees > 45 and angle_in_degrees < 135:
+                    compass = 'NORTH'
+                elif angle_in_degrees > 135 and angle_in_degrees < 225:
+                    compass = 'WEST'
+                elif angle_in_degrees > 225 and angle_in_degrees < 315 :
+                    compass = 'SOUTH'
+                else:
+                    print("Error: not able to find compass with heading value of {}".format(yaw)) 
+                
+                # listen for interaction from human to see if the robot has been allowed to open the door
+                # right now we do not confirm that it has been opened - we just assume that it has been
+                # TODO: find a way to confirm that the door has been opened before changing door_status 
+                if message.obstacle_status.door_status == 'open':
+                    door_status = 'door-open'
+                return ((message.robot_status.y_coord, message.robot_status.x_coord, compass ,door_status), 3)
         else:
-            return ((message.robot_status.x_coord, message.robot_status.y_coord), 3)
+            # default LoA is 3 which means unsupervised autonomy 
+            return ((message.robot_status.y_coord, message.robot_status.x_coord), 3)
 
-    def is_start(self, odom_x_coord, odom_y_coord):
-        # have to offset the odom data from the origin: [-0.45, -1.9, 0.0]
-        x_coord = odom_x_coord + 0.45 
-        y_coord = odom_y_coord + 1.9
+    def is_start(self, message):
+        start = (message.robot_status.y_coord, message.robot_status.x_coord)
+        pass
 
     def is_goal(self, state, goal):
-        return state == goal
+        current_state = (state[0][0], state[0][1])
+        return current_state == goal
 
-    def get_solution(self, world_map, start, goal):
-    # world_map = json.load()
-    # end = message.goal
-    # start = task_handler.get_state_from_message(ssp_state_message)
+    def get_problem(self, world_map, start, goal):
+        # set up the data files from feedback 
+        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'cross.data') ):
+            init_cross_data()
+        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open.data') ):
+            init_open_data()
+        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data') ):
+            init_full_cross_data()
+        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data') ):
+            init_full_open_data()
 
-        rospy.loginfo("Info[task_handler.CASTaskHandler.get_solution]: Instantiating the domain model...")
-        # changed DM to accept start and goal of (x, y) instead of text 'S' and 'G'
+        # Initiate all of the models
+
+        rospy.loginfo("Info[task_handler.get_problem]: Instantiating the domain model...")
+        # changed DM to accept start and goal of '(x, y)' or a text like 'S' or 'G'
         DM = DeliveryBotDomain(world_map, start, goal)
 
-        rospy.loginfo("Info[task_handler.CASTaskHandler.get_solution]: Instantiating the autonomy model...")
+        rospy.loginfo("Info[task_handler.get_problem]: Instantiating the autonomy model...")
         AM = AutonomyModel(DM, [0,1,2,3,])
 
-        rospy.loginfo("Info[task_handler.CASTaskHandler.get_solution]: Instantiating the feedback model...")
+        rospy.loginfo("Info[task_handler.get_problem]: Instantiating the feedback model...")
         HM = FeedbackModel(DM, AM, ['+', '-', '/', None], ['open'])
 
-        rospy.loginfo("Info[task_handler.CASTaskHandler.get_solution]: Instanaitating the CAS model...")
-        solution = CAS(DM, AM, HM, persistence = 0.75)
-        rospy.loginfo("Info[task_handler.CASTaskHandler.get_solution]: Solving the CAS model...")
-        solution.solve()
-        state_map = solution.state_map
-        policy = solution.pi 
+        rospy.loginfo("Info[task_handler.get_problem]: Instanaitating the CAS model...")
+        cas_model = CAS(DM, AM, HM, persistence = 0.75)
+        # CAS model to be returned and passed into get_solution
+        return cas_model
+
+
+
+    def get_solution(self, model):
+        # CAS model that has already been initiated by get_problem
+        model.solve()
+        state_map = model.state_map
+        policy = model.pi S
         return policy, state_map
 

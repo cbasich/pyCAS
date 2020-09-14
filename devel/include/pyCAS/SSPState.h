@@ -17,7 +17,8 @@
 
 #include <std_msgs/Header.h>
 #include <pyCAS/RobotStatus.h>
-#include <pyCAS/DoorStatus.h>
+#include <pyCAS/ObstacleStatus.h>
+#include <pyCAS/Interaction.h>
 
 namespace pyCAS
 {
@@ -29,12 +30,14 @@ struct SSPState_
   SSPState_()
     : header()
     , robot_status()
-    , door_status()  {
+    , obstacle_status()
+    , interaction_status()  {
     }
   SSPState_(const ContainerAllocator& _alloc)
     : header(_alloc)
     , robot_status(_alloc)
-    , door_status(_alloc)  {
+    , obstacle_status(_alloc)
+    , interaction_status(_alloc)  {
   (void)_alloc;
     }
 
@@ -46,8 +49,11 @@ struct SSPState_
    typedef  ::pyCAS::RobotStatus_<ContainerAllocator>  _robot_status_type;
   _robot_status_type robot_status;
 
-   typedef  ::pyCAS::DoorStatus_<ContainerAllocator>  _door_status_type;
-  _door_status_type door_status;
+   typedef  ::pyCAS::ObstacleStatus_<ContainerAllocator>  _obstacle_status_type;
+  _obstacle_status_type obstacle_status;
+
+   typedef  ::pyCAS::Interaction_<ContainerAllocator>  _interaction_status_type;
+  _interaction_status_type interaction_status;
 
 
 
@@ -80,7 +86,8 @@ bool operator==(const ::pyCAS::SSPState_<ContainerAllocator1> & lhs, const ::pyC
 {
   return lhs.header == rhs.header &&
     lhs.robot_status == rhs.robot_status &&
-    lhs.door_status == rhs.door_status;
+    lhs.obstacle_status == rhs.obstacle_status &&
+    lhs.interaction_status == rhs.interaction_status;
 }
 
 template<typename ContainerAllocator1, typename ContainerAllocator2>
@@ -137,12 +144,12 @@ struct MD5Sum< ::pyCAS::SSPState_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "56ecd69bc6e82bc6e4d2a495fb8db40b";
+    return "ab0c5c9508d54efc9d177817d64efe0a";
   }
 
   static const char* value(const ::pyCAS::SSPState_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x56ecd69bc6e82bc6ULL;
-  static const uint64_t static_value2 = 0xe4d2a495fb8db40bULL;
+  static const uint64_t static_value1 = 0xab0c5c9508d54efcULL;
+  static const uint64_t static_value2 = 0x9d177817d64efe0aULL;
 };
 
 template<class ContainerAllocator>
@@ -163,7 +170,8 @@ struct Definition< ::pyCAS::SSPState_<ContainerAllocator> >
   {
     return "Header header\n"
 "RobotStatus robot_status\n"
-"DoorStatus door_status\n"
+"ObstacleStatus obstacle_status\n"
+"Interaction interaction_status\n"
 "================================================================================\n"
 "MSG: std_msgs/Header\n"
 "# Standard metadata for higher-level stamped data types.\n"
@@ -185,11 +193,17 @@ struct Definition< ::pyCAS::SSPState_<ContainerAllocator> >
 "Header header\n"
 "int8 x_coord\n"
 "int8 y_coord\n"
+"float32 heading\n"
+"================================================================================\n"
+"MSG: pyCAS/ObstacleStatus\n"
+"Header header\n"
+"string obstacle_data\n"
+"string door_status\n"
 "\n"
 "================================================================================\n"
-"MSG: pyCAS/DoorStatus\n"
+"MSG: pyCAS/Interaction\n"
 "Header header\n"
-"string door_type\n"
+"string status\n"
 ;
   }
 
@@ -210,7 +224,8 @@ namespace serialization
     {
       stream.next(m.header);
       stream.next(m.robot_status);
-      stream.next(m.door_status);
+      stream.next(m.obstacle_status);
+      stream.next(m.interaction_status);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -235,9 +250,12 @@ struct Printer< ::pyCAS::SSPState_<ContainerAllocator> >
     s << indent << "robot_status: ";
     s << std::endl;
     Printer< ::pyCAS::RobotStatus_<ContainerAllocator> >::stream(s, indent + "  ", v.robot_status);
-    s << indent << "door_status: ";
+    s << indent << "obstacle_status: ";
     s << std::endl;
-    Printer< ::pyCAS::DoorStatus_<ContainerAllocator> >::stream(s, indent + "  ", v.door_status);
+    Printer< ::pyCAS::ObstacleStatus_<ContainerAllocator> >::stream(s, indent + "  ", v.obstacle_status);
+    s << indent << "interaction_status: ";
+    s << std::endl;
+    Printer< ::pyCAS::Interaction_<ContainerAllocator> >::stream(s, indent + "  ", v.interaction_status);
   }
 };
 

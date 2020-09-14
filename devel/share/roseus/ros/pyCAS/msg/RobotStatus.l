@@ -16,7 +16,7 @@
 
 (defclass pyCAS::RobotStatus
   :super ros::object
-  :slots (_header _x_coord _y_coord ))
+  :slots (_header _x_coord _y_coord _heading ))
 
 (defmethod pyCAS::RobotStatus
   (:init
@@ -24,11 +24,13 @@
     ((:header __header) (instance std_msgs::Header :init))
     ((:x_coord __x_coord) 0)
     ((:y_coord __y_coord) 0)
+    ((:heading __heading) 0.0)
     )
    (send-super :init)
    (setq _header __header)
    (setq _x_coord (round __x_coord))
    (setq _y_coord (round __y_coord))
+   (setq _heading (float __heading))
    self)
   (:header
    (&rest __header)
@@ -43,6 +45,9 @@
   (:y_coord
    (&optional __y_coord)
    (if __y_coord (setq _y_coord __y_coord)) _y_coord)
+  (:heading
+   (&optional __heading)
+   (if __heading (setq _heading __heading)) _heading)
   (:serialization-length
    ()
    (+
@@ -52,6 +57,8 @@
     1
     ;; int8 _y_coord
     1
+    ;; float32 _heading
+    4
     ))
   (:serialize
    (&optional strm)
@@ -63,6 +70,8 @@
        (write-byte _x_coord s)
      ;; int8 _y_coord
        (write-byte _y_coord s)
+     ;; float32 _heading
+       (sys::poke _heading (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -75,17 +84,19 @@
    ;; int8 _y_coord
      (setq _y_coord (sys::peek buf ptr- :char)) (incf ptr- 1)
      (if (> _y_coord 127) (setq _y_coord (- _y_coord 256)))
+   ;; float32 _heading
+     (setq _heading (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;;
    self)
   )
 
-(setf (get pyCAS::RobotStatus :md5sum-) "825108100d13b9d7ed8f8cb19cd32973")
+(setf (get pyCAS::RobotStatus :md5sum-) "47473fc5feb11cdaf545b221dbccb35d")
 (setf (get pyCAS::RobotStatus :datatype-) "pyCAS/RobotStatus")
 (setf (get pyCAS::RobotStatus :definition-)
       "Header header
 int8 x_coord
 int8 y_coord
-
+float32 heading
 ================================================================================
 MSG: std_msgs/Header
 # Standard metadata for higher-level stamped data types.
@@ -106,6 +117,6 @@ string frame_id
 
 
 
-(provide :pyCAS/RobotStatus "825108100d13b9d7ed8f8cb19cd32973")
+(provide :pyCAS/RobotStatus "47473fc5feb11cdaf545b221dbccb35d")
 
 

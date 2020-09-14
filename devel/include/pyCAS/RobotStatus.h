@@ -27,12 +27,14 @@ struct RobotStatus_
   RobotStatus_()
     : header()
     , x_coord(0)
-    , y_coord(0)  {
+    , y_coord(0)
+    , heading(0.0)  {
     }
   RobotStatus_(const ContainerAllocator& _alloc)
     : header(_alloc)
     , x_coord(0)
-    , y_coord(0)  {
+    , y_coord(0)
+    , heading(0.0)  {
   (void)_alloc;
     }
 
@@ -46,6 +48,9 @@ struct RobotStatus_
 
    typedef int8_t _y_coord_type;
   _y_coord_type y_coord;
+
+   typedef float _heading_type;
+  _heading_type heading;
 
 
 
@@ -78,7 +83,8 @@ bool operator==(const ::pyCAS::RobotStatus_<ContainerAllocator1> & lhs, const ::
 {
   return lhs.header == rhs.header &&
     lhs.x_coord == rhs.x_coord &&
-    lhs.y_coord == rhs.y_coord;
+    lhs.y_coord == rhs.y_coord &&
+    lhs.heading == rhs.heading;
 }
 
 template<typename ContainerAllocator1, typename ContainerAllocator2>
@@ -135,12 +141,12 @@ struct MD5Sum< ::pyCAS::RobotStatus_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "825108100d13b9d7ed8f8cb19cd32973";
+    return "47473fc5feb11cdaf545b221dbccb35d";
   }
 
   static const char* value(const ::pyCAS::RobotStatus_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x825108100d13b9d7ULL;
-  static const uint64_t static_value2 = 0xed8f8cb19cd32973ULL;
+  static const uint64_t static_value1 = 0x47473fc5feb11cdaULL;
+  static const uint64_t static_value2 = 0xf545b221dbccb35dULL;
 };
 
 template<class ContainerAllocator>
@@ -162,7 +168,7 @@ struct Definition< ::pyCAS::RobotStatus_<ContainerAllocator> >
     return "Header header\n"
 "int8 x_coord\n"
 "int8 y_coord\n"
-"\n"
+"float32 heading\n"
 "================================================================================\n"
 "MSG: std_msgs/Header\n"
 "# Standard metadata for higher-level stamped data types.\n"
@@ -199,6 +205,7 @@ namespace serialization
       stream.next(m.header);
       stream.next(m.x_coord);
       stream.next(m.y_coord);
+      stream.next(m.heading);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -224,6 +231,8 @@ struct Printer< ::pyCAS::RobotStatus_<ContainerAllocator> >
     Printer<int8_t>::stream(s, indent + "  ", v.x_coord);
     s << indent << "y_coord: ";
     Printer<int8_t>::stream(s, indent + "  ", v.y_coord);
+    s << indent << "heading: ";
+    Printer<float>::stream(s, indent + "  ", v.heading);
   }
 };
 

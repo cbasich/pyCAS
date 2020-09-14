@@ -55,8 +55,6 @@ class DeliveryBotDomain():
 
         used_features = open(os.path.join(PARAM_PATH, "used_features.txt")).readline().split(",")
 
-        # print(used_features)
-
         states, goals = set(), set()
 
         for s in S:
@@ -110,17 +108,14 @@ class DeliveryBotDomain():
                             else:
                                 self.kappa[tmp][a] = 3
             elif self.grid[x][y] == '.':
-                #print("These are the possible x and y pairs:\n\t\tx: {}\t\ty: {}".format(x,y))
                 states.add(s)
                 if s not in self.kappa.keys():
                     self.kappa[s] = {}
                     for a in self.actions:
                         self.kappa[s][a] = 3
             elif not self.grid[x][y] == 'X':
-                # TODO change self.grid[x][y] to (x,y) - will have to do some debugging 
                 if start == (x, y) or start == self.grid[x][y]:
                     self.init = s
-                # TODO change self.grid[x][y] to (x,y) - will have to do some debugging 
                 elif destination == (x, y) or destination == self.grid[x][y]:
                     goals.add(s)
                 states.add(s)

@@ -12,7 +12,8 @@ const _arrayDeserializer = _deserializer.Array;
 const _finder = _ros_msg_utils.Find;
 const _getByteLength = _ros_msg_utils.getByteLength;
 let RobotStatus = require('./RobotStatus.js');
-let DoorStatus = require('./DoorStatus.js');
+let ObstacleStatus = require('./ObstacleStatus.js');
+let Interaction = require('./Interaction.js');
 let std_msgs = _finder('std_msgs');
 
 //-----------------------------------------------------------
@@ -23,7 +24,8 @@ class SSPState {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.header = null;
       this.robot_status = null;
-      this.door_status = null;
+      this.obstacle_status = null;
+      this.interaction_status = null;
     }
     else {
       if (initObj.hasOwnProperty('header')) {
@@ -38,11 +40,17 @@ class SSPState {
       else {
         this.robot_status = new RobotStatus();
       }
-      if (initObj.hasOwnProperty('door_status')) {
-        this.door_status = initObj.door_status
+      if (initObj.hasOwnProperty('obstacle_status')) {
+        this.obstacle_status = initObj.obstacle_status
       }
       else {
-        this.door_status = new DoorStatus();
+        this.obstacle_status = new ObstacleStatus();
+      }
+      if (initObj.hasOwnProperty('interaction_status')) {
+        this.interaction_status = initObj.interaction_status
+      }
+      else {
+        this.interaction_status = new Interaction();
       }
     }
   }
@@ -53,8 +61,10 @@ class SSPState {
     bufferOffset = std_msgs.msg.Header.serialize(obj.header, buffer, bufferOffset);
     // Serialize message field [robot_status]
     bufferOffset = RobotStatus.serialize(obj.robot_status, buffer, bufferOffset);
-    // Serialize message field [door_status]
-    bufferOffset = DoorStatus.serialize(obj.door_status, buffer, bufferOffset);
+    // Serialize message field [obstacle_status]
+    bufferOffset = ObstacleStatus.serialize(obj.obstacle_status, buffer, bufferOffset);
+    // Serialize message field [interaction_status]
+    bufferOffset = Interaction.serialize(obj.interaction_status, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -66,8 +76,10 @@ class SSPState {
     data.header = std_msgs.msg.Header.deserialize(buffer, bufferOffset);
     // Deserialize message field [robot_status]
     data.robot_status = RobotStatus.deserialize(buffer, bufferOffset);
-    // Deserialize message field [door_status]
-    data.door_status = DoorStatus.deserialize(buffer, bufferOffset);
+    // Deserialize message field [obstacle_status]
+    data.obstacle_status = ObstacleStatus.deserialize(buffer, bufferOffset);
+    // Deserialize message field [interaction_status]
+    data.interaction_status = Interaction.deserialize(buffer, bufferOffset);
     return data;
   }
 
@@ -75,7 +87,8 @@ class SSPState {
     let length = 0;
     length += std_msgs.msg.Header.getMessageSize(object.header);
     length += RobotStatus.getMessageSize(object.robot_status);
-    length += DoorStatus.getMessageSize(object.door_status);
+    length += ObstacleStatus.getMessageSize(object.obstacle_status);
+    length += Interaction.getMessageSize(object.interaction_status);
     return length;
   }
 
@@ -86,7 +99,7 @@ class SSPState {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '56ecd69bc6e82bc6e4d2a495fb8db40b';
+    return 'ab0c5c9508d54efc9d177817d64efe0a';
   }
 
   static messageDefinition() {
@@ -94,7 +107,8 @@ class SSPState {
     return `
     Header header
     RobotStatus robot_status
-    DoorStatus door_status
+    ObstacleStatus obstacle_status
+    Interaction interaction_status
     ================================================================================
     MSG: std_msgs/Header
     # Standard metadata for higher-level stamped data types.
@@ -116,11 +130,17 @@ class SSPState {
     Header header
     int8 x_coord
     int8 y_coord
+    float32 heading
+    ================================================================================
+    MSG: pyCAS/ObstacleStatus
+    Header header
+    string obstacle_data
+    string door_status
     
     ================================================================================
-    MSG: pyCAS/DoorStatus
+    MSG: pyCAS/Interaction
     Header header
-    string door_type
+    string status
     
     `;
   }
@@ -145,11 +165,18 @@ class SSPState {
       resolved.robot_status = new RobotStatus()
     }
 
-    if (msg.door_status !== undefined) {
-      resolved.door_status = DoorStatus.Resolve(msg.door_status)
+    if (msg.obstacle_status !== undefined) {
+      resolved.obstacle_status = ObstacleStatus.Resolve(msg.obstacle_status)
     }
     else {
-      resolved.door_status = new DoorStatus()
+      resolved.obstacle_status = new ObstacleStatus()
+    }
+
+    if (msg.interaction_status !== undefined) {
+      resolved.interaction_status = Interaction.Resolve(msg.interaction_status)
+    }
+    else {
+      resolved.interaction_status = new Interaction()
     }
 
     return resolved;

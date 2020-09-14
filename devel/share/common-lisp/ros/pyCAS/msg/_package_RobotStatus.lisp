@@ -5,4 +5,6 @@
           X_COORD
           Y_COORD-VAL
           Y_COORD
+          HEADING-VAL
+          HEADING
 ))

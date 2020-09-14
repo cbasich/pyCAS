@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os, sys, time, random, pickle
 
 import numpy as np
@@ -6,6 +7,7 @@ import pandas as pd
 from IPython import embed
 
 current_file_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(current_file_path, '..'))
 sys.path.append(os.path.join(current_file_path, '..', '..'))
 
 from scripts.utils import build_gam
@@ -29,8 +31,13 @@ def build_gams():
     """
 
     # Build and save the gam and gam_map for the action 'open'
+    print("Trying to open feedback data ")
+    print(current_file_path)
+    print(FEEDBACK_PATH)
+    print(pd.read_csv(os.path.join(FEEDBACK_PATH, 'open.data')))
+    # embed()
     open_gam, open_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'open.data')))
-
+    print(open_gam)
     gam_map_file = open(os.path.join(PARAM_PATH, 'open_gam_map.pkl'), mode = 'wb')
     pickle.dump(open_gam_map, gam_map_file, protocol=pickle.HIGHEST_PROTOCOL)
     gam_map_file.close()
@@ -61,6 +68,7 @@ def load_gams():
         notes:
             Pickled objects must be store in the PARAM directory to be loaded properly.
     """
+    # embed()
     cross_GAM = pickle.load( open( os.path.join(PARAM_PATH, 'cross_gam.pkl'), mode='rb'), encoding='bytes')
     open_GAM = pickle.load( open( os.path.join(PARAM_PATH, 'open_gam.pkl'), mode='rb'), encoding='bytes')
 
@@ -74,6 +82,7 @@ class CampusDeliveryBotHelper():
         self.DM = DM
         self.map_info = self.DM.map_info
         try:
+            print("Info[domain_helper.init] Building GAMs...")
             build_gams()
         except Exception:
             print("Failed to build GAMs, using previously stored models.")

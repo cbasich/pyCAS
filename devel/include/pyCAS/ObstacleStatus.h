@@ -26,11 +26,13 @@ struct ObstacleStatus_
 
   ObstacleStatus_()
     : header()
-    , obstacle_data()  {
+    , obstacle_data()
+    , door_status()  {
     }
   ObstacleStatus_(const ContainerAllocator& _alloc)
     : header(_alloc)
-    , obstacle_data(_alloc)  {
+    , obstacle_data(_alloc)
+    , door_status(_alloc)  {
   (void)_alloc;
     }
 
@@ -41,6 +43,9 @@ struct ObstacleStatus_
 
    typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _obstacle_data_type;
   _obstacle_data_type obstacle_data;
+
+   typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _door_status_type;
+  _door_status_type door_status;
 
 
 
@@ -72,7 +77,8 @@ template<typename ContainerAllocator1, typename ContainerAllocator2>
 bool operator==(const ::pyCAS::ObstacleStatus_<ContainerAllocator1> & lhs, const ::pyCAS::ObstacleStatus_<ContainerAllocator2> & rhs)
 {
   return lhs.header == rhs.header &&
-    lhs.obstacle_data == rhs.obstacle_data;
+    lhs.obstacle_data == rhs.obstacle_data &&
+    lhs.door_status == rhs.door_status;
 }
 
 template<typename ContainerAllocator1, typename ContainerAllocator2>
@@ -129,12 +135,12 @@ struct MD5Sum< ::pyCAS::ObstacleStatus_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "01f13ac50bca8d8a91c4495d3ee892ae";
+    return "9e75ab8483cc66b6625903b6ddb179ba";
   }
 
   static const char* value(const ::pyCAS::ObstacleStatus_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x01f13ac50bca8d8aULL;
-  static const uint64_t static_value2 = 0x91c4495d3ee892aeULL;
+  static const uint64_t static_value1 = 0x9e75ab8483cc66b6ULL;
+  static const uint64_t static_value2 = 0x625903b6ddb179baULL;
 };
 
 template<class ContainerAllocator>
@@ -155,6 +161,7 @@ struct Definition< ::pyCAS::ObstacleStatus_<ContainerAllocator> >
   {
     return "Header header\n"
 "string obstacle_data\n"
+"string door_status\n"
 "\n"
 "================================================================================\n"
 "MSG: std_msgs/Header\n"
@@ -191,6 +198,7 @@ namespace serialization
     {
       stream.next(m.header);
       stream.next(m.obstacle_data);
+      stream.next(m.door_status);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -214,6 +222,8 @@ struct Printer< ::pyCAS::ObstacleStatus_<ContainerAllocator> >
     Printer< ::std_msgs::Header_<ContainerAllocator> >::stream(s, indent + "  ", v.header);
     s << indent << "obstacle_data: ";
     Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.obstacle_data);
+    s << indent << "door_status: ";
+    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.door_status);
   }
 };
 

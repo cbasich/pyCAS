@@ -6,6 +6,15 @@ import pandas as pd
 from pygam.terms import Term, TermList
 from pygam import GAM, te, s, f, l
 
+
+current_file_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(current_file_path, '..'))
+
+OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB')
+FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'feedback')
+PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'params')
+MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
+
 def FVI(mdp, eps = 0.001):
     """
         This is a fast value iteration using vectorized operations only.
@@ -73,6 +82,7 @@ def build_gam(df, distr='binomial', link='logit', input_classifier=None):
     """
 
     # First get all of the features (Xv) and convert into the dataframe identifiers
+    print("Info[utils.build_gam] Entering build GAMs...")
     Xv = df.values[:,:-1]
     X = np.unique(df.values[:,0:1], return_inverse=True)[1].reshape(-1,1)
     for i in range(1, len(df.values[0])-1):
@@ -101,3 +111,35 @@ def build_gam(df, distr='binomial', link='logit', input_classifier=None):
     gam = GAM(terms, distribution=distr, link=link).fit(X,y)
 
     return gam, gam_map
+
+def init_cross_data():
+    with open( os.path.join(FEEDBACK_DATA_PATH, 'cross.data'), 'a+') as f:
+        f.write('level,region,obstacle,feedback')
+        for level in ['1','2']:
+            for region in ['r1','r2']:
+                for obstacle in ['empty', 'light', 'heavy']:
+                    for feedback in ['yes','no']:
+                
+                        entry = level + "," + region + "," + obstacle + "," + feedback
+                        f.write("\n" + entry)
+
+
+def init_full_cross_data():
+    with open( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data'), 'a+') as f:
+        f.write('level,region,obstacle,visibility,streettype,feedback')
+
+
+def init_open_data():
+    with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
+        f.write('level,region,obstacle,feedback')
+        for level in ['1','2']:
+            for region in ['b1','b2','b3']:
+                for obstacle in ['door']:
+                    for feedback in ['yes','no']:
+                        entry = level + "," + region + "," + obstacle + "," + feedback
+                        f.write("\n" + entry)
+
+
+def init_full_open_data():
+    with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'a+') as f:
+        f.write('level,region,obstacle,doorsize,doorcolor,doortype,feedback')

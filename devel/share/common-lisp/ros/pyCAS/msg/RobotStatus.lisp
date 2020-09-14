@@ -21,7 +21,12 @@
     :reader y_coord
     :initarg :y_coord
     :type cl:fixnum
-    :initform 0))
+    :initform 0)
+   (heading
+    :reader heading
+    :initarg :heading
+    :type cl:float
+    :initform 0.0))
 )
 
 (cl:defclass RobotStatus (<RobotStatus>)
@@ -46,6 +51,11 @@
 (cl:defmethod y_coord-val ((m <RobotStatus>))
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader pyCAS-msg:y_coord-val is deprecated.  Use pyCAS-msg:y_coord instead.")
   (y_coord m))
+
+(cl:ensure-generic-function 'heading-val :lambda-list '(m))
+(cl:defmethod heading-val ((m <RobotStatus>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader pyCAS-msg:heading-val is deprecated.  Use pyCAS-msg:heading instead.")
+  (heading m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <RobotStatus>) ostream)
   "Serializes a message object of type '<RobotStatus>"
   (roslisp-msg-protocol:serialize (cl:slot-value msg 'header) ostream)
@@ -55,6 +65,11 @@
   (cl:let* ((signed (cl:slot-value msg 'y_coord)) (unsigned (cl:if (cl:< signed 0) (cl:+ signed 256) signed)))
     (cl:write-byte (cl:ldb (cl:byte 8 0) unsigned) ostream)
     )
+  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'heading))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
 )
 (cl:defmethod roslisp-msg-protocol:deserialize ((msg <RobotStatus>) istream)
   "Deserializes a message object of type '<RobotStatus>"
@@ -65,6 +80,12 @@
     (cl:let ((unsigned 0))
       (cl:setf (cl:ldb (cl:byte 8 0) unsigned) (cl:read-byte istream))
       (cl:setf (cl:slot-value msg 'y_coord) (cl:if (cl:< unsigned 128) unsigned (cl:- unsigned 256))))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'heading) (roslisp-utils:decode-single-float-bits bits)))
   msg
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<RobotStatus>)))
@@ -75,21 +96,22 @@
   "pyCAS/RobotStatus")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<RobotStatus>)))
   "Returns md5sum for a message object of type '<RobotStatus>"
-  "825108100d13b9d7ed8f8cb19cd32973")
+  "47473fc5feb11cdaf545b221dbccb35d")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'RobotStatus)))
   "Returns md5sum for a message object of type 'RobotStatus"
-  "825108100d13b9d7ed8f8cb19cd32973")
+  "47473fc5feb11cdaf545b221dbccb35d")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<RobotStatus>)))
   "Returns full string definition for message of type '<RobotStatus>"
-  (cl:format cl:nil "Header header~%int8 x_coord~%int8 y_coord~%~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%string frame_id~%~%~%"))
+  (cl:format cl:nil "Header header~%int8 x_coord~%int8 y_coord~%float32 heading~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%string frame_id~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'RobotStatus)))
   "Returns full string definition for message of type 'RobotStatus"
-  (cl:format cl:nil "Header header~%int8 x_coord~%int8 y_coord~%~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%string frame_id~%~%~%"))
+  (cl:format cl:nil "Header header~%int8 x_coord~%int8 y_coord~%float32 heading~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%string frame_id~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <RobotStatus>))
   (cl:+ 0
      (roslisp-msg-protocol:serialization-length (cl:slot-value msg 'header))
      1
      1
+     4
 ))
 (cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <RobotStatus>))
   "Converts a ROS message object to a list"
@@ -97,4 +119,5 @@
     (cl:cons ':header (header msg))
     (cl:cons ':x_coord (x_coord msg))
     (cl:cons ':y_coord (y_coord msg))
+    (cl:cons ':heading (heading msg))
 ))

@@ -17,16 +17,15 @@ def odometry_message_callback(message):
 def get_location():
     # add one to account for the robot starting at (1, 1) and not (0, 0) on the map
     # need to convert odom data (in meters) to states (in feet)
-    current_x = int(odometry_message.pose.pose.position.x*3.281) + 1
-    current_y = int(odometry_message.pose.pose.position.y*3.281) + 1
+    current_x = abs(int(round(odometry_message.pose.pose.position.x*3.281))) + 1
+    current_y = abs(int(round(odometry_message.pose.pose.position.y*3.281))) + 1
     return current_x, current_y
 
 def get_orientation():
     # the orientation in quaternion
     quat = [odometry_message.pose.pose.orientation.x, odometry_message.pose.pose.orientation.y, odometry_message.pose.pose.orientation.z, odometry_message.pose.pose.orientation.w]
+    # the heading is the yaw which is what we want for robot face
     (_, _, yaw) = euler_from_quaternion(quat)
-    # the heading is the yaw which is what we want
-    # TODO find a way to convert this to CAS state 
     return yaw
 
 
@@ -48,8 +47,6 @@ def main():
             message.x_coord = current_x
             message.y_coord = current_y
             message.heading = yaw
-            # TODO will have to add heading into the message 
-            # publish the RobotStatus message 
             publisher.publish(message)
 
         rate.sleep()

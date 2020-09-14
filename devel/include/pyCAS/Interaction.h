@@ -26,11 +26,11 @@ struct Interaction_
 
   Interaction_()
     : header()
-    , action()  {
+    , status()  {
     }
   Interaction_(const ContainerAllocator& _alloc)
     : header(_alloc)
-    , action(_alloc)  {
+    , status(_alloc)  {
   (void)_alloc;
     }
 
@@ -39,8 +39,8 @@ struct Interaction_
    typedef  ::std_msgs::Header_<ContainerAllocator>  _header_type;
   _header_type header;
 
-   typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _action_type;
-  _action_type action;
+   typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _status_type;
+  _status_type status;
 
 
 
@@ -72,7 +72,7 @@ template<typename ContainerAllocator1, typename ContainerAllocator2>
 bool operator==(const ::pyCAS::Interaction_<ContainerAllocator1> & lhs, const ::pyCAS::Interaction_<ContainerAllocator2> & rhs)
 {
   return lhs.header == rhs.header &&
-    lhs.action == rhs.action;
+    lhs.status == rhs.status;
 }
 
 template<typename ContainerAllocator1, typename ContainerAllocator2>
@@ -129,12 +129,12 @@ struct MD5Sum< ::pyCAS::Interaction_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "b3f74ddb4be40919530023baf4517550";
+    return "5af2dbd9f0f51a7e50dfafa69867ed29";
   }
 
   static const char* value(const ::pyCAS::Interaction_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xb3f74ddb4be40919ULL;
-  static const uint64_t static_value2 = 0x530023baf4517550ULL;
+  static const uint64_t static_value1 = 0x5af2dbd9f0f51a7eULL;
+  static const uint64_t static_value2 = 0x50dfafa69867ed29ULL;
 };
 
 template<class ContainerAllocator>
@@ -154,7 +154,7 @@ struct Definition< ::pyCAS::Interaction_<ContainerAllocator> >
   static const char* value()
   {
     return "Header header\n"
-"string action\n"
+"string status\n"
 "\n"
 "================================================================================\n"
 "MSG: std_msgs/Header\n"
@@ -190,7 +190,7 @@ namespace serialization
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
       stream.next(m.header);
-      stream.next(m.action);
+      stream.next(m.status);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -212,8 +212,8 @@ struct Printer< ::pyCAS::Interaction_<ContainerAllocator> >
     s << indent << "header: ";
     s << std::endl;
     Printer< ::std_msgs::Header_<ContainerAllocator> >::stream(s, indent + "  ", v.header);
-    s << indent << "action: ";
-    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.action);
+    s << indent << "status: ";
+    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.status);
   }
 };
 

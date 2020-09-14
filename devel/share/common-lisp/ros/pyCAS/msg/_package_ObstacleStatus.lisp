@@ -3,4 +3,6 @@
           HEADER
           OBSTACLE_DATA-VAL
           OBSTACLE_DATA
+          DOOR_STATUS-VAL
+          DOOR_STATUS
 ))

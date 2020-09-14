@@ -1,3 +1,4 @@
 Header header
 RobotStatus robot_status
 ObstacleStatus obstacle_status
+Interaction interaction_status
