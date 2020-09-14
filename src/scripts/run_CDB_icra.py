@@ -174,12 +174,12 @@ def execute_policy(CAS, M, i, interact, verbose=True):
 
             feedback = None
             if action[1] == 1 or action[1] == 2:
-                feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))], CAS.DM.tod, interact=interact)
+                feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))], CAS.DM.timeofday, interact=interact)
                 if j == M-1:
                     f1 = [action[1]] + [CAS.DM.helper.get_state_feature_value(state[0], f) 
                             for f in used_features if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
-                    if f1[2] == 'crosswalk':
-                        f1[2] = state[0][3]
+                    # if f1[2] == 'crosswalk':
+                    #     f1[2] = state[0][3]
 
                     f2 = [CAS.DM.helper.get_state_feature_value(state[0], f) for f in unused_features 
                           if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
@@ -207,7 +207,7 @@ def execute_policy(CAS, M, i, interact, verbose=True):
     return total_returns
 
 
-def interfaceWithHuman(state, action, info, tod, interact=True):
+def interfaceWithHuman(state, action, info, timeofday, interact=True):
     feedback = None
 
     if interact:
@@ -232,7 +232,7 @@ def interfaceWithHuman(state, action, info, tod, interact=True):
 
         elif info['obstacle'] == 'crosswalk':
             if state[3] == 'empty' or (info['visibility'] == 'high' and state[3] == 'light'):
-                if tod in info['pedestrians']:
+                if timeofday in info['pedestrians']:
                     feedback = 'no'
                 else:
                     feedback = 'yes'
@@ -298,7 +298,7 @@ def init_cross_data():
 
 def init_full_cross_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data'), 'a+') as f:
-        f.write('level,region,obstacle,visibility,streettype,tod,feedback')
+        f.write('level,region,obstacle,visibility,streettype,timeofday,feedback')
 
 
 def init_open_data():
@@ -314,7 +314,7 @@ def init_open_data():
 
 def init_full_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'a+') as f:
-        f.write('level,region,obstacle,doorsize,doorcolor,doortype,tod,feedback')
+        f.write('level,region,obstacle,doorsize,doorcolor,doortype,timeofday,feedback')
 
 
 def process_results(CAS):
