@@ -58,40 +58,47 @@ def execute(message):
     start_x = ssp_state_message.robot_status.x_coord
     start_y = ssp_state_message.robot_status.y_coord
 
+    start = (start_x, start_y)
     goal = (message.goal_x, message.goal_y)
-    # TODO state map of states to indeeces 
-    # return policy and state map
-    # policy is state index : action 
-    policy, state_map = task_handler.get_solution(grid_map, (start_x, start_y), goal)
+
+    policy, state_map = task_handler.get_solution(grid_map, start, goal)
     rospy.loginfo("Info[CDB_execution_node.instantiate]: Retrieved solution...")
     
     current_state = None
     
-    while not task_handler.is_goal(current_state, task_data):
+    while not task_handler.is_goal(current_state, goal):
         # state is in format ((x, y, theta), obstacle_status)
         new_state = task_handler.get_state(ssp_state_message)
         if new_state != current_state:
             current_state = new_state
             state_index = state_map[current_state]
             current_action = policy[state_index]
-            # something along this line to get the next state 
-            target_state = current_state + current_action
-            
+            # something along this line to get the next state
+            # convert foot to meters * 0.3048
+            print(current_state)
+            print(current_action)
+            before_transform_target_state = ((current_state[0][0] + current_action[0][0]), (current_state[0][1] + current_action[0][1]))
+            print(before_transform_target_state)
+            is_state_index = state_map[before_transform_target_state]
+            print(is_state_index)
+            target_state = (-1*((current_state[0][0]-1)*0.3048 + current_action[0][0]*0.3048), -1*((current_state[0][1]-1)*0.3048 + current_action[0][1]*0.3048))
             # if there is an obstacle there will be an obstacle type published. if not, None will be published
             # 0 human 
             # 1 ask permission
             # 2 just act 
-            if ssp_state_message.obstacle_status.obstacle_type: 
+            if ssp_state_message.obstacle_status.obstacle_data != 'None': 
                 # TODO human interaction handling 
                 pass
             else: 
                 x = target_state[0]
                 y = target_state[1]
+                print(target_state)
                 next_location = MoveBaseGoal()
                 next_location.target_pose.header.frame_id = 'map'
                 next_location.target_pose.header.stamp = rospy.Time.now()
                 next_location.target_pose.pose = Pose(Point(x, y, 0), Quaternion(0, 0, 0, 1))
-
+                print(next_location)
+                print('----------------------------------------------')
                 NAVIGATION_SERVICE.send_goal(next_location)
 
                 status = NAVIGATION_SERVICE.wait_for_result()

@@ -15,8 +15,10 @@ def odometry_message_callback(message):
 
 # TODO: Implement this function
 def get_location():
-    current_x = int(odometry_message.pose.pose.position.x)
-    current_y = int(odometry_message.pose.pose.position.y)
+    # add one to account for the robot starting at (1, 1) and not (0, 0) on the map
+    # need to convert odom data (in meters) to states (in feet)
+    current_x = int(odometry_message.pose.pose.position.x*3.281) + 1
+    current_y = int(odometry_message.pose.pose.position.y*3.281) + 1
     return current_x, current_y
 
 def get_orientation():

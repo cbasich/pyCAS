@@ -16,7 +16,10 @@ from models.CDB.competence_aware_system import CAS
 class CASTaskHandler(object):
     def get_state(self, message):
         # have to offset the odom data from the origin: [-0.45, -1.9, 0.0]
-        return ((message.robot_status.x_coord, message.robot_status.y_coord), message.obstacle_status)
+        if message.obstacle_status.obstacle_data != 'None':
+            return ((message.robot_status.x_coord, message.robot_status.y_coord), message.obstacle_status.obstacle_data)
+        else:
+            return ((message.robot_status.x_coord, message.robot_status.y_coord), 3)
 
     def is_start(self, odom_x_coord, odom_y_coord):
         # have to offset the odom data from the origin: [-0.45, -1.9, 0.0]
@@ -32,6 +35,7 @@ class CASTaskHandler(object):
     # start = task_handler.get_state_from_message(ssp_state_message)
 
         rospy.loginfo("Info[task_handler.CASTaskHandler.get_solution]: Instantiating the domain model...")
+        # changed DM to accept start and goal of (x, y) instead of text 'S' and 'G'
         DM = DeliveryBotDomain(world_map, start, goal)
 
         rospy.loginfo("Info[task_handler.CASTaskHandler.get_solution]: Instantiating the autonomy model...")

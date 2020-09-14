@@ -20,7 +20,8 @@ def get_door_type():
 
 def get_obstacle_status(obstacle_map):
     # set a tolerance to say when we are in the area of an obstacle 
-    distance_tolerance = 1.0
+    # NEED TO CONVERT EVERYTHING INTO METERS
+    distance_tolerance = 0.15
     obstacle_location = None
     obstacle_data = 'None'
 
@@ -28,8 +29,8 @@ def get_obstacle_status(obstacle_map):
         tmp = obstacle.strip('(')
         tmp_2 = tmp.strip(')')
         obstacle_strs = tmp_2.split(',')
-        obstacle_x = float(obstacle_strs[0])
-        obstacle_y = float(obstacle_strs[1])
+        obstacle_x = (float(obstacle_strs[0])-1) *0.3048
+        obstacle_y = (float(obstacle_strs[1]) -1 ) * 0.3048
 
         current_location_pose = odometry_message.pose.pose.position
 

@@ -181,8 +181,8 @@ def execute_policy(CAS, M, i, interact, verbose=True):
                 if j == M-1:
                     f1 = [action[1]] + [CAS.DM.helper.get_state_feature_value(state[0], f) for f in used_features
                             if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
-                    if f1[2] == 'crosswalk':
-                        f1[2] = state[0][3]
+                    # if f1[2] == 'crosswalk':
+                    #     f1[2] = state[0][3]
 
                     f2 = [CAS.DM.helper.get_state_feature_value(state[0], f) for f in unused_features 
                           if CAS.DM.helper.get_state_feature_value(state[0], f) != None]

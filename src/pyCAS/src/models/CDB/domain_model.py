@@ -32,11 +32,8 @@ class DeliveryBotDomain():
         self.grid = read_gw_map(os.path.join(MAP_PATH, filename))
         with open(os.path.join(MAP_PATH, 'map_info.json')) as F:
             self.map_info = json.load(F)
-        print(self.grid)
         self.rows = len(self.grid)
         self.cols = len(self.grid[0])
-        print(self.rows, self.cols)
-        print(filename)
         self.kappa = {}
         try:
             self.kappa = pickle.load( open( os.path.join(PARAM_PATH,'kappa.pkl'), mode='rb'), encoding='bytes')
@@ -121,9 +118,10 @@ class DeliveryBotDomain():
                         self.kappa[s][a] = 3
             elif not self.grid[x][y] == 'X':
                 # TODO change self.grid[x][y] to (x,y) - will have to do some debugging 
-                if start == self.grid[x][y]:
+                if start == (x, y):
                     self.init = s
-                elif destination == self.grid[x][y]:
+                # TODO change self.grid[x][y] to (x,y) - will have to do some debugging 
+                elif destination == (x, y):
                     goals.add(s)
                 states.add(s)
                 if s not in self.kappa.keys():

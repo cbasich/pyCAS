@@ -51,3 +51,7 @@ level,region,obstacle,doorsize,doorcolor,doortype,feedback
 2,b1,door,small,brown,push,yes
 2,b1,door,medium,black,push,yes
 2,b1,door,small,brown,pull,no
+1,door,brown,pull,no
+2,door,brown,pull,no
+1,door,brown,pull,no
+2,door,brown,pull,no
