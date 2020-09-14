@@ -47,6 +47,8 @@ class DeliveryBotDomain():
 
         self.actions = DIRECTIONS + ['cross', 'open', 'wait']
         self.states, self.goals = self.generate_states(start, destination)
+        # embed()
+        # quit()
         self.time_of_day = np.arange(8,17)[np.random.randint(9)]
         
         self.transitions = self.generate_transitions()

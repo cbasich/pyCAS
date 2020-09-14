@@ -88,7 +88,7 @@ class CampusDeliveryBotHelper():
             returns:
                 True if the action is being taken at the optimal level in state. 
         """
-        state = state[0]        # This is a HACK. TODO: Remove when level matters for states
+        state = state[0]        # This is a HACK. timeofdayO: Remove when level matters for states
         level = action[1]
 
         if len(state) < 3:
@@ -164,8 +164,8 @@ class CampusDeliveryBotHelper():
                 The feature *value* (i.e. 'heavy', 'high') of the state, or None if the state
                 does not contain this feature.
         """
-        if feature == 'tod':
-            return self.DM.tod
+        if feature == 'timeofday':
+            return self.DM.timeofday
         try:
             return self.map_info[str((state[0], state[1]))][feature]
         except Exception:
