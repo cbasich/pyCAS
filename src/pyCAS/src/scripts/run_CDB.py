@@ -33,6 +33,14 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
     if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data') ):
         init_full_open_data()
 
+    # check the start and goal to see if it is a tuple
+    if len(start) > 1:
+        # start must be a tuple of x, y coords
+        tmp = start.strip('(').strip(')').split(',')
+        start =  (int(tmp[0]), int(tmp[1]))
+    if len(end) > 1:
+        tmp = end.strip('(').strip(')').split(',')
+        end = (int(tmp[0]), int(tmp[1]))
     all_level_optimality = []
     try:
         with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_alo.txt'), mode = 'r+') as all_level_optimality_file:

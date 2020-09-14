@@ -75,8 +75,16 @@ def execute(message):
             current_action = policy[state_index]
             # something along this line to get the next state
             # convert foot to meters * 0.3048
+            print("Current State : ")
             print(current_state)
+            print("Current Action : ")
             print(current_action)
+            print("State Index : ")
+            print(state_index)
+            print("State Map : ")
+            print(state_map)
+            print("Policy : ")
+            print(policy)
             before_transform_target_state = ((current_state[0][0] + current_action[0][0]), (current_state[0][1] + current_action[0][1]))
             print(before_transform_target_state)
             is_state_index = state_map[before_transform_target_state]

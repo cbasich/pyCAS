@@ -118,10 +118,10 @@ class DeliveryBotDomain():
                         self.kappa[s][a] = 3
             elif not self.grid[x][y] == 'X':
                 # TODO change self.grid[x][y] to (x,y) - will have to do some debugging 
-                if start == (x, y):
+                if start == (x, y) or start == self.grid[x][y]:
                     self.init = s
                 # TODO change self.grid[x][y] to (x,y) - will have to do some debugging 
-                elif destination == (x, y):
+                elif destination == (x, y) or destination == self.grid[x][y]:
                     goals.add(s)
                 states.add(s)
                 if s not in self.kappa.keys():
