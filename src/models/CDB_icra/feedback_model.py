@@ -219,6 +219,7 @@ class FeedbackModel():
         _corr = pd.get_dummies( D[np.append(unused_features, 'feedback')] ).corr()
         _corr = _corr[[c for c in _corr.columns.values if 'feedback' in c]]
         _corr = _corr.drop([c for c in _corr.axes[0].values if 'feedback' in c], axis = 0)
+        # embed()
 
         # Third, build the discrimantor matrix for each feature or pair
         # of features present in the correlation matrix. Right now we are simply

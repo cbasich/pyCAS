@@ -47,9 +47,8 @@ class DeliveryBotDomain():
 
         self.actions = DIRECTIONS + ['cross', 'open', 'wait']
         self.states, self.goals = self.generate_states(start, destination)
-        # embed()
-        # quit()
-        self.time_of_day = np.arange(8,17)[np.random.randint(9)]
+
+        self.time_of_day = np.random.choice(['morning', 'midday', 'afternoon'])
         
         self.transitions = self.generate_transitions()
         self.costs = self.generate_costs()
@@ -70,27 +69,15 @@ class DeliveryBotDomain():
                 if 'visibility' in used_features and 'streettype' in used_features:
                     f1 = self.map_info[str((x,y))]['visibility']
                     f2 = self.map_info[str((x,y))]['streettype']
-                    if 'timeofday' in used_features:
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), [self.timeofday], ['empty', 'light', 'busy'], [f1], [f2]))
-                    else:
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], [f1], [f2]))
+                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], [f1], [f2]))
                 elif 'visibility' in used_features:
                     f = self.map_info[str((x,y))]['visibility']
-                    if 'timeofday' in used_features:
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), [self.timeofday], ['empty', 'light', 'busy'], [f]))
-                    else:
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], [f]))
+                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], [f]))
                 elif 'streettype' in used_features:
                     f = self.map_info[str((x,y))]['streettype']
-                    if 'timeofday' in used_features:
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), [self.timeofday], ['empty', 'light', 'busy'], [f]))
-                    else:
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], [f]))
+                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy'], [f]))
                 else:
-                    if 'timeofday' in used_features:
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), [self.timeofday], ['empty', 'light', 'busy']))
-                    else:
-                        tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy']))
+                    tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['empty', 'light', 'busy']))
 
                 states = states.union(tmp_states)
                 for tmp in tmp_states:
@@ -161,7 +148,7 @@ class DeliveryBotDomain():
         for s, state in enumerate(self.states):
             for a, action in enumerate(self.actions):
 
-                if state in self.goals: # Check for goal condition to self-loop
+                if state in self.goals:
                     T[s][a][s] = 1.0
 
                 for sp, statePrime in enumerate(self.states):

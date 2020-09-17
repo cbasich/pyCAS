@@ -3,6 +3,8 @@ import os, sys, pickle
 import numpy as np
 import pandas as pd
 
+from IPython import embed
+
 from pygam.terms import Term, TermList
 from pygam import GAM, te, s, f, l
 
@@ -67,13 +69,14 @@ def build_gam(df, distr='binomial', link='logit', input_classifier=None):
             values that the GAM requires.
 
     """
-
     # First get all of the features (Xv) and convert into the dataframe identifiers
     Xv = df.values[:,:-1]
     X = np.unique(df.values[:,0:1], return_inverse=True)[1].reshape(-1,1)
     for i in range(1, len(df.values[0])-1):
-        X = np.concatenate((X, np.unique(df.values[:,i:i+1], return_inverse=True)[1].reshape(-1,1) ), axis=1)
-
+        if isinstance(df.values[:,i:i+1][0][0], float):
+            X = np.concatenate((X, df.values[:, i:i+1].reshape(-1,1)), axis=1)
+        else:
+            X = np.concatenate((X, np.unique(df.values[:,i:i+1], return_inverse=True)[1].reshape(-1,1) ), axis=1)
     # Second get the labels and convert to the dataframe identifiers
     y = np.unique(df.values[:,-1], return_inverse=True)[1]
 
@@ -86,11 +89,12 @@ def build_gam(df, distr='binomial', link='logit', input_classifier=None):
             except Exception:           # Deal with shaping issues
                 X = X.reshape(-1,1)
                 gam_map[key] = X[:,i][np.where(Xv[:,i] == key)[0]][0]
-
     terms = s(0)
     for i in range(df.shape[1]-1):
         for j in range(i+1, df.shape[1]-1):
             terms += te(i,j)
+
+    # embed()
 
     # Build the GAM now. By default use a Logistic GAM.
     # Use gridsearch to determine optimal parameters.

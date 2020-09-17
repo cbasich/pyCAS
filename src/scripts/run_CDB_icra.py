@@ -178,8 +178,8 @@ def execute_policy(CAS, M, i, interact, verbose=True):
                 if j == M-1:
                     f1 = [action[1]] + [CAS.DM.helper.get_state_feature_value(state[0], f) 
                             for f in used_features if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
-                    # if f1[2] == 'crosswalk':
-                    #     f1[2] = state[0][3]
+                    if f1[2] == 'crosswalk':
+                        f1[2] = state[0][3]
 
                     f2 = [CAS.DM.helper.get_state_feature_value(state[0], f) for f in unused_features 
                           if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
@@ -225,7 +225,8 @@ def interfaceWithHuman(state, action, info, timeofday, interact=True):
             if info['doortype'] == 'pull':
                 feedback = 'no'
             else:
-                if info['doorsize'] == 'small' or (info['doorsize'] == 'medium' and info['region'] == 'b1'):
+                if ((info['doorheight'] * info['doorwidth'] < 17) 
+                 or (17 <= info['doorheight'] * info['doorwidth'] <= 22 and info['region'] == 'b1')):
                     feedback = 'yes'
                 else:
                     feedback = 'no'
@@ -292,7 +293,7 @@ def init_cross_data():
             for region in ['r1','r2']:
                 for obstacle in ['empty', 'light', 'busy']:
                     for feedback in ['yes','no']:
-                        entry = level + "," + region + "," + obstacle + "," + feedback
+                        entry = ",".join([level,region,obstacle,feedback])
                         f.write("\n" + entry)
 
 
@@ -308,13 +309,13 @@ def init_open_data():
             for region in ['b1','b2','b3']:
                 for obstacle in ['door']:
                     for feedback in ['yes','no']:
-                        entry = level + "," + region + "," + obstacle + "," + feedback
+                        entry = ",".join([level,region,obstacle,feedback])
                         f.write("\n" + entry)
 
 
 def init_full_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'a+') as f:
-        f.write('level,region,obstacle,doorsize,doorcolor,doortype,timeofday,feedback')
+        f.write('level,region,obstacle,doorheight,doorwidth,doorcolor,doortype,timeofday,feedback')
 
 
 def process_results(CAS):
