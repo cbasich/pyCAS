@@ -81,16 +81,16 @@ def execute(message):
     while not task_handler.is_goal(current_state, goal):
         # state is in format ((x, y, theta), obstacle_status)
         new_state = task_handler.get_state(ssp_state_message)
-        print("This is new state : ")
-        print(new_state)
-        print("This is current state : ")
-        print(current_state)
+        # print("This is new state : ")
+        # print(new_state)
+        # print("This is current state : ")
+        # print(current_state)
         if new_state != current_state:
             current_state = new_state
             state_index = state_map[current_state]
             current_action = policy[state_index]
-            print("Current action")
-            print(current_action)
+            # print("Current action")
+            # print(current_action)
             
             # for debug
             # print(current_state)
@@ -103,7 +103,8 @@ def execute(message):
                 # LoA 0: Human does the action
                 if current_action[1] == 0:
                     rospy.loginfo("Level 0 Autonomy: Will wait for human interference to remove obstacle... ")
-                    check = input("Have you removed the obstacle? [y/n]: ")
+                    response = input("Have you removed the obstacle? [y/n]: ")
+                    # check = input("Have you removed the obstacle? [y/n]: ")
                     # while check[0] !=  'y' or check[0] != 'Y':
                     #     rospy.loginfo("Waiting for {} ....".format(wait_duration))
                     #     rospy.sleep(wait_duration)
@@ -164,8 +165,8 @@ def execute(message):
             # elif not response:
             else: 
                 target_state = (current_state[0][0] + current_action[0][0], current_state[0][1] + current_action[0][1])
-                print("This is target state: ")
-                print(target_state)
+                # print("This is target state: ")
+                # print(target_state)
                 target_pose = task_handler.get_pose(target_state)
                 x = target_pose[0]
                 y = target_pose[1]
@@ -174,8 +175,8 @@ def execute(message):
                 next_location.target_pose.header.frame_id = 'map'
                 next_location.target_pose.header.stamp = rospy.Time.now()
                 next_location.target_pose.pose = Pose(Point(x, y, 0), Quaternion(0, 0, 0, 1))
-                print(next_location)
-                print('----------------------------------------------')
+                # print(next_location)
+                # print('----------------------------------------------')
                 NAVIGATION_SERVICE.send_goal(next_location)
 
                 status = NAVIGATION_SERVICE.wait_for_result()

@@ -10,7 +10,7 @@
     <param name="wait_duration" value="1" />
     <param name="timeout_duration" value="1000" />
     <param name="obstacle_map" value="$(find pyCAS)/domains/CDB/maps/obstacle_info.json" />
-    <param name="grid_map" value="$(find pyCAS)/domains/CDB/maps/campus_1.txt" />
+    <param name="grid_map" value="$(find pyCAS)/domains/CDB/maps/tiny_map.txt" />
     <param name="topological_map" value="$(find pyCAS)/domains/CDB/maps/map_info.json" />
     <param name="number_iterations" value="5" />
   </node>

@@ -20,7 +20,7 @@ from models.CDB_robot import autonomy_model, feedback_model, domain_model
 OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB_robot')
 FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'feedback')
 PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params')
-MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'maps')
+MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
 
 
 def main(grid_file, N, update=False, interact=False, logging=False, verbose=True, start=None, end=None):
@@ -40,6 +40,7 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
 
     for i in range(N):
         end = np.random.choice(offices)
+        end = (1, 3)
 
         print("Building environment for destination {}...".format(end))
         print("Building domain model...")
@@ -133,7 +134,7 @@ def execute_policy(CAS, M, i, interact, verbose=True):
         policies = {0: {'policy': pi_base, 'state_map': CAS.state_map}}
     pickle.dump(policies, open(os.path.join(OUTPUT_PATH, 'policies.pkl'), mode='wb'), protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open(os.path.join(MAP_PATH, 'map_info.json')) as F:
+    with open(os.path.join(MAP_PATH, 'obstacle_info.json')) as F:
         map_info = json.load(F)
 
     used_features = open(os.path.join(PARAM_PATH, 'used_features.txt')).readline().split(",")

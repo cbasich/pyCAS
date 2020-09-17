@@ -10,9 +10,9 @@ current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 sys.path.append(current_file_path)
 
-OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB')
-FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'feedback')
-PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'params')
+OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB_robot')
+FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'feedback')
+PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'params_robot')
 MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
 
 
