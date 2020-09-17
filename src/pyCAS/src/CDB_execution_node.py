@@ -10,7 +10,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
 from pyCAS.msg import RobotStatus, ObstacleStatus, SSPState, TaskRequest, Interaction
 from task_handler import CASTaskHandler
-from models.CDB.competence_aware_system import CAS
+from models.CDB_robot.competence_aware_system import CAS
 
 CURRENT_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 

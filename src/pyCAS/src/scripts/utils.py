@@ -39,7 +39,6 @@ def FVI(mdp, eps = 0.001):
     while True:
         Q = R + gamma*( np.sum( T * V.reshape(dim_array), axis = 2) )
         tmp = np.amax(Q, axis = 1)
-        print(np.max( abs(tmp - V) ))
         if np.max( abs(tmp - V) ) < eps:
             V = tmp
             break

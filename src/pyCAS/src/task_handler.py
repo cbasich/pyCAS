@@ -16,10 +16,10 @@ PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'para
 MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
 
 
-from models.CDB.domain_model import DeliveryBotDomain
-from models.CDB.autonomy_model import AutonomyModel
-from models.CDB.feedback_model import FeedbackModel
-from models.CDB.competence_aware_system import CAS
+from models.CDB_robot.domain_model import DeliveryBotDomain
+from models.CDB_robot.autonomy_model import AutonomyModel
+from models.CDB_robot.feedback_model import FeedbackModel
+from models.CDB_robot.competence_aware_system import CAS
 
 from scripts.utils import init_cross_data, init_full_cross_data, init_open_data, init_full_open_data
 
@@ -118,7 +118,7 @@ class CASTaskHandler(object):
         DM = DeliveryBotDomain(world_map, start, goal)
 
         rospy.loginfo("Info[task_handler.get_problem]: Instantiating the autonomy model...")
-        AM = AutonomyModel(DM, [0,1,2,3,])
+        AM = AutonomyModel(DM, [0,1,2,3])
 
         rospy.loginfo("Info[task_handler.get_problem]: Instantiating the feedback model...")
         HM = FeedbackModel(DM, AM, ['+', '-', '/', None], ['open'])
