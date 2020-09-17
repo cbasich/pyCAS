@@ -21,9 +21,7 @@ class TaskRequest {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.Header = null;
       this.id = null;
-      this.goal_x = null;
-      this.goal_y = null;
-      this.data = null;
+      this.goals = null;
     }
     else {
       if (initObj.hasOwnProperty('Header')) {
@@ -38,23 +36,11 @@ class TaskRequest {
       else {
         this.id = 0;
       }
-      if (initObj.hasOwnProperty('goal_x')) {
-        this.goal_x = initObj.goal_x
+      if (initObj.hasOwnProperty('goals')) {
+        this.goals = initObj.goals
       }
       else {
-        this.goal_x = 0;
-      }
-      if (initObj.hasOwnProperty('goal_y')) {
-        this.goal_y = initObj.goal_y
-      }
-      else {
-        this.goal_y = 0;
-      }
-      if (initObj.hasOwnProperty('data')) {
-        this.data = initObj.data
-      }
-      else {
-        this.data = '';
+        this.goals = '';
       }
     }
   }
@@ -65,12 +51,8 @@ class TaskRequest {
     bufferOffset = std_msgs.msg.Header.serialize(obj.Header, buffer, bufferOffset);
     // Serialize message field [id]
     bufferOffset = _serializer.uint8(obj.id, buffer, bufferOffset);
-    // Serialize message field [goal_x]
-    bufferOffset = _serializer.uint8(obj.goal_x, buffer, bufferOffset);
-    // Serialize message field [goal_y]
-    bufferOffset = _serializer.uint8(obj.goal_y, buffer, bufferOffset);
-    // Serialize message field [data]
-    bufferOffset = _serializer.string(obj.data, buffer, bufferOffset);
+    // Serialize message field [goals]
+    bufferOffset = _serializer.string(obj.goals, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -82,20 +64,16 @@ class TaskRequest {
     data.Header = std_msgs.msg.Header.deserialize(buffer, bufferOffset);
     // Deserialize message field [id]
     data.id = _deserializer.uint8(buffer, bufferOffset);
-    // Deserialize message field [goal_x]
-    data.goal_x = _deserializer.uint8(buffer, bufferOffset);
-    // Deserialize message field [goal_y]
-    data.goal_y = _deserializer.uint8(buffer, bufferOffset);
-    // Deserialize message field [data]
-    data.data = _deserializer.string(buffer, bufferOffset);
+    // Deserialize message field [goals]
+    data.goals = _deserializer.string(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
     let length = 0;
     length += std_msgs.msg.Header.getMessageSize(object.Header);
-    length += object.data.length;
-    return length + 7;
+    length += object.goals.length;
+    return length + 5;
   }
 
   static datatype() {
@@ -105,7 +83,7 @@ class TaskRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'c55ab525a6c1d56131fcd172d61cde19';
+    return 'bc7fb89ff606bae2d46e6500ded40427';
   }
 
   static messageDefinition() {
@@ -113,9 +91,7 @@ class TaskRequest {
     return `
     Header Header
     uint8 id
-    uint8 goal_x
-    uint8 goal_y
-    string data
+    string goals
     ================================================================================
     MSG: std_msgs/Header
     # Standard metadata for higher-level stamped data types.
@@ -155,25 +131,11 @@ class TaskRequest {
       resolved.id = 0
     }
 
-    if (msg.goal_x !== undefined) {
-      resolved.goal_x = msg.goal_x;
+    if (msg.goals !== undefined) {
+      resolved.goals = msg.goals;
     }
     else {
-      resolved.goal_x = 0
-    }
-
-    if (msg.goal_y !== undefined) {
-      resolved.goal_y = msg.goal_y;
-    }
-    else {
-      resolved.goal_y = 0
-    }
-
-    if (msg.data !== undefined) {
-      resolved.data = msg.data;
-    }
-    else {
-      resolved.data = ''
+      resolved.goals = ''
     }
 
     return resolved;

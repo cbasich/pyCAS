@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import numpy as np
 import rospy
 import roslib
 import actionlib
@@ -67,8 +68,10 @@ def execute(message):
     start_col = ssp_state_message.robot_status.location_col
 
     start = (start_row, start_col)
-    goal = (message.goal_x, message.goal_y)
+    goals = task_handler.parse_goals(message.goals)
 
+    goal = goals[np.random.choice(len(goals))]
+    rospy.loginfo("Info[CDB_execution_node.execute]: The goal has been selected : {}".format(goal))
     model = task_handler.get_problem(grid_map, start, goal)
     policy, state_map = task_handler.get_solution(model)
     rospy.loginfo("Info[CDB_execution_node.instantiate]: Retrieved solution...")
@@ -92,24 +95,26 @@ def execute(message):
             # for debug
             # print(current_state)
             # print(current_action)
+
+            response = None
             
             if current_action[1] != 3: 
                 # TODO human interaction handling 
                 # LoA 0: Human does the action
                 if current_action[1] == 0:
                     rospy.loginfo("Level 0 Autonomy: Will wait for human interference to remove obstacle... ")
-                    response = input("Have you removed the obstacle? [y/n]: ")
+                    check = input("Have you removed the obstacle? [y/n]: ")
+                    # while check[0] !=  'y' or check[0] != 'Y':
+                    #     rospy.loginfo("Waiting for {} ....".format(wait_duration))
+                    #     rospy.sleep(wait_duration)
+                    #     check = input("Have you removed the obstacle? [y/n]: ")
                     if response[0] == 'y' or response[0] == 'Y':
                         interaction = Interaction()
                         interaction.status = 'open'
                         INTERACTION_PUBLISHER.publish(interaction)
                     else:
-                        print(current_state)
-                        print(current_action)
-                        rospy.loginfo('Removing action from transition function... ')
-                        model.remove_transition(current_state, current_action)
-                        policy, state_map = task_handler.get_solution(model)
-                        current_state = None
+                        rospy.loginfo("Invalid input. Will continue to wait until the obstacle has been removed and the input is 'yes'.")
+                    response = None
                 # LoA 1: Robot requests permission
                 elif current_action[1] == 1:
                     rospy.loginfo("Level 1 Autonomy: Ask permission to remove obstacle... ")
@@ -135,14 +140,29 @@ def execute(message):
                     if response[0] == 'y' or response[0] == 'Y':
                         interaction = Interaction()
                         interaction.status = 'open'
-                        INTERACTION_PUBLISHER.publish(interaction)   
+                        INTERACTION_PUBLISHER.publish(interaction) 
+                    elif response[0] == 'n' or response[0] == 'N':
+                        rospy.loginfo('Removing action from transition function... ')
+                        model.remove_transition(current_state, current_action)
+                        policy, state_map = task_handler.get_solution(model)
+                        current_state = None  
+            # elif response[0] == 'n' or response[0] == 'N':
+            #     rospy.loginfo('Removing action from transition function... ')
+            #     model.remove_transition(current_state, current_action)
+            #     policy, state_map = task_handler.get_solution(model)
+            #     current_state = None  
+            #     # action is in format of row, col NOT x, y 
+            #     # adding action to current state = x + action[1], y + action[0]
+            #     # convert foot to meters * 0.3048
+            #     #target_state = (((current_state[0][1]-1)*0.3048 + current_action[0][1]*0.3048), -1*((current_state[0][0]-1)*0.3048 + current_action[0][0]*0.3048))
+            #     #x = target_state[0]
+            #     #y = target_state[1]
+            # elif response[0] == 'y' or response[0] == 'Y':
+            #     interaction = Interaction()
+            #     interaction.status = 'open'
+            #     INTERACTION_PUBLISHER.publish(interaction) 
+            # elif not response:
             else: 
-                # action is in format of row, col NOT x, y 
-                # adding action to current state = x + action[1], y + action[0]
-                # convert foot to meters * 0.3048
-                #target_state = (((current_state[0][1]-1)*0.3048 + current_action[0][1]*0.3048), -1*((current_state[0][0]-1)*0.3048 + current_action[0][0]*0.3048))
-                #x = target_state[0]
-                #y = target_state[1]
                 target_state = (current_state[0][0] + current_action[0][0], current_state[0][1] + current_action[0][1])
                 print("This is target state: ")
                 print(target_state)

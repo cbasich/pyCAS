@@ -31,13 +31,8 @@ def build_gams():
     """
 
     # Build and save the gam and gam_map for the action 'open'
-    print("Trying to open feedback data ")
-    print(current_file_path)
-    print(FEEDBACK_PATH)
-    print(pd.read_csv(os.path.join(FEEDBACK_PATH, 'open.data')))
     # embed()
     open_gam, open_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'open.data')))
-    print(open_gam)
     gam_map_file = open(os.path.join(PARAM_PATH, 'open_gam_map.pkl'), mode = 'wb')
     pickle.dump(open_gam_map, gam_map_file, protocol=pickle.HIGHEST_PROTOCOL)
     gam_map_file.close()

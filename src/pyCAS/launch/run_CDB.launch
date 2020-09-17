@@ -12,6 +12,7 @@
     <param name="obstacle_map" value="$(find pyCAS)/domains/CDB/maps/obstacle_info.json" />
     <param name="grid_map" value="$(find pyCAS)/domains/CDB/maps/campus_1.txt" />
     <param name="topological_map" value="$(find pyCAS)/domains/CDB/maps/map_info.json" />
+    <param name="number_iterations" value="5" />
   </node>
 
   <node pkg="pyCAS" type="robot_status_monitor.py" name="robot_status_monitor" output="screen">

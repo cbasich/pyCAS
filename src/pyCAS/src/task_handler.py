@@ -27,7 +27,25 @@ class CASTaskHandler(object):
     def __init__(self):
         self.topological_map = json.load(open(rospy.get_param('/CDB_execution_node/topological_map')))
 
+    def parse_goals(self, goal_string):
+        # must be in format [(), (), ()]
+        goal_array = goal_string.strip('[').replace('(', '').replace(')', '').strip(']').replace(' ', '').split(',')
+        goals = []
+        goal = ()
+        # to make sure that you only get x, y data
+        cntr = 0
+        for location in goal_array:
+            goal = goal + (int(location),)
+            if cntr == 1:
+                goals.append(goal)
+                goal = ()
+                cntr = 0
+            else:
+                cntr += 1
+        print(goals)    
+        return goals
 
+    
     def get_state(self, message):
         # have to offset the odom data from the origin: [-0.45, -1.9, 0.0]
         if message.obstacle_status.obstacle_data != 'None':
@@ -64,7 +82,7 @@ class CASTaskHandler(object):
         else:
             # default LoA is 3 which means unsupervised autonomy 
             return ((message.robot_status.location_row, message.robot_status.location_col), 3)
-
+    
     def get_pose(self, state):
         pose = self.topological_map["states"][str(state)]["pose"]
         state_x = pose['x']
@@ -114,6 +132,7 @@ class CASTaskHandler(object):
 
     def get_solution(self, model):
         # CAS model that has already been initiated by get_problem
+        rospy.loginfo("Info[task_handler.get_solution]: Instantiating solver... ")
         model.solve()
         state_map = model.state_map
         policy = model.pi

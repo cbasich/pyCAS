@@ -27,16 +27,12 @@ struct TaskRequest_
   TaskRequest_()
     : Header()
     , id(0)
-    , goal_x(0)
-    , goal_y(0)
-    , data()  {
+    , goals()  {
     }
   TaskRequest_(const ContainerAllocator& _alloc)
     : Header(_alloc)
     , id(0)
-    , goal_x(0)
-    , goal_y(0)
-    , data(_alloc)  {
+    , goals(_alloc)  {
   (void)_alloc;
     }
 
@@ -48,14 +44,8 @@ struct TaskRequest_
    typedef uint8_t _id_type;
   _id_type id;
 
-   typedef uint8_t _goal_x_type;
-  _goal_x_type goal_x;
-
-   typedef uint8_t _goal_y_type;
-  _goal_y_type goal_y;
-
-   typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _data_type;
-  _data_type data;
+   typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _goals_type;
+  _goals_type goals;
 
 
 
@@ -88,9 +78,7 @@ bool operator==(const ::pyCAS::TaskRequest_<ContainerAllocator1> & lhs, const ::
 {
   return lhs.Header == rhs.Header &&
     lhs.id == rhs.id &&
-    lhs.goal_x == rhs.goal_x &&
-    lhs.goal_y == rhs.goal_y &&
-    lhs.data == rhs.data;
+    lhs.goals == rhs.goals;
 }
 
 template<typename ContainerAllocator1, typename ContainerAllocator2>
@@ -147,12 +135,12 @@ struct MD5Sum< ::pyCAS::TaskRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "c55ab525a6c1d56131fcd172d61cde19";
+    return "bc7fb89ff606bae2d46e6500ded40427";
   }
 
   static const char* value(const ::pyCAS::TaskRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xc55ab525a6c1d561ULL;
-  static const uint64_t static_value2 = 0x31fcd172d61cde19ULL;
+  static const uint64_t static_value1 = 0xbc7fb89ff606bae2ULL;
+  static const uint64_t static_value2 = 0xd46e6500ded40427ULL;
 };
 
 template<class ContainerAllocator>
@@ -173,9 +161,7 @@ struct Definition< ::pyCAS::TaskRequest_<ContainerAllocator> >
   {
     return "Header Header\n"
 "uint8 id\n"
-"uint8 goal_x\n"
-"uint8 goal_y\n"
-"string data\n"
+"string goals\n"
 "================================================================================\n"
 "MSG: std_msgs/Header\n"
 "# Standard metadata for higher-level stamped data types.\n"
@@ -211,9 +197,7 @@ namespace serialization
     {
       stream.next(m.Header);
       stream.next(m.id);
-      stream.next(m.goal_x);
-      stream.next(m.goal_y);
-      stream.next(m.data);
+      stream.next(m.goals);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -237,12 +221,8 @@ struct Printer< ::pyCAS::TaskRequest_<ContainerAllocator> >
     Printer< ::std_msgs::Header_<ContainerAllocator> >::stream(s, indent + "  ", v.Header);
     s << indent << "id: ";
     Printer<uint8_t>::stream(s, indent + "  ", v.id);
-    s << indent << "goal_x: ";
-    Printer<uint8_t>::stream(s, indent + "  ", v.goal_x);
-    s << indent << "goal_y: ";
-    Printer<uint8_t>::stream(s, indent + "  ", v.goal_y);
-    s << indent << "data: ";
-    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.data);
+    s << indent << "goals: ";
+    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.goals);
   }
 };
 

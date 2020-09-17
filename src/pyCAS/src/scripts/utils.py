@@ -5,7 +5,7 @@ import pandas as pd
 
 from pygam.terms import Term, TermList
 from pygam import GAM, te, s, f, l
-
+from IPython import embed
 
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
@@ -39,6 +39,7 @@ def FVI(mdp, eps = 0.001):
     while True:
         Q = R + gamma*( np.sum( T * V.reshape(dim_array), axis = 2) )
         tmp = np.amax(Q, axis = 1)
+        print(np.max( abs(tmp - V) ))
         if np.max( abs(tmp - V) ) < eps:
             V = tmp
             break
