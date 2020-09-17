@@ -26,14 +26,14 @@ struct RobotStatus_
 
   RobotStatus_()
     : header()
-    , x_coord(0)
-    , y_coord(0)
+    , location_row(0)
+    , location_col(0)
     , heading(0.0)  {
     }
   RobotStatus_(const ContainerAllocator& _alloc)
     : header(_alloc)
-    , x_coord(0)
-    , y_coord(0)
+    , location_row(0)
+    , location_col(0)
     , heading(0.0)  {
   (void)_alloc;
     }
@@ -43,11 +43,11 @@ struct RobotStatus_
    typedef  ::std_msgs::Header_<ContainerAllocator>  _header_type;
   _header_type header;
 
-   typedef int8_t _x_coord_type;
-  _x_coord_type x_coord;
+   typedef int8_t _location_row_type;
+  _location_row_type location_row;
 
-   typedef int8_t _y_coord_type;
-  _y_coord_type y_coord;
+   typedef int8_t _location_col_type;
+  _location_col_type location_col;
 
    typedef float _heading_type;
   _heading_type heading;
@@ -82,8 +82,8 @@ template<typename ContainerAllocator1, typename ContainerAllocator2>
 bool operator==(const ::pyCAS::RobotStatus_<ContainerAllocator1> & lhs, const ::pyCAS::RobotStatus_<ContainerAllocator2> & rhs)
 {
   return lhs.header == rhs.header &&
-    lhs.x_coord == rhs.x_coord &&
-    lhs.y_coord == rhs.y_coord &&
+    lhs.location_row == rhs.location_row &&
+    lhs.location_col == rhs.location_col &&
     lhs.heading == rhs.heading;
 }
 
@@ -141,12 +141,12 @@ struct MD5Sum< ::pyCAS::RobotStatus_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "47473fc5feb11cdaf545b221dbccb35d";
+    return "18461a44b0d1a2987df9514e09c45ef0";
   }
 
   static const char* value(const ::pyCAS::RobotStatus_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x47473fc5feb11cdaULL;
-  static const uint64_t static_value2 = 0xf545b221dbccb35dULL;
+  static const uint64_t static_value1 = 0x18461a44b0d1a298ULL;
+  static const uint64_t static_value2 = 0x7df9514e09c45ef0ULL;
 };
 
 template<class ContainerAllocator>
@@ -166,8 +166,8 @@ struct Definition< ::pyCAS::RobotStatus_<ContainerAllocator> >
   static const char* value()
   {
     return "Header header\n"
-"int8 x_coord\n"
-"int8 y_coord\n"
+"int8 location_row\n"
+"int8 location_col\n"
 "float32 heading\n"
 "================================================================================\n"
 "MSG: std_msgs/Header\n"
@@ -203,8 +203,8 @@ namespace serialization
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
       stream.next(m.header);
-      stream.next(m.x_coord);
-      stream.next(m.y_coord);
+      stream.next(m.location_row);
+      stream.next(m.location_col);
       stream.next(m.heading);
     }
 
@@ -227,10 +227,10 @@ struct Printer< ::pyCAS::RobotStatus_<ContainerAllocator> >
     s << indent << "header: ";
     s << std::endl;
     Printer< ::std_msgs::Header_<ContainerAllocator> >::stream(s, indent + "  ", v.header);
-    s << indent << "x_coord: ";
-    Printer<int8_t>::stream(s, indent + "  ", v.x_coord);
-    s << indent << "y_coord: ";
-    Printer<int8_t>::stream(s, indent + "  ", v.y_coord);
+    s << indent << "location_row: ";
+    Printer<int8_t>::stream(s, indent + "  ", v.location_row);
+    s << indent << "location_col: ";
+    Printer<int8_t>::stream(s, indent + "  ", v.location_col);
     s << indent << "heading: ";
     Printer<float>::stream(s, indent + "  ", v.heading);
   }

@@ -1,4 +1,4 @@
 Header header
-int8 x_coord
-int8 y_coord
+int8 location_row
+int8 location_col
 float32 heading

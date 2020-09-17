@@ -22,26 +22,29 @@ def interaction_status_message_callback(message):
 def get_door_type():
     return None
 
-def get_obstacle_status(obstacle_map):
+def get_obstacle_status(obstacle_map, topological_map):
     # set a tolerance to say when we are in the area of an obstacle 
     # NEED TO CONVERT EVERYTHING INTO METERS
     distance_tolerance = 0.15
-    obstacle_location = None
+    obstacle = None
     obstacle_data = 'None'
 
-    for obstacle in obstacle_map.keys():
-        tmp = obstacle.strip('(').strip(')').split(',')
-        obstacle_y = (float(tmp[0])-1) *0.3048 # 1.2
-        obstacle_x = (float(tmp[1]) -1 ) * 0.3048 # 0.9
+    for obstacle_location in obstacle_map.keys():
+        # tmp = obstacle.strip('(').strip(')').split(',')
+        # obstacle_y = (float(tmp[0])-1) *0.3048 # 1.2
+        # obstacle_x = (float(tmp[1]) -1 ) * 0.3048 # 0.9
 
+        obstacle_pose = topological_map["states"][obstacle_location]["pose"]
+        obstacle_x = obstacle_pose["x"]
+        obstacle_y = obstacle_pose["y"]
         current_location_pose = odometry_message.pose.pose.position
 
-        horizontal_distance = (obstacle_x - abs(current_location_pose.x)) ** 2
-        vertical_distance = (obstacle_y - abs(current_location_pose.y)) ** 2
+        horizontal_distance = (obstacle_x - current_location_pose.x) ** 2
+        vertical_distance = (obstacle_y - current_location_pose.y) ** 2
         distance = math.sqrt(horizontal_distance + vertical_distance)
 
         if distance < distance_tolerance:
-            obstacle_location = obstacle
+            obstacle = obstacle_location
             obstacle_data = str(obstacle_map[obstacle])
             
     return obstacle_location, obstacle_data
@@ -58,10 +61,11 @@ def main():
     publisher = rospy.Publisher("monitor/obstacle_status", ObstacleStatus, queue_size=10)
     rate = rospy.Rate(rospy.get_param("/obstacle_monitor/rate"))
     obstacle_map = json.load(open(rospy.get_param('/CDB_execution_node/obstacle_map')))
+    topological_map = json.load(open(rospy.get_param('/CDB_execution_node/topological_map')))
 
     while not rospy.is_shutdown():
         if odometry_message:
-            _, obstacle_data = get_obstacle_status(obstacle_map)
+            _, obstacle_data = get_obstacle_status(obstacle_map, topological_map)
 
             message = ObstacleStatus()
             message.obstacle_data = obstacle_data

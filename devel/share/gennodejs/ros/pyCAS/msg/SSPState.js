@@ -99,7 +99,7 @@ class SSPState {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'ab0c5c9508d54efc9d177817d64efe0a';
+    return '9e4c47688e24205d5fee9811c75832ac';
   }
 
   static messageDefinition() {
@@ -128,8 +128,8 @@ class SSPState {
     ================================================================================
     MSG: pyCAS/RobotStatus
     Header header
-    int8 x_coord
-    int8 y_coord
+    int8 location_row
+    int8 location_col
     float32 heading
     ================================================================================
     MSG: pyCAS/ObstacleStatus

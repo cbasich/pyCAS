@@ -9,8 +9,9 @@
   <node pkg="pyCAS" type="CDB_execution_node.py" name="CDB_execution_node" output="screen">
     <param name="wait_duration" value="1" />
     <param name="timeout_duration" value="1000" />
-    <param name="obstacle_map" value="$(find pyCAS)/domains/CDB/maps/map_info.json" />
+    <param name="obstacle_map" value="$(find pyCAS)/domains/CDB/maps/obstacle_info.json" />
     <param name="grid_map" value="$(find pyCAS)/domains/CDB/maps/campus_1.txt" />
+    <param name="topological_map" value="$(find pyCAS)/domains/CDB/maps/map_info.json" />
   </node>
 
   <node pkg="pyCAS" type="robot_status_monitor.py" name="robot_status_monitor" output="screen">

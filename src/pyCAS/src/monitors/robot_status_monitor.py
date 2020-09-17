@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import rospy
+import rospy, json, math
 from pyCAS.msg import RobotStatus
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
@@ -14,12 +14,40 @@ def odometry_message_callback(message):
 
 
 # TODO: Implement this function
-def get_location():
+def get_location(topological_map):
     # add one to account for the robot starting at (1, 1) and not (0, 0) on the map
     # need to convert odom data (in meters) to states (in feet)
-    current_x = abs(int(round(odometry_message.pose.pose.position.x*3.281))) + 1
-    current_y = abs(int(round(odometry_message.pose.pose.position.y*3.281))) + 1
-    return current_x, current_y
+    # set a tolerance to say when we are in the area of a state  
+    distance_tolerance = 0.15
+    location = None
+   
+
+    for state in topological_map["states"]:
+        # this is the odom position for each state
+        pose = topological_map["states"][state]["pose"]
+        state_x = pose['x']
+        state_y = pose['y']
+        # tmp = states.strip('(').strip(')').split(',')
+        # obstacle_y = (float(tmp[0])-1) *0.3048 # 1.2
+        # obstacle_x = (float(tmp[1]) -1 ) * 0.3048 # 0.9
+
+        current_location_pose = odometry_message.pose.pose.position
+
+        horizontal_distance = (state_x - current_location_pose.x) ** 2
+        vertical_distance = (state_y - current_location_pose.y) ** 2
+        distance = math.sqrt(horizontal_distance + vertical_distance)
+
+        if state == '(3, 1)':
+            if distance < 0.5:
+                pass
+                # print(distance)
+        if distance < distance_tolerance:
+            tmp = state.strip('(').strip(')').split(',')
+            location_row = int(tmp[0])
+            location_col = int(tmp[1])
+            location = (location_row, location_col)
+            
+    return location
 
 def get_orientation():
     # the orientation in quaternion
@@ -38,16 +66,27 @@ def main():
 
     publisher = rospy.Publisher("monitor/robot_status", RobotStatus, queue_size=10)
     rate = rospy.Rate(rospy.get_param("/robot_status_monitor/rate"))
+    topological_map = json.load(open(rospy.get_param('/CDB_execution_node/topological_map')))
 
+    # hard coded for debugging
+    old_location = (1, 1)
     while not rospy.is_shutdown():
-        if odometry_message: 
-            current_x, current_y = get_location()
+        if odometry_message:  
+            location = get_location(topological_map)
             yaw = get_orientation()
-            message = RobotStatus()
-            message.x_coord = current_x
-            message.y_coord = current_y
-            message.heading = yaw
-            publisher.publish(message)
+            if not location:
+                message = RobotStatus()
+                message.location_row = old_location[0]
+                message.location_col = old_location[1]
+                message.heading = yaw
+                publisher.publish(message)
+            if location:
+                message = RobotStatus()
+                message.location_row = location[0]
+                message.location_col = location[1]
+                message.heading = yaw
+                publisher.publish(message)
+                old_location = location
 
         rate.sleep()
 

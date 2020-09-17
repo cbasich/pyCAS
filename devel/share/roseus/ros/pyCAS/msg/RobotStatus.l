@@ -16,20 +16,20 @@
 
 (defclass pyCAS::RobotStatus
   :super ros::object
-  :slots (_header _x_coord _y_coord _heading ))
+  :slots (_header _location_row _location_col _heading ))
 
 (defmethod pyCAS::RobotStatus
   (:init
    (&key
     ((:header __header) (instance std_msgs::Header :init))
-    ((:x_coord __x_coord) 0)
-    ((:y_coord __y_coord) 0)
+    ((:location_row __location_row) 0)
+    ((:location_col __location_col) 0)
     ((:heading __heading) 0.0)
     )
    (send-super :init)
    (setq _header __header)
-   (setq _x_coord (round __x_coord))
-   (setq _y_coord (round __y_coord))
+   (setq _location_row (round __location_row))
+   (setq _location_col (round __location_col))
    (setq _heading (float __heading))
    self)
   (:header
@@ -39,12 +39,12 @@
      (progn
        (if __header (setq _header (car __header)))
        _header)))
-  (:x_coord
-   (&optional __x_coord)
-   (if __x_coord (setq _x_coord __x_coord)) _x_coord)
-  (:y_coord
-   (&optional __y_coord)
-   (if __y_coord (setq _y_coord __y_coord)) _y_coord)
+  (:location_row
+   (&optional __location_row)
+   (if __location_row (setq _location_row __location_row)) _location_row)
+  (:location_col
+   (&optional __location_col)
+   (if __location_col (setq _location_col __location_col)) _location_col)
   (:heading
    (&optional __heading)
    (if __heading (setq _heading __heading)) _heading)
@@ -53,9 +53,9 @@
    (+
     ;; std_msgs/Header _header
     (send _header :serialization-length)
-    ;; int8 _x_coord
+    ;; int8 _location_row
     1
-    ;; int8 _y_coord
+    ;; int8 _location_col
     1
     ;; float32 _heading
     4
@@ -66,10 +66,10 @@
               (make-string-output-stream (send self :serialization-length)))))
      ;; std_msgs/Header _header
        (send _header :serialize s)
-     ;; int8 _x_coord
-       (write-byte _x_coord s)
-     ;; int8 _y_coord
-       (write-byte _y_coord s)
+     ;; int8 _location_row
+       (write-byte _location_row s)
+     ;; int8 _location_col
+       (write-byte _location_col s)
      ;; float32 _heading
        (sys::poke _heading (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;;
@@ -78,24 +78,24 @@
    (buf &optional (ptr- 0))
    ;; std_msgs/Header _header
      (send _header :deserialize buf ptr-) (incf ptr- (send _header :serialization-length))
-   ;; int8 _x_coord
-     (setq _x_coord (sys::peek buf ptr- :char)) (incf ptr- 1)
-     (if (> _x_coord 127) (setq _x_coord (- _x_coord 256)))
-   ;; int8 _y_coord
-     (setq _y_coord (sys::peek buf ptr- :char)) (incf ptr- 1)
-     (if (> _y_coord 127) (setq _y_coord (- _y_coord 256)))
+   ;; int8 _location_row
+     (setq _location_row (sys::peek buf ptr- :char)) (incf ptr- 1)
+     (if (> _location_row 127) (setq _location_row (- _location_row 256)))
+   ;; int8 _location_col
+     (setq _location_col (sys::peek buf ptr- :char)) (incf ptr- 1)
+     (if (> _location_col 127) (setq _location_col (- _location_col 256)))
    ;; float32 _heading
      (setq _heading (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;;
    self)
   )
 
-(setf (get pyCAS::RobotStatus :md5sum-) "47473fc5feb11cdaf545b221dbccb35d")
+(setf (get pyCAS::RobotStatus :md5sum-) "18461a44b0d1a2987df9514e09c45ef0")
 (setf (get pyCAS::RobotStatus :datatype-) "pyCAS/RobotStatus")
 (setf (get pyCAS::RobotStatus :definition-)
       "Header header
-int8 x_coord
-int8 y_coord
+int8 location_row
+int8 location_col
 float32 heading
 ================================================================================
 MSG: std_msgs/Header
@@ -117,6 +117,6 @@ string frame_id
 
 
 
-(provide :pyCAS/RobotStatus "47473fc5feb11cdaf545b221dbccb35d")
+(provide :pyCAS/RobotStatus "18461a44b0d1a2987df9514e09c45ef0")
 
 

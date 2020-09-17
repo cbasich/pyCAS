@@ -100,7 +100,7 @@
    self)
   )
 
-(setf (get pyCAS::SSPState :md5sum-) "ab0c5c9508d54efc9d177817d64efe0a")
+(setf (get pyCAS::SSPState :md5sum-) "9e4c47688e24205d5fee9811c75832ac")
 (setf (get pyCAS::SSPState :datatype-) "pyCAS/SSPState")
 (setf (get pyCAS::SSPState :definition-)
       "Header header
@@ -126,8 +126,8 @@ string frame_id
 ================================================================================
 MSG: pyCAS/RobotStatus
 Header header
-int8 x_coord
-int8 y_coord
+int8 location_row
+int8 location_col
 float32 heading
 ================================================================================
 MSG: pyCAS/ObstacleStatus
@@ -144,6 +144,6 @@ string status
 
 
 
-(provide :pyCAS/SSPState "ab0c5c9508d54efc9d177817d64efe0a")
+(provide :pyCAS/SSPState "9e4c47688e24205d5fee9811c75832ac")
 
 

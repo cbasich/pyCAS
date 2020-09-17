@@ -1,0 +1,22 @@
+{
+    "(1, 4)": {
+        "obstacle": "door",
+        "doortype": "push",
+        "doorcolor": "brown"
+    },
+    "(3, 2)": {
+        "obstacle": "door",
+        "doortype": "push",
+        "doorcolor": "brown"
+    },
+    "(3, 4)": {
+        "obstacle": "door",
+        "doortype": "pull",
+        "doorcolor": "brown"
+    },
+    "(5, 4)": {
+        "obstacle": "door",
+        "doortype": "pull",
+        "doorcolor": "brown"
+    }
+}

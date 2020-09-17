@@ -1,10 +1,10 @@
 (cl:in-package pyCAS-msg)
 (cl:export '(HEADER-VAL
           HEADER
-          X_COORD-VAL
-          X_COORD
-          Y_COORD-VAL
-          Y_COORD
+          LOCATION_ROW-VAL
+          LOCATION_ROW
+          LOCATION_COL-VAL
+          LOCATION_COL
           HEADING-VAL
           HEADING
 ))

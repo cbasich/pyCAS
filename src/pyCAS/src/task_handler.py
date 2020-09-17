@@ -4,6 +4,7 @@ print(os.getcwd())
 import sys
 import rospy
 import math
+import json
 
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
@@ -23,6 +24,10 @@ from models.CDB.competence_aware_system import CAS
 from scripts.utils import init_cross_data, init_full_cross_data, init_open_data, init_full_open_data
 
 class CASTaskHandler(object):
+    def __init__(self):
+        self.topological_map = json.load(open(rospy.get_param('/CDB_execution_node/topological_map')))
+
+
     def get_state(self, message):
         # have to offset the odom data from the origin: [-0.45, -1.9, 0.0]
         if message.obstacle_status.obstacle_data != 'None':
@@ -55,17 +60,26 @@ class CASTaskHandler(object):
                 # TODO: find a way to confirm that the door has been opened before changing door_status 
                 if message.obstacle_status.door_status == 'open':
                     door_status = 'door-open'
-                return ((message.robot_status.y_coord, message.robot_status.x_coord, compass ,door_status), 3)
+                return ((message.robot_status.location_row, message.robot_status.location_col, compass ,door_status), 3)
         else:
             # default LoA is 3 which means unsupervised autonomy 
-            return ((message.robot_status.y_coord, message.robot_status.x_coord), 3)
+            return ((message.robot_status.location_row, message.robot_status.location_col), 3)
+
+    def get_pose(self, state):
+        pose = self.topological_map["states"][str(state)]["pose"]
+        state_x = pose['x']
+        state_y = pose['y']
+        return (state_x, state_y)
 
     def is_start(self, message):
         start = (message.robot_status.y_coord, message.robot_status.x_coord)
         pass
 
     def is_goal(self, state, goal):
-        current_state = (state[0][0], state[0][1])
+        if state:
+            current_state = (state[0][0], state[0][1])
+        else:
+            current_state = None
         return current_state == goal
 
     def get_problem(self, world_map, start, goal):
@@ -102,6 +116,6 @@ class CASTaskHandler(object):
         # CAS model that has already been initiated by get_problem
         model.solve()
         state_map = model.state_map
-        policy = model.pi S
+        policy = model.pi
         return policy, state_map
 

@@ -1,7 +1,6 @@
-image: test_campus.png
-# convert feet to meters - so each pixel is about 0.3048 meters and 1 foot
-resolution: 0.3048
-origin: [-0.45, -1.7, 0.0]
+image: campus_1.png
+resolution: 0.0028
+origin: [-0.45, -1.9, 0.0]
 occupied_thresh: 0.65
 free_thresh: 0.195
 negate: 0

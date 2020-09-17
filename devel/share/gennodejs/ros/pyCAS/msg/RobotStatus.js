@@ -20,8 +20,8 @@ class RobotStatus {
     if (initObj === null) {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.header = null;
-      this.x_coord = null;
-      this.y_coord = null;
+      this.location_row = null;
+      this.location_col = null;
       this.heading = null;
     }
     else {
@@ -31,17 +31,17 @@ class RobotStatus {
       else {
         this.header = new std_msgs.msg.Header();
       }
-      if (initObj.hasOwnProperty('x_coord')) {
-        this.x_coord = initObj.x_coord
+      if (initObj.hasOwnProperty('location_row')) {
+        this.location_row = initObj.location_row
       }
       else {
-        this.x_coord = 0;
+        this.location_row = 0;
       }
-      if (initObj.hasOwnProperty('y_coord')) {
-        this.y_coord = initObj.y_coord
+      if (initObj.hasOwnProperty('location_col')) {
+        this.location_col = initObj.location_col
       }
       else {
-        this.y_coord = 0;
+        this.location_col = 0;
       }
       if (initObj.hasOwnProperty('heading')) {
         this.heading = initObj.heading
@@ -56,10 +56,10 @@ class RobotStatus {
     // Serializes a message object of type RobotStatus
     // Serialize message field [header]
     bufferOffset = std_msgs.msg.Header.serialize(obj.header, buffer, bufferOffset);
-    // Serialize message field [x_coord]
-    bufferOffset = _serializer.int8(obj.x_coord, buffer, bufferOffset);
-    // Serialize message field [y_coord]
-    bufferOffset = _serializer.int8(obj.y_coord, buffer, bufferOffset);
+    // Serialize message field [location_row]
+    bufferOffset = _serializer.int8(obj.location_row, buffer, bufferOffset);
+    // Serialize message field [location_col]
+    bufferOffset = _serializer.int8(obj.location_col, buffer, bufferOffset);
     // Serialize message field [heading]
     bufferOffset = _serializer.float32(obj.heading, buffer, bufferOffset);
     return bufferOffset;
@@ -71,10 +71,10 @@ class RobotStatus {
     let data = new RobotStatus(null);
     // Deserialize message field [header]
     data.header = std_msgs.msg.Header.deserialize(buffer, bufferOffset);
-    // Deserialize message field [x_coord]
-    data.x_coord = _deserializer.int8(buffer, bufferOffset);
-    // Deserialize message field [y_coord]
-    data.y_coord = _deserializer.int8(buffer, bufferOffset);
+    // Deserialize message field [location_row]
+    data.location_row = _deserializer.int8(buffer, bufferOffset);
+    // Deserialize message field [location_col]
+    data.location_col = _deserializer.int8(buffer, bufferOffset);
     // Deserialize message field [heading]
     data.heading = _deserializer.float32(buffer, bufferOffset);
     return data;
@@ -93,15 +93,15 @@ class RobotStatus {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '47473fc5feb11cdaf545b221dbccb35d';
+    return '18461a44b0d1a2987df9514e09c45ef0';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
     Header header
-    int8 x_coord
-    int8 y_coord
+    int8 location_row
+    int8 location_col
     float32 heading
     ================================================================================
     MSG: std_msgs/Header
@@ -135,18 +135,18 @@ class RobotStatus {
       resolved.header = new std_msgs.msg.Header()
     }
 
-    if (msg.x_coord !== undefined) {
-      resolved.x_coord = msg.x_coord;
+    if (msg.location_row !== undefined) {
+      resolved.location_row = msg.location_row;
     }
     else {
-      resolved.x_coord = 0
+      resolved.location_row = 0
     }
 
-    if (msg.y_coord !== undefined) {
-      resolved.y_coord = msg.y_coord;
+    if (msg.location_col !== undefined) {
+      resolved.location_col = msg.location_col;
     }
     else {
-      resolved.y_coord = 0
+      resolved.location_col = 0
     }
 
     if (msg.heading !== undefined) {

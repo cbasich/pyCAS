@@ -144,12 +144,12 @@ struct MD5Sum< ::pyCAS::SSPState_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "ab0c5c9508d54efc9d177817d64efe0a";
+    return "9e4c47688e24205d5fee9811c75832ac";
   }
 
   static const char* value(const ::pyCAS::SSPState_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xab0c5c9508d54efcULL;
-  static const uint64_t static_value2 = 0x9d177817d64efe0aULL;
+  static const uint64_t static_value1 = 0x9e4c47688e24205dULL;
+  static const uint64_t static_value2 = 0x5fee9811c75832acULL;
 };
 
 template<class ContainerAllocator>
@@ -191,8 +191,8 @@ struct Definition< ::pyCAS::SSPState_<ContainerAllocator> >
 "================================================================================\n"
 "MSG: pyCAS/RobotStatus\n"
 "Header header\n"
-"int8 x_coord\n"
-"int8 y_coord\n"
+"int8 location_row\n"
+"int8 location_col\n"
 "float32 heading\n"
 "================================================================================\n"
 "MSG: pyCAS/ObstacleStatus\n"

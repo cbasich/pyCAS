@@ -9,6 +9,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
 from pyCAS.msg import RobotStatus, ObstacleStatus, SSPState, TaskRequest, Interaction
 from task_handler import CASTaskHandler
+from models.CDB.competence_aware_system import CAS
 
 CURRENT_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -62,10 +63,10 @@ def execute(message):
         rospy.loginfo('Info[CDB_execution_node.execute]: waiting to get start position...')
         rospy.sleep(wait_duration)
    
-    start_x = ssp_state_message.robot_status.x_coord
-    start_y = ssp_state_message.robot_status.y_coord
+    start_row = ssp_state_message.robot_status.location_row
+    start_col = ssp_state_message.robot_status.location_col
 
-    start = (start_x, start_y)
+    start = (start_row, start_col)
     goal = (message.goal_x, message.goal_y)
 
     model = task_handler.get_problem(grid_map, start, goal)
@@ -85,6 +86,8 @@ def execute(message):
             current_state = new_state
             state_index = state_map[current_state]
             current_action = policy[state_index]
+            print("Current action")
+            print(current_action)
             
             # for debug
             # print(current_state)
@@ -101,7 +104,12 @@ def execute(message):
                         interaction.status = 'open'
                         INTERACTION_PUBLISHER.publish(interaction)
                     else:
-                        rospy.loginfo("Error: no human interaction to move the obstacle... please try again later")
+                        print(current_state)
+                        print(current_action)
+                        rospy.loginfo('Removing action from transition function... ')
+                        model.remove_transition(current_state, current_action)
+                        policy, state_map = task_handler.get_solution(model)
+                        current_state = None
                 # LoA 1: Robot requests permission
                 elif current_action[1] == 1:
                     rospy.loginfo("Level 1 Autonomy: Ask permission to remove obstacle... ")
@@ -113,7 +121,11 @@ def execute(message):
                         INTERACTION_PUBLISHER.publish(interaction)
                     # request permission
                     elif response[0] == 'n' or response[0] == 'N':
-                        rospy.loginfo('Forcing robot to turn around... ')
+                        rospy.loginfo('Removing action from transition function... ')
+                        model.remove_transition(current_state, current_action)
+                        policy, state_map = task_handler.get_solution(model)
+                        current_state = None
+                        
                     else:
                         rospy.loginfo("Invalid input")
                 # LoA 2: Robot acts under supervision
@@ -128,13 +140,16 @@ def execute(message):
                 # action is in format of row, col NOT x, y 
                 # adding action to current state = x + action[1], y + action[0]
                 # convert foot to meters * 0.3048
-                target_state = (((current_state[0][1]-1)*0.3048 + current_action[0][1]*0.3048), -1*((current_state[0][0]-1)*0.3048 + current_action[0][0]*0.3048))
-                x = target_state[0]
-                y = target_state[1]
-                # for debugging 
-                # x = 0.3
-                # y = -1.2
+                #target_state = (((current_state[0][1]-1)*0.3048 + current_action[0][1]*0.3048), -1*((current_state[0][0]-1)*0.3048 + current_action[0][0]*0.3048))
+                #x = target_state[0]
+                #y = target_state[1]
+                target_state = (current_state[0][0] + current_action[0][0], current_state[0][1] + current_action[0][1])
+                print("This is target state: ")
                 print(target_state)
+                target_pose = task_handler.get_pose(target_state)
+                x = target_pose[0]
+                y = target_pose[1]
+                
                 next_location = MoveBaseGoal()
                 next_location.target_pose.header.frame_id = 'map'
                 next_location.target_pose.header.stamp = rospy.Time.now()
