@@ -45,7 +45,7 @@ def get_obstacle_status(obstacle_map, topological_map):
 
         if distance < distance_tolerance:
             obstacle = obstacle_location
-            obstacle_data = str(obstacle_map[obstacle])
+            obstacle_data = str(obstacle_map[obstacle]["doortype"])
             
     return obstacle_location, obstacle_data
 

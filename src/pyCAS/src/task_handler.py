@@ -49,8 +49,8 @@ class CASTaskHandler(object):
     def get_state(self, message):
         # have to offset the odom data from the origin: [-0.45, -1.9, 0.0]
         if message.obstacle_status.obstacle_data != 'None':
-            obstacle_dict = eval(message.obstacle_status.obstacle_data)
-            if obstacle_dict['obstacle'] == 'door':
+            # obstacle_dict = eval(message.obstacle_status.obstacle_data)
+            if message.obstacle_status.obstacle_data == 'pull' or message.obstacle_status.obstacle_data == 'push':
                 # set the default door status to closed 
                 door_status = 'door-closed'
                 yaw = message.robot_status.heading
