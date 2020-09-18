@@ -327,7 +327,8 @@ class CAS():
                     L = [level-1, level, level+1]
                 self.update_potential(state, s, action, a, L)
 
-                for level_index in np.argsort(-1.0 * np.array([self.potential[s][a][l] for l in L])):
+                tmp = np.argsort(-1.0 * np.array([self.potential[s][a][l] for l in L]))
+                for level_index in tmp:
                     if np.random.uniform() <= self.potential[s][a][L[level_index]]:
                         if L[level_index] == 3 and len(state) > 2:
                             if ((state[3] == 'door-closed' and action == 'open'

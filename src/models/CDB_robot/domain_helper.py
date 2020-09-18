@@ -125,7 +125,7 @@ class CampusDeliveryBotHelper():
         if len(state) == 2 or 'open' in state[3]:
             return 1.
 
-        features = [level] + self.extract_state_features(state)
+        features = ['level'+str(level)] + self.extract_state_features(state)
 
         if action == 'open' and 'door' in state[3]:
             return self.open_GAM.predict_mu([[self.open_GAM_map[f] for f in features]])

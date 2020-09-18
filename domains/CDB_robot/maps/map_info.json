@@ -3,28 +3,24 @@
         "obstacle": "door",
         "doortype": "push",
         "doorcolor": "brown",
-        "x": 1,
-        "y": 4
+        "doorid": "door1"
     },
     "(3, 2)": {
         "obstacle": "door",
         "doortype": "push",
         "doorcolor": "brown",
-        "x": 3,
-        "y": 2
+        "doorid": "door2"
     },
     "(3, 4)": {
         "obstacle": "door",
         "doortype": "pull",
         "doorcolor": "brown",
-        "x": 3,
-        "y": 4
+        "doorid": "door3"
     },
     "(5, 4)": {
         "obstacle": "door",
         "doortype": "pull",
         "doorcolor": "brown",
-        "x": 5,
-        "y": 4
+        "doorid": "door4"
     }
 }

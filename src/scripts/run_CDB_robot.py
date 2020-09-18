@@ -74,7 +74,7 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
             with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), mode = 'a+') as cost_file:
                 for cost in costs:
                     cost_file.write(str(cost) + ",")
-            cost_file.write("\n")
+                cost_file.write("\n")
 
         print("Updating parameters...")
         environment.update_kappa()
@@ -245,17 +245,17 @@ def updateData(action, used_features, unused_features, feedback, flagged):
 
 def init_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
-        f.write('level,x,y,obstacle,feedback')
+        f.write('level,obstacle,doorid,feedback')
         for level in ['level1','level2']:
-            for x,y in [(1,4), (3,2), (3,4), (5,4)]:
-                for obstacle in ['door']:
+            for obstacle in ['door']:
+                for doorid in ['door1', 'door2', 'door3', 'door4']:
                     for feedback in ['yes','no']:
-                        entry = ",".join([level,str(x),str(y),obstacle,feedback])
+                        entry = ",".join([level,obstacle,doorid,feedback])
                         f.write("\n" + entry)
 
 def init_full_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'a+') as f:
-        f.write('level,x,y,obstacle,doortype,doorcolor,feedback')
+        f.write('level,obstacle,doorid,doortype,doorcolor,feedback')
 
 
 def process_results(CAS):

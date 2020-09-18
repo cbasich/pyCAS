@@ -272,7 +272,7 @@ class FeedbackModel():
     def build_lambda(self, D_train, used_features, discriminator):
         train = D_train[np.append(used_features, [discriminator, 'feedback'])]
 
-        gam, gam_map = build_gam(train)
+        gam, gam_map = build_gam(train, fast=True)
 
         return (gam, gam_map)
 
