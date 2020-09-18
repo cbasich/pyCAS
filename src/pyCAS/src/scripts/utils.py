@@ -10,10 +10,10 @@ from IPython import embed
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
-OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB')
-FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'feedback')
-PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'params')
-MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
+OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB_robot')
+FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'feedback')
+PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params')
+MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'maps')
 
 def FVI(mdp, eps = 0.001):
     """
@@ -64,7 +64,7 @@ def build_gam(df, distr='binomial', link='logit', input_classifier=None):
         This function is for building a GAM classifier.
         
         params:
-            domain - A string of the name of the domain, e.g. 'CDB'
+            domain - A string of the name of the domain, e.g. 'CDB_robot'
             name - A string of the name for the classifier, generally the action in question, e.g. 'cross'
             distr - The distribution used for the GAM, defaulted to binomial.
             link - The link used for the GAM, deefaulted to logit.

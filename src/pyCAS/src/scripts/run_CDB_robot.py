@@ -14,13 +14,13 @@ sys.path.append(os.path.join(current_file_path, '..'))
 import utils
 import process_data
 
-from models.CDB_robot.competence_aware_system import CAS
-from models.CDB_robot import autonomy_model, feedback_model, domain_model
+from models.CDB_robot_robot.competence_aware_system import CAS
+from models.CDB_robot_robot import autonomy_model, feedback_model, domain_model
 
-OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB_robot')
-FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'feedback')
-PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params')
-MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
+OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB_robot_robot')
+FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot_robot', 'feedback')
+PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot_robot', 'params')
+MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'maps')
 
 
 def main(grid_file, N, update=False, interact=False, logging=False, verbose=True, start=None, end=None):

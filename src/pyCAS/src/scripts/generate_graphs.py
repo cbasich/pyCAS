@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from IPython import embed
 
-OUTPUT_PATH = os.path.join('..','..','output','CDB')
+OUTPUT_PATH = os.path.join('..','..','output','CDB_robot')
 
 def generate_cost_graphs():
     cost_file = open(os.path.join(OUTPUT_PATH,'map_1_costs.txt'), mode = 'r+')

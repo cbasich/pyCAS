@@ -10,7 +10,7 @@ sys.path.append(os.path.join(current_file_path, '..', '..'))
 
 
 
-DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB')
+DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB_robot')
 MAP_PATH = os.path.join(DOMAIN_PATH, 'maps')
 
 
@@ -21,7 +21,7 @@ def read_gw_map(filename):
             grid.append(line.strip().split(' '))
     return grid
 
-grid = read_gw_map('/home/willcoe/pyCAS/src/pyCAS/domains/CDB/maps/campus_1.txt')
+grid = read_gw_map('/home/willcoe/pyCAS/src/pyCAS/domains/CDB_robot/maps/campus_1.txt')
 print(grid)
 print(len(grid))
 print(len(grid[0]))

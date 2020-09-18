@@ -1,1 +1,0 @@
-level,region,obstacle,doorsize,doorcolor,doortype,visibility,streettype

@@ -12,7 +12,7 @@ sys.path.append(os.path.join(current_file_path, '..', '..'))
 from models.CDB_robot.domain_helper import CampusDeliveryBotHelper
 from scripts.utils import FVI
 
-DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB')
+DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB_robot')
 MAP_PATH = os.path.join(DOMAIN_PATH, 'maps')
 PARAM_PATH = os.path.join(DOMAIN_PATH, 'params')
 

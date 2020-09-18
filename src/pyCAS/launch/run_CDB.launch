@@ -2,7 +2,7 @@
 <launch>
   <!-- TODO: Clean up the map_file argument? -->
   <!-- TODO: Remove duplicate files within the CDB/CDB_robot directories -->
-  <arg name="map_file" default="$(find pyCAS)/domains/CDB/maps/campus_1.yaml" />
+  <arg name="map_file" default="$(find pyCAS)/domains/CDB_robot/maps/campus_1.yaml" />
   <arg name="model" default="burger"/>
   <arg name="move_forward_only" default="false"/>
 
@@ -11,9 +11,9 @@
     <param name="wait_duration" value="1" />
     <param name="timeout_duration" value="1000" />
     <param name="number_iterations" value="50" />
-    <param name="obstacle_map" value="$(find pyCAS)/domains/CDB/maps/obstacle_info.json" />
-    <param name="grid_map" value="$(find pyCAS)/domains/CDB/maps/tiny_map.txt" />
-    <param name="topological_map" value="$(find pyCAS)/domains/CDB/maps/map_info.json" />
+    <param name="obstacle_map" value="$(find pyCAS)/domains/CDB_robot/maps/obstacle_info.json" />
+    <param name="grid_map" value="$(find pyCAS)/domains/CDB_robot/maps/tiny_map.txt" />
+    <param name="topological_map" value="$(find pyCAS)/domains/CDB_robot/maps/map_info.json" />
   </node>
 
   <node pkg="pyCAS" type="robot_status_monitor.py" name="robot_status_monitor" output="screen">

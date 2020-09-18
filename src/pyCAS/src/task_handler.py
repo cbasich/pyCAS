@@ -12,8 +12,8 @@ sys.path.append(current_file_path)
 
 OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB_robot')
 FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'feedback')
-PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'params_robot')
-MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
+PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params_robot')
+MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'maps')
 
 
 from models.CDB_robot.domain_model import DeliveryBotDomain

@@ -11,7 +11,7 @@ sys.path.append(os.path.join(current_file_path, '..'))
 
 from scripts.utils import build_gam
 
-DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB')
+DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB_robot')
 FEEDBACK_PATH = os.path.join(DOMAIN_PATH, 'feedback')
 PARAM_PATH = os.path.join(DOMAIN_PATH, 'params')
 MAP_PATH = os.path.join(DOMAIN_PATH, 'maps')

@@ -1,7 +1,0 @@
-X X X X X X X 
-X S X B D . X
-X . X . X . X
-X . D . D . X
-X . X X X . X
-X . . . D A X
-X X X X X X X
