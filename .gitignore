@@ -133,6 +133,7 @@ dmypy.json
 # ROS
 devel/
 build/
+.catkin_workspace
 
 # VSCode
 .vscode
