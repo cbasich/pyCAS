@@ -6,17 +6,21 @@ robot_status_message = RobotStatus()
 obstacle_status_message = ObstacleStatus()
 interaction_status_message = Interaction()
 
+
 def robot_status_message_callback(message):
     global robot_status_message
     robot_status_message = message
+
 
 def obstacle_status_message_callback(message):
     global obstacle_status_message
     obstacle_status_message = message
 
+
 def interaction_status_message_callback(message):
     global interaction_status_message
     interaction_status_message = message
+
 
 def main():
     rospy.loginfo("Info[ssp_state_monitor.main]: Instantiating the ssp_state_monitor node...")
@@ -30,10 +34,9 @@ def main():
     rate = rospy.Rate(rospy.get_param("ssp_state_monitor/rate"))
 
     while not rospy.is_shutdown():
-
         message = SSPState()
+    
         if robot_status_message and obstacle_status_message:
-            # combines all of the messages into one mega SSPState message 
             message.robot_status = robot_status_message
             message.obstacle_status = obstacle_status_message
             message.interaction_status = interaction_status_message
