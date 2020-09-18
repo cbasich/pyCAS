@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import rospy
-from pyCAS.msg import SSPState, RobotStatus, ObstacleStatus, Interaction
+
+from pyCAS.msg import Interaction, ObstacleStatus, RobotStatus, SSPState
 
 robot_status_message = RobotStatus()
 obstacle_status_message = ObstacleStatus()
@@ -31,6 +32,7 @@ def main():
     rospy.Subscriber("monitor/interaction", Interaction, interaction_status_message_callback, queue_size=1)
 
     publisher = rospy.Publisher("monitor/ssp_state_monitor", SSPState, queue_size=10)
+
     rate = rospy.Rate(rospy.get_param("ssp_state_monitor/rate"))
 
     while not rospy.is_shutdown():
