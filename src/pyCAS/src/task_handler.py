@@ -172,7 +172,6 @@ class CASTaskHandler(object):
 
 
     def get_problem(self, world_map, start, goal):
-<<<<<<< HEAD
         """
         params:
             World map: this is the path text file representation of the state space that is needed for the Domain Model
@@ -187,12 +186,6 @@ class CASTaskHandler(object):
         if not os.path.exists(os.path.join(FEEDBACK_DATA_PATH, "open.data")):
             init_open_data()
         if not os.path.exists(os.path.join(FEEDBACK_DATA_PATH, "open_full.data")):
-=======
-        # set up the data files from feedback 
-        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open.data') ):
-            init_open_data()
-        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data') ):
->>>>>>> fcfbfd356c7bddb3d468b7dff587bb9b445022d2
             init_full_open_data()
 
         # Initiate all of the models
