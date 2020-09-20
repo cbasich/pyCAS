@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import os, sys, time, random, pickle
 
 import numpy as np
@@ -13,7 +12,7 @@ sys.path.append(os.path.join(current_file_path, '..', '..'))
 
 from scripts.utils import build_gam
 
-DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB_robot')
+DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB')
 FEEDBACK_PATH = os.path.join(DOMAIN_PATH, 'feedback')
 PARAM_PATH = os.path.join(DOMAIN_PATH, 'params')
 
@@ -32,14 +31,29 @@ def build_gams():
     """
 
     # Build and save the gam and gam_map for the action 'open'
+    print("Trying to open feedback data ")
+    print(current_file_path)
+    print(FEEDBACK_PATH)
+    print(pd.read_csv(os.path.join(FEEDBACK_PATH, 'open.data')))
+    # embed()
     open_gam, open_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'open.data')))
-
+    print(open_gam)
     gam_map_file = open(os.path.join(PARAM_PATH, 'open_gam_map.pkl'), mode = 'wb')
     pickle.dump(open_gam_map, gam_map_file, protocol=pickle.HIGHEST_PROTOCOL)
     gam_map_file.close()
     
     gam_file = open(os.path.join(PARAM_PATH, 'open_gam.pkl'), mode = 'wb')
     pickle.dump(open_gam, gam_file, protocol=pickle. HIGHEST_PROTOCOL)
+    gam_file.close()
+
+    cross_gam, cross_gam_map = build_gam(pd.read_csv(os.path.join(FEEDBACK_PATH, 'cross.data')))
+
+    gam_map_file = open(os.path.join(PARAM_PATH, 'cross_gam_map.pkl'), mode = 'wb')
+    pickle.dump(cross_gam_map, gam_map_file, protocol=pickle.HIGHEST_PROTOCOL)
+    gam_map_file.close()
+
+    gam_file = open(os.path.join(PARAM_PATH, 'cross_gam.pkl'), mode = 'wb')
+    pickle.dump(cross_gam, gam_file, protocol=pickle. HIGHEST_PROTOCOL)
     gam_file.close()
 
 
@@ -54,20 +68,25 @@ def load_gams():
         notes:
             Pickled objects must be store in the PARAM directory to be loaded properly.
     """
+    # embed()
+    cross_GAM = pickle.load( open( os.path.join(PARAM_PATH, 'cross_gam.pkl'), mode='rb'), encoding='bytes')
     open_GAM = pickle.load( open( os.path.join(PARAM_PATH, 'open_gam.pkl'), mode='rb'), encoding='bytes')
+
+    cross_GAM_map = pickle.load( open( os.path.join(PARAM_PATH, 'cross_gam_map.pkl'), mode='rb'), encoding='bytes')
     open_GAM_map = pickle.load( open( os.path.join(PARAM_PATH, 'open_gam_map.pkl'), mode='rb'), encoding='bytes')
 
-    return open_GAM, open_GAM_map
+    return cross_GAM, open_GAM, cross_GAM_map, open_GAM_map
 
 class CampusDeliveryBotHelper():
     def __init__(self, DM):
         self.DM = DM
-        self.obstacle_info = self.DM.obstacle_info
+        self.map_info = self.DM.map_info
         try:
+            print("Info[domain_helper.init] Building GAMs...")
             build_gams()
         except Exception:
             print("Failed to build GAMs, using previously stored models.")
-        self.open_GAM, self.open_GAM_map = load_gams()
+        self.cross_GAM, self.open_GAM, self.cross_GAM_map, self.open_GAM_map = load_gams()
 
     def level_optimal(self, state, action):
         """
@@ -78,14 +97,19 @@ class CampusDeliveryBotHelper():
             returns:
                 True if the action is being taken at the optimal level in state. 
         """
-        state = state[0]        # This is a HACK. timeofdayO: Remove when level matters for states
+        state = state[0]        # This is a HACK. TODO: Remove when level matters for states
         level = action[1]
 
         if len(state) < 3:
             return level == 3
 
         if ((state[3] == 'door-closed' and action[0] == 'open'
-            and (self.get_state_feature_value(state, 'doortype') == 'pull'))):
+            and (self.get_state_feature_value(state, 'doortype') == 'pull'
+            or self.get_state_feature_value(state, 'doorsize') == 'heavy'
+            or (self.get_state_feature_value(state, 'doorsize') == 'medium'
+            and self.get_state_feature_value(state, 'region') == 'b2')))
+        or (action[0] == 'cross' and (state[3] == 'busy' or (state[3] == 'light'
+            and self.get_state_feature_value(state, 'visibility') == 'low')))):
             return level == 0
 
         return level == 3
@@ -111,6 +135,8 @@ class CampusDeliveryBotHelper():
             used_features = F.readline().split(',')
 
         features = [self.get_state_feature_value(state, feature) for feature in used_features if self.get_state_feature_value(state, feature) != None]
+        if 'crosswalk' in features:
+            features[features.index('crosswalk')] = state[3]
         return features
 
     def predict(self, state, action, level):
@@ -132,6 +158,8 @@ class CampusDeliveryBotHelper():
 
         if action == 'open' and 'door' in state[3]:
             return self.open_GAM.predict_mu([[self.open_GAM_map[f] for f in features]])
+        elif action == 'cross' and 'door' not in state[3]:
+            return self.cross_GAM.predict_mu([[self.cross_GAM_map[f] for f in features]])
         else:
             return -1.
 
@@ -146,7 +174,7 @@ class CampusDeliveryBotHelper():
                 does not contain this feature.
         """
         try:
-            return self.obstacle_info[str((state[0], state[1]))][feature]
+            return self.map_info[str((state[0], state[1]))][feature]
         except Exception:
             return None
 

@@ -3,27 +3,34 @@ import rospy
 
 from pyCAS.msg import Interaction, ObstacleStatus, RobotStatus, SSPState
 
-robot_status_message = RobotStatus()
-obstacle_status_message = ObstacleStatus()
-interaction_status_message = Interaction()
+ROBOT_STATUS_MESSAGE = RobotStatus()
+OBSTACLE_STATUS_MESSAGE = ObstacleStatus()
+INTERACTION_STATUS_MESSAGE = Interaction()
 
 
 def robot_status_message_callback(message):
-    global robot_status_message
-    robot_status_message = message
+    global ROBOT_STATUS_MESSAGE
+    ROBOT_STATUS_MESSAGE = message
 
 
 def obstacle_status_message_callback(message):
-    global obstacle_status_message
-    obstacle_status_message = message
+    global OBSTACLE_STATUS_MESSAGE
+    OBSTACLE_STATUS_MESSAGE = message
 
 
 def interaction_status_message_callback(message):
-    global interaction_status_message
-    interaction_status_message = message
+    global INTERACTION_STATUS_MESSAGE
+    INTERACTION_STATUS_MESSAGE = message
 
 
 def main():
+    """
+    params:
+        None
+
+    returns:
+        Publishes a combination of the obstacle status data, robot status data, and interaction status data to the SSP State topic 
+    """
     rospy.loginfo("Info[ssp_state_monitor.main]: Instantiating the ssp_state_monitor node...")
     rospy.init_node("ssp_state_monitor", anonymous=True)
 
@@ -38,10 +45,11 @@ def main():
     while not rospy.is_shutdown():
         message = SSPState()
     
-        if robot_status_message and obstacle_status_message:
-            message.robot_status = robot_status_message
-            message.obstacle_status = obstacle_status_message
-            message.interaction_status = interaction_status_message
+        if ROBOT_STATUS_MESSAGE and OBSTACLE_STATUS_MESSAGE and INTERACTION_STATUS_MESSAGE:
+
+            message.robot_status = ROBOT_STATUS_MESSAGE
+            message.obstacle_status = OBSTACLE_STATUS_MESSAGE
+            message.interaction_status = INTERACTION_STATUS_MESSAGE
             publisher.publish(message)
 
         rate.sleep()
