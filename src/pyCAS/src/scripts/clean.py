@@ -4,10 +4,6 @@ current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
 def clean_feedback():
-    if os.path.exists(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'feedback', 'cross.data')):
-        os.remove(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'feedback', 'cross.data'))
-    if os.path.exists(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'feedback', 'cross_full.data')):
-        os.remove(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'feedback', 'cross_full.data'))
     if os.path.exists(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'feedback', 'open.data')):
         os.remove(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'feedback', 'open.data'))
     if os.path.exists(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'feedback', 'open_full.data')):
@@ -16,16 +12,12 @@ def clean_feedback():
 def clean_params():
     if os.path.exists(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params', 'kappa.pkl')):
         os.remove(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params', 'kappa.pkl'))
-    if os.path.exists(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params', 'cross_gam.pkl')):
-        os.remove(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params', 'cross_gam.pkl'))
-    if os.path.exists(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params', 'cross_gam_map.pkl')):
-        os.remove(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params', 'cross_gam_map.pkl'))
     if os.path.exists(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params', 'open_gam.pkl')):
         os.remove(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params', 'open_gam.pkl'))
     if os.path.exists(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params', 'open_gam_map.pkl')):
         os.remove(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params', 'open_gam_map.pkl'))
     with open(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params', 'used_features.txt'), 'w') as f:
-        f.write('level,region,obstacle')
+        f.write('level,obstacle,doorid')
 
 def clean_outputs():
     if os.path.exists(os.path.join(current_file_path, '..', '..', 'output', 'CDB_robot', 'candidate_count.txt')):

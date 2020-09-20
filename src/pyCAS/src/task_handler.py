@@ -17,21 +17,10 @@ from models.CDB_robot.feedback_model import FeedbackModel
 from models.CDB_robot.competence_aware_system import CAS
 
 # generating the data files to be used
-from scripts.utils import (
-    init_open_data,
-    init_full_open_data,
-)
+from scripts.utils import init_open_data, init_full_open_data
 
-# generating necessary global paths
-OUTPUT_PATH = os.path.join(current_file_path, "..", "..", "output", "CDB_robot")
-FEEDBACK_DATA_PATH = os.path.join(
-    current_file_path, "..", "..", "domains", "CDB_robot", "feedback"
-)
-PARAM_PATH = os.path.join(
-    current_file_path, "..", "..", "domains", "CDB_robot", "params_robot"
-)
-MAP_PATH = os.path.join(current_file_path, "..", "..", "domains", "CDB_robot", "maps")
-
+# generating necessary global path
+FEEDBACK_DATA_PATH = os.path.join(current_file_path, "..", "..", "domains", "CDB_robot", "feedback")
 
 class CASTaskHandler(object):
     def __init__(self):
@@ -183,6 +172,7 @@ class CASTaskHandler(object):
 
 
     def get_problem(self, world_map, start, goal):
+<<<<<<< HEAD
         """
         params:
             World map: this is the path text file representation of the state space that is needed for the Domain Model
@@ -197,6 +187,12 @@ class CASTaskHandler(object):
         if not os.path.exists(os.path.join(FEEDBACK_DATA_PATH, "open.data")):
             init_open_data()
         if not os.path.exists(os.path.join(FEEDBACK_DATA_PATH, "open_full.data")):
+=======
+        # set up the data files from feedback 
+        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open.data') ):
+            init_open_data()
+        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data') ):
+>>>>>>> fcfbfd356c7bddb3d468b7dff587bb9b445022d2
             init_full_open_data()
 
         # Initiate all of the models
