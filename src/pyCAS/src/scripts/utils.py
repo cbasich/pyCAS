@@ -59,12 +59,12 @@ def FVI(mdp, eps = 0.001):
     return results
 
 
-def build_gam(df, distr='binomial', link='logit', input_classifier=None):
+def build_gam(df, distr='binomial', link='logit', fast=False, input_classifier=None):
     """
         This function is for building a GAM classifier.
         
         params:
-            domain - A string of the name of the domain, e.g. 'CDB_robot'
+            domain - A string of the name of the domain, e.g. 'CDB'
             name - A string of the name for the classifier, generally the action in question, e.g. 'cross'
             distr - The distribution used for the GAM, defaulted to binomial.
             link - The link used for the GAM, deefaulted to logit.
@@ -80,27 +80,26 @@ def build_gam(df, distr='binomial', link='logit', input_classifier=None):
             values that the GAM requires.
 
     """
-
     # First get all of the features (Xv) and convert into the dataframe identifiers
-    print("Info[utils.build_gam] Entering build GAMs...")
     Xv = df.values[:,:-1]
     X = np.unique(df.values[:,0:1], return_inverse=True)[1].reshape(-1,1)
     for i in range(1, len(df.values[0])-1):
-        X = np.concatenate((X, np.unique(df.values[:,i:i+1], return_inverse=True)[1].reshape(-1,1) ), axis=1)
-
+        if isinstance(df.values[:,i:i+1][0][0], float):
+            X = np.concatenate((X, df.values[:, i:i+1].reshape(-1,1)), axis=1)
+        else:
+            X = np.concatenate((X, np.unique(df.values[:,i:i+1], return_inverse=True)[1].reshape(-1,1) ), axis=1)
     # Second get the labels and convert to the dataframe identifiers
     y = np.unique(df.values[:,-1], return_inverse=True)[1]
 
-    gam_map = {}                # We will need this for the model. This let's us map semantics into
-                                # dataframe identifiers for calling predict.
+    gam_map = {}                        # We will need this for the model. This let's us map semantics into
+                                        # dataframe identifiers for calling predict.
     for i in range(df.shape[1]-1):      # Iterate through the number of features
         for key in np.unique(Xv[:,i]):  # Iterate through each value of feature
-            try:                # Try to add the key if it doesn't exist yet
+            try:                        # Try to add the key if it doesn't exist yet
                 gam_map[key] = X[:,i][np.where(Xv[:,i] == key)[0]][0]
-            except Exception:   # Deal with shaping issues
+            except Exception:           # Deal with shaping issues
                 X = X.reshape(-1,1)
                 gam_map[key] = X[:,i][np.where(Xv[:,i] == key)[0]][0]
-
     terms = s(0)
     for i in range(df.shape[1]-1):
         for j in range(i+1, df.shape[1]-1):
@@ -108,38 +107,40 @@ def build_gam(df, distr='binomial', link='logit', input_classifier=None):
 
     # Build the GAM now. By default use a Logistic GAM.
     # Use gridsearch to determine optimal parameters.
-    gam = GAM(terms, distribution=distr, link=link).fit(X,y)
+    if fast == True:
+        gam = GAM(terms, distribution=distr, link=link).fit(X,y)
+    else:
+        gam = GAM(terms, distribution=distr, link=link).gridsearch(X,y)
 
     return gam, gam_map
 
-def init_cross_data():
-    with open( os.path.join(FEEDBACK_DATA_PATH, 'cross.data'), 'a+') as f:
-        f.write('level,region,obstacle,feedback')
-        for level in ['1','2']:
-            for region in ['r1','r2']:
-                for obstacle in ['empty', 'light', 'heavy']:
-                    for feedback in ['yes','no']:
+# def init_cross_data():
+#     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross.data'), 'a+') as f:
+#         f.write('level,region,obstacle,feedback')
+#         for level in ['1','2']:
+#             for region in ['r1','r2']:
+#                 for obstacle in ['empty', 'light', 'heavy']:
+#                     for feedback in ['yes','no']:
                 
-                        entry = level + "," + region + "," + obstacle + "," + feedback
-                        f.write("\n" + entry)
+#                         entry = level + "," + region + "," + obstacle + "," + feedback
+#                         f.write("\n" + entry)
 
 
-def init_full_cross_data():
-    with open( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data'), 'a+') as f:
-        f.write('level,region,obstacle,visibility,streettype,feedback')
+# def init_full_cross_data():
+#     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data'), 'a+') as f:
+#         f.write('level,region,obstacle,visibility,streettype,feedback')
 
 
 def init_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
-        f.write('level,region,obstacle,feedback')
-        for level in ['1','2']:
-            for region in ['b1','b2','b3']:
-                for obstacle in ['door']:
+        f.write('level,obstacle,doorid,feedback')
+        for level in ['level1','level2']:
+            for obstacle in ['door']:
+                for doorid in ['door1', 'door2', 'door3', 'door4']:
                     for feedback in ['yes','no']:
-                        entry = level + "," + region + "," + obstacle + "," + feedback
+                        entry = ",".join([level,obstacle,doorid,feedback])
                         f.write("\n" + entry)
-
 
 def init_full_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'a+') as f:
-        f.write('level,region,obstacle,doorsize,doorcolor,doortype,feedback')
+        f.write('level,obstacle,doorid,doortype,doorcolor,feedback')

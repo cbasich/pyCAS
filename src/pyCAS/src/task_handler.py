@@ -21,7 +21,7 @@ from models.CDB_robot.autonomy_model import AutonomyModel
 from models.CDB_robot.feedback_model import FeedbackModel
 from models.CDB_robot.competence_aware_system import CAS
 
-from scripts.utils import init_cross_data, init_full_cross_data, init_open_data, init_full_open_data
+from scripts.utils import init_open_data, init_full_open_data
 
 class CASTaskHandler(object):
     def __init__(self):
@@ -102,12 +102,8 @@ class CASTaskHandler(object):
 
     def get_problem(self, world_map, start, goal):
         # set up the data files from feedback 
-        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'cross.data') ):
-            init_cross_data()
         if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open.data') ):
             init_open_data()
-        if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data') ):
-            init_full_cross_data()
         if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data') ):
             init_full_open_data()
 
