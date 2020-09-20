@@ -114,22 +114,6 @@ def build_gam(df, distr='binomial', link='logit', fast=False, input_classifier=N
 
     return gam, gam_map
 
-# def init_cross_data():
-#     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross.data'), 'a+') as f:
-#         f.write('level,region,obstacle,feedback')
-#         for level in ['1','2']:
-#             for region in ['r1','r2']:
-#                 for obstacle in ['empty', 'light', 'heavy']:
-#                     for feedback in ['yes','no']:
-                
-#                         entry = level + "," + region + "," + obstacle + "," + feedback
-#                         f.write("\n" + entry)
-
-
-# def init_full_cross_data():
-#     with open( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data'), 'a+') as f:
-#         f.write('level,region,obstacle,visibility,streettype,feedback')
-
 
 def init_open_data():
     with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
