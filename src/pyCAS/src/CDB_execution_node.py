@@ -97,7 +97,7 @@ def get_human_interaction(current_state, current_action, model, is_sim):
         # check response to either open the door or have to generate new transition function
         if response[0] == "y" or response[0] == "Y":
             # verify the obstacle has been moved if real-world experiment 
-            if not message.is_sim:
+            if not is_sim:
                 input('Press any key to confirm that the door has been opened: ')
             
             update_interaction_with_open()
@@ -235,8 +235,7 @@ def execute(message):
         # loop until the task is completed 
         while not task_handler.is_goal(current_state, goal):
             new_state = task_handler.get_state(SSP_STATE_MESSAGE)
-            print(new_state)
-
+            
             if new_state != current_state:
                 # get the optimal action for the current state
                 current_state = new_state

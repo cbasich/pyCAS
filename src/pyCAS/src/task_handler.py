@@ -117,7 +117,7 @@ class CASTaskHandler(object):
                 # set the default door status to closed
                 door_status = "door-closed"
                 yaw = message.robot_status.heading
-                direction = get_direction(yaw)
+                direction = self.get_direction(yaw)
 
                 # listen for interaction from human to see if the robot has been allowed to open the door
                 # right now we do not confirm that it has been opened - we just assume that it has been
