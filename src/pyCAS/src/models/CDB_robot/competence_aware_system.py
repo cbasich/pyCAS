@@ -442,7 +442,7 @@ class CAS():
 
         return correct/total
 
-    def update_data(state, action, feedback):
+    def update_data(self, state, action, feedback):
         used_features = open(os.path.join(PARAM_PATH, 'used_features.txt')).readline().split(",")
         full_features = open(os.path.join(PARAM_PATH, 'full_features.txt')).readline().split(",")
         unused_features = [feature for feature in full_features if feature not in used_features]
