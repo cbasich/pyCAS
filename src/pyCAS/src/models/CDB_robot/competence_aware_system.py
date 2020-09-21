@@ -12,7 +12,7 @@ sys.path.append(os.path.join(current_file_path, '..'))
 
 from scripts.utils import FVI
 
-PARAM_PATH = os.path.join('..', 'data', 'model parameters')
+FEEDBACK_DATA_PATH = os.path.join('..', '..', '..', 'domains', 'CDB_robot', 'feedback')
 
 
 class CAS():
