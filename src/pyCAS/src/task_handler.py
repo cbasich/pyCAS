@@ -189,11 +189,6 @@ class CASTaskHandler(object):
             Instantiates the domain model (DM), autonomy model (AM), feedback model (FM). 
             Returns the CAS model with inputs of DM, AM, and FM  
         """
-        # set up the data files from feedback
-        if not os.path.exists(os.path.join(FEEDBACK_DATA_PATH, "open.data")):
-            init_open_data()
-        if not os.path.exists(os.path.join(FEEDBACK_DATA_PATH, "open_full.data")):
-            init_full_open_data()
 
         # Initiate all of the models
         rospy.loginfo("Info[task_handler.get_problem]: Instantiating the domain model...")

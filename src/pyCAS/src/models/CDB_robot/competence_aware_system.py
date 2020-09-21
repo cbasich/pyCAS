@@ -441,3 +441,37 @@ class CAS():
             correct = correct + self.DM.helper.level_optimal(state, action)
 
         return correct/total
+
+    def update_date(state, action, feedback):
+        used_features = open(os.path.join(PARAM_PATH, 'used_features.txt')).readline().split(",")
+        full_features = open(os.path.join(PARAM_PATH, 'full_features.txt')).readline().split(",")
+        unused_features = [feature for feature in full_features if feature not in used_features]
+
+        used_features = ['level'+str(action[1])] + [self.DM.helper.get_state_feature_value(state[0], f)
+                          for f in used_features if self.DM.helper.get_state_feature_value(state[0], f) != None]
+
+        unused_features = [CAS.DM.helper.get_state_feature_value(state[0], f) for f in unused_features 
+                        if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
+
+        data_string = ",".join([str(f) for f in used_features])
+        full_data_string = data_string 
+        if len(unused_features) > 0:
+            full_data_string = full_data_string + "," + ",".join([str(f) for f in unused_features])
+
+        flagged = (action[1] == 1 and self.flags[self.states.index(state)][self.DM.actions.index(action[0])] == False)
+
+        if flagged:
+            data_string_copy = "level2" + data_string[6:]
+            full_data_string_copy = "level2" + full_data_string[6:]
+
+        filepath = os.path.join(FEEDBACK_DATA_PATH, 'open.data')
+        with open(filepath, mode='a+') as f:
+            f.write("\n" + data_string + "," + str(feedback))
+            if flagged:
+                f.write("\n" + data_string_copy + "," + str(feedback))
+
+        filepath = os.path.join(FEEDBACK_DATA_PATH, 'open_full.data')
+        with open(filepath, mode='a+') as f:
+            f.write("\n" + full_data_string + "," + str(feedback))
+            if flagged:
+                f.write("\n" + full_data_string_copy + "," + str(feedback))

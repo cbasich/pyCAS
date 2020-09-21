@@ -46,7 +46,7 @@ def update_interaction_with_open():
     INTERACTION_PUBLISHER.publish(interaction)
 
 
-def get_human_interaction(current_action, is_sim):
+def get_human_interaction(model, current_state, current_action, is_sim):
     """
     params:
         Current action: ((+/- increment row, +/- increment col), LoA) or (('open'), LoA)
@@ -101,6 +101,10 @@ def get_human_interaction(current_action, is_sim):
             # verify the obstacle has been moved if real-world experiment 
             if not is_sim:
                 input('Press any key to confirm that the door has been opened: ')
+
+            # Update the dataset. TODO: Move this to a "data/learning monitor"
+            feedback = "yes"
+            model.update_data(current_state, current_action, feedback)
             
             # assumes door has been opened and updates interaction message
             update_interaction_with_open()
@@ -108,6 +112,8 @@ def get_human_interaction(current_action, is_sim):
         # sets flag to remove action from transition and generate a new policy
         elif response[0] == "n" or response[0] == "N":
             generate_new_policy_flag = 1
+            feedback = "no"
+            model.update_data(current_state, current_action, feedback)
 
         else:
             rospy.loginfo("[ERROR]: Invalid input...")
@@ -125,10 +131,14 @@ def get_human_interaction(current_action, is_sim):
         if response[0] == "y" or response[0] == "Y":
             # assumes door has been opened and updates interaction message
             update_interaction_with_open()
+            feedback = "yes"
+            model.update_data(current_state, current_action, feedback)
         
         # if response is no, then the action will be removed from the transition 
         elif response[0] == "n" or response[0] == "N":
-            generate_new_policy_flag = 1 
+            generate_new_policy_flag = 1
+            feedback = "no"
+            model.update_data(current_state, current_action, feedback)
         
     return generate_new_policy_flag 
 
@@ -181,6 +191,12 @@ def execute(message):
     timeout_duration = rospy.get_param("/CDB_execution_node/timeout_duration")
     obstacle_map = rospy.get_param("/CDB_execution_node/obstacle_map")
     grid_map = rospy.get_param("/CDB_execution_node/grid_map")
+
+    # set up the data files from feedback
+    if not os.path.exists(os.path.join("..", "domains", "CDB_robot", "feedback", "open.data")):
+        init_open_data()
+    if not os.path.exists(os.path.join("..", "domains", "CDB_robot", "feedback", "open_full.data")):
+        init_full_open_data()
     
     #  simulates multiple iterations but only does one iteration for real world experiments  
     if message.is_sim:
@@ -241,7 +257,7 @@ def execute(message):
                 # if the level of autonomy needs some human interaction (any level other than unsupervised = 3)
                 if current_action[1] != 3:
                     # detemines the level of human interaction needed and retrives user input 
-                    generate_new_policy_flag = get_human_interaction(current_action, message.is_sim)
+                    generate_new_policy_flag = get_human_interaction(model, current_state, current_action, message.is_sim)
                     # if the action has been denied, then it needs to be removed from the transition function 
                     if generate_new_policy_flag:
                         rospy.loginfo("Removing action from transition function... ")
