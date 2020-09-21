@@ -16,9 +16,6 @@ from models.CDB_robot.autonomy_model import AutonomyModel
 from models.CDB_robot.feedback_model import FeedbackModel
 from models.CDB_robot.competence_aware_system import CAS
 
-# importing utility functions 
-from scripts.utils import init_open_data, init_full_open_data
-
 
 # Globals
 FEEDBACK_DATA_PATH = os.path.join(current_file_path, "..", "..", "domains", "CDB_robot", "feedback")

@@ -14,6 +14,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from pyCAS.msg import RobotStatus, ObstacleStatus, SSPState, TaskRequest, Interaction
 from task_handler import CASTaskHandler
 from models.CDB_robot.competence_aware_system import CAS
+from scripts.utils import init_open_data, init_full_open_data
 
 ### GLOBALS ###
 
@@ -32,17 +33,22 @@ def ssp_state_callback(message):
     SSP_STATE_MESSAGE = message
 
 
-def update_interaction_with_open():
+def update_interaction(door_status_boolean):
     """
     params:
-        None
+        Door status boolean: false means door is closed and true means door is open
 
     returns:
         Publishes an interaction message of door status = "open" 
         Only publishes a message when the door status is open 
     """
     interaction = Interaction()
-    interaction.status = "open"
+
+    if door_status_boolean:
+        interaction.status = "open"
+    else:
+        interaction.status = "closed"
+
     INTERACTION_PUBLISHER.publish(interaction)
 
 
@@ -72,7 +78,7 @@ def get_human_interaction(model, current_state, current_action, is_sim):
         # check response to see if the door has been opened
         if response[0] == "y" or response[0] == "Y":
             # update the interaction status with door "open"
-            update_interaction_with_open()
+            update_interaction(True)
         else:
             #TODO: figure out what we want to do if invalid input 
             rospy.loginfo("[ERROR]: Invalid input...")
@@ -107,10 +113,12 @@ def get_human_interaction(model, current_state, current_action, is_sim):
             model.update_data(current_state, current_action, feedback)
             
             # assumes door has been opened and updates interaction message
-            update_interaction_with_open()
+            update_interaction(True)
 
         # sets flag to remove action from transition and generate a new policy
         elif response[0] == "n" or response[0] == "N":
+            # make sure human interaction message has door status = "closed "
+            update_interaction(False)
             generate_new_policy_flag = 1
             feedback = "no"
             model.update_data(current_state, current_action, feedback)
@@ -130,7 +138,7 @@ def get_human_interaction(model, current_state, current_action, is_sim):
         # checking response to publish interaction 
         if response[0] == "y" or response[0] == "Y":
             # assumes door has been opened and updates interaction message
-            update_interaction_with_open()
+            update_interaction(True)
             feedback = "yes"
             model.update_data(current_state, current_action, feedback)
         
@@ -169,14 +177,14 @@ def go_back_to_start(start):
     status = NAVIGATION_SERVICE.wait_for_result()
     if not status:
         raise RuntimeError("Failed to reach the action server")
-    
 
-### EXECUTE ###
+
+    ### EXECUTE ###
 
 def execute(message):
     """
     params:
-        Taske request message that contains the goal and a boolean to flag when to use simulation mode 
+        Task request message that contains the goal and a boolean to flag when to use simulation mode 
 
     returns:
         Executes the CAS robot code  
@@ -256,6 +264,8 @@ def execute(message):
 
                 # if the level of autonomy needs some human interaction (any level other than unsupervised = 3)
                 if current_action[1] != 3:
+                    # set default door status interaction to "closed " 
+                    update_interaction(False)
                     # detemines the level of human interaction needed and retrives user input 
                     generate_new_policy_flag = get_human_interaction(model, current_state, current_action, message.is_sim)
                     # if the action has been denied, then it needs to be removed from the transition function 
