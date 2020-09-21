@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import os
 import sys
 import rospy
@@ -16,18 +16,20 @@ from models.CDB_robot.autonomy_model import AutonomyModel
 from models.CDB_robot.feedback_model import FeedbackModel
 from models.CDB_robot.competence_aware_system import CAS
 
-# generating the data files to be used
+# importing utility functions 
 from scripts.utils import init_open_data, init_full_open_data
 
-# generating necessary global path
+
+# Globals
 FEEDBACK_DATA_PATH = os.path.join(current_file_path, "..", "..", "domains", "CDB_robot", "feedback")
+
 
 class CASTaskHandler(object):
     def __init__(self):
+
         # load the toplogical map that contains all of the state waypoints
-        self.topological_map = json.load(
-            open(rospy.get_param("/CDB_execution_node/topological_map"))
-        )
+        self.topological_map = json.load(open(rospy.get_param("/CDB_execution_node/topological_map")))
+
 
     def parse_goals(self, goal_string):
         """
@@ -49,20 +51,26 @@ class CASTaskHandler(object):
         )
         goals = []
         goal = ()
-        # Parsing the goal data from an continous array into an array of tuples [(goal1_row, goal1_col), (goal2_row, goal2_col)]
+
+        # Parsing the goal data from a flat array into an array of tuples [(goal1_row, goal1_col), (goal2_row, goal2_col)]
         counter = 0
         for goal_coord in goal_array:
             goal = goal + (int(goal_coord),)
+
+            # checks to see if the goal has both row and col
             if counter == 1:
-                # goal is now a tuple (row, col)
+                # goal is now a tuple (row, col) and is added to the new goal array
                 goals.append(goal)
+                # reset goal to get the next tuple
                 goal = ()
                 # reset counter
                 counter = 0
+
             else:
                 counter += 1
         
         return goals
+
 
     def get_direction(self, yaw):
         """
@@ -72,6 +80,7 @@ class CASTaskHandler(object):
         returns:
             direction in format NORTH, SOUTH, EAST, or WEST
         """
+
         # convert yaw from radians to degrees
         if yaw < 0:
             angle_in_degrees = 360 + (yaw * (180 / math.pi))
@@ -81,22 +90,24 @@ class CASTaskHandler(object):
         # convert yaw into state representation (NORTH, SOUTH, EAST, WEST)
         if angle_in_degrees < 45 and angle_in_degrees > 0:
             direction = "EAST"
+
         elif angle_in_degrees < 360 and angle_in_degrees > 315:
             direction = "EAST"
+
         elif angle_in_degrees > 45 and angle_in_degrees < 135:
             direction = "NORTH"
+
         elif angle_in_degrees > 135 and angle_in_degrees < 225:
             direction = "WEST"
+
         elif angle_in_degrees > 225 and angle_in_degrees < 315:
             direction = "SOUTH"
         else:
             # invalid yaw
-            print(
-                "[ERROR invalid yaw value]: not able to find the direction with heading/yaw value of {}".format(
-                    yaw
-                )
-            )
+            print("[ERROR invalid yaw value]: not able to find the direction with heading/yaw value of {}".format(yaw))
+
         return direction
+
     
     def get_state(self, message):
         """
@@ -108,37 +119,29 @@ class CASTaskHandler(object):
             Format ((row, col) LoA) or ((row, col, direction, door status), LoA)
             LoA - level of autonomy 
         """
-        if message.obstacle_status.obstacle_data != "None":
-            # obstacle_dict = eval(message.obstacle_status.obstacle_data)
-            if (
-                message.obstacle_status.obstacle_data == "pull"
-                or message.obstacle_status.obstacle_data == "push"
-            ):
-                # set the default door status to closed
-                door_status = "door-closed"
-                yaw = message.robot_status.heading
-                direction = self.get_direction(yaw)
 
-                # listen for interaction from human to see if the robot has been allowed to open the door
-                # right now we do not confirm that it has been opened - we just assume that it has been
-                # TODO: find a way to confirm that the door has been opened before changing door_status
-                if message.obstacle_status.door_status == "open":
-                    door_status = "door-open"
-                return (
-                    (
-                        message.robot_status.location_row,
-                        message.robot_status.location_col,
-                        direction,
-                        door_status,
-                    ),
-                    3,
-                )
+        # set the default values
+        door_status = "door-closed"
+        LoA = 3
+        
+        # checks to see if there is an obstacle present 
+        if message.obstacle_status.obstacle_data != "None":   
+
+            # get the direction of the robot 
+            yaw = message.robot_status.heading
+            direction = self.get_direction(yaw)
+
+            # listen for interaction from human to see if the robot has been allowed to open the door
+            # TODO: find a way to confirm that the door has been opened before changing door_status
+            if message.obstacle_status.door_status == "open":
+                door_status = "door-open"
+
+            return ((message.robot_status.location_row, message.robot_status.location_col, direction, door_status), LoA)
+
         else:
-            # default LoA is 3 which means unsupervised autonomy
-            return (
-                (message.robot_status.location_row, message.robot_status.location_col),
-                3,
-            )
+            # no obstacle so just return state ((row, col), LoA)
+            return ((message.robot_status.location_row, message.robot_status.location_col), LoA)
+
 
     def get_pose(self, state):
         """
@@ -148,9 +151,12 @@ class CASTaskHandler(object):
         returns:
             X and y coordinates of that particular state. These coordinates are stored in the topoligical map as waypoints. 
         """
-        pose = self.topological_map["states"][str(state)]["pose"]
+
+        pose = self.topological_map["states"][str(state)]["position"]
+        # coordinates are in the map reference frame
         state_x = pose["x"]
         state_y = pose["y"]
+
         return (state_x, state_y)
 
 
@@ -168,6 +174,7 @@ class CASTaskHandler(object):
             current_state = (state[0][0], state[0][1])
         else:
             current_state = None
+
         return current_state == goal
 
 
@@ -190,7 +197,6 @@ class CASTaskHandler(object):
 
         # Initiate all of the models
         rospy.loginfo("Info[task_handler.get_problem]: Instantiating the domain model...")
-        # changed DM to accept start and goal of '(x, y)' or a text like 'S' or 'G'
         DM = DeliveryBotDomain(world_map, start, goal)
 
         rospy.loginfo("Info[task_handler.get_problem]: Instantiating the autonomy model...")
@@ -203,6 +209,7 @@ class CASTaskHandler(object):
         cas_model = CAS(DM, AM, HM, persistence=0.75)
         
         return cas_model
+
 
     def get_solution(self, model):
         """

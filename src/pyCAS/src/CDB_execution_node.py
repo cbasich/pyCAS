@@ -24,8 +24,8 @@ NAVIGATION_SERVICE = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 # ex: if LoA is 1, the robot needs permission, if human says yes to proceeding in opening a door, the interaction will send a message "open"
 INTERACTION_PUBLISHER = rospy.Publisher("monitor/interaction", Interaction, queue_size=10)
 
-
 SSP_STATE_MESSAGE = None
+
 
 def ssp_state_callback(message):
     global SSP_STATE_MESSAGE
@@ -46,28 +46,27 @@ def update_interaction_with_open():
     INTERACTION_PUBLISHER.publish(interaction)
 
 
-def get_human_interaction(current_state, current_action, model, is_sim):
+def get_human_interaction(current_action, is_sim):
     """
     params:
-        Current state: ((row, col, direction, door status), LoA)
-        Current action: ((+/- increment row, +/- increment col), LoA)
-        Model: current CAS model 
+        Current action: ((+/- increment row, +/- increment col), LoA) or (('open'), LoA)
+            Check to see what Level of Autonomy (LoA) to decide the need of human interaction. 
+            Then, prompts the user if a response if necessary.
         Simulation flag: boolean to define if this is a simulation run 
 
     returns:
         Flag to detemine if a new policy and state map needs to be generated
-        Model that might be updated with a new transition if an action is denied 
     """
     generate_new_policy_flag = 0
     # LoA 0: Human does the action
     if current_action[1] == 0:
         rospy.loginfo("Level 0 Autonomy: Will wait for human interference to remove obstacle... ")
 
-        # gets verification of obstacle removed
         # bypassing the user input if simulation
         if is_sim:
             response = "y"
         else:
+            # gets verification of obstacle removed
             response = input("Have you removed the obstacle? [y/n]: ")
 
         # check response to see if the door has been opened
@@ -75,8 +74,8 @@ def get_human_interaction(current_state, current_action, model, is_sim):
             # update the interaction status with door "open"
             update_interaction_with_open()
         else:
-            rospy.loginfo("[ERROR]: Invalid input...")
             #TODO: figure out what we want to do if invalid input 
+            rospy.loginfo("[ERROR]: Invalid input...")
 
     # LoA 1: Robot requests permission
     elif current_action[1] == 1:
@@ -85,30 +84,30 @@ def get_human_interaction(current_state, current_action, model, is_sim):
         # check door status to determine response for simulation
         if is_sim:
             doortype = SSP_STATE_MESSAGE.obstacle_status.obstacle_data
+
             if doortype == "push":
                 response = "y"
             elif doortype == "pull":
                 response = "n"
             else:
                 rospy.loginfo("[ERROR] did not find doortype: {}\n".format(doortype))
+        
         else:
             response = input("May I open the door? [y/n]: ")
 
-        # check response to either open the door or have to generate new transition function
+        # check response to either open the door or to generate new transition function
         if response[0] == "y" or response[0] == "Y":
+            
             # verify the obstacle has been moved if real-world experiment 
             if not is_sim:
                 input('Press any key to confirm that the door has been opened: ')
             
+            # assumes door has been opened and updates interaction message
             update_interaction_with_open()
 
-        # have to remove option from transition and resolve 
+        # sets flag to remove action from transition and generate a new policy
         elif response[0] == "n" or response[0] == "N":
-            rospy.loginfo("Removing action from transition function... ")
-            model.remove_transition(current_state, current_action)
             generate_new_policy_flag = 1
-            # restart to current state of null
-            current_state = None
 
         else:
             rospy.loginfo("[ERROR]: Invalid input...")
@@ -119,20 +118,19 @@ def get_human_interaction(current_state, current_action, model, is_sim):
         if is_sim:
             response = "y"
         else:
+            # checks that the user is ready for the robot to continue
             response = input('Are you supervising my actions?')
         
         # checking response to publish interaction 
         if response[0] == "y" or response[0] == "Y":
+            # assumes door has been opened and updates interaction message
             update_interaction_with_open()
         
         # if response is no, then the action will be removed from the transition 
         elif response[0] == "n" or response[0] == "N":
-            rospy.loginfo("Removing action from transition function... ")
-            model.remove_transition(current_state, current_action)
             generate_new_policy_flag = 1 
-            # restart to current state of null
-            current_state = None
-    return generate_new_policy_flag, model 
+        
+    return generate_new_policy_flag 
 
 
 def go_back_to_start(start):
@@ -141,8 +139,10 @@ def go_back_to_start(start):
         Start position (row, col)
 
     returns:
-        Publishes the start position as the next position through move base planner 
+        None
+        After the task has been completed, publishes the start position as the next position through move base planner 
     """
+    task_handler = CASTaskHandler()
     # after the goal has been completed, send robot back to the start to repeat 
     target_pose = task_handler.get_pose(start)
     x = target_pose[0]
@@ -154,8 +154,6 @@ def go_back_to_start(start):
     next_location.target_pose.header.stamp = rospy.Time.now()
     next_location.target_pose.pose = Pose(Point(x, y, 0), Quaternion(0, 0, 0, 1))
 
-    print("Returning to start")
-    print(next_location)
     NAVIGATION_SERVICE.send_goal(next_location)
 
     status = NAVIGATION_SERVICE.wait_for_result()
@@ -198,9 +196,7 @@ def execute(message):
 
     # delaying the code to get the start position from odom data
     while not SSP_STATE_MESSAGE:
-        rospy.loginfo(
-            "Info[CDB_execution_node.execute]: waiting to get start position..."
-        )
+        rospy.loginfo("Info[CDB_execution_node.execute]: waiting to get start position...")
         rospy.sleep(wait_duration)
 
     start_row = SSP_STATE_MESSAGE.robot_status.location_row
@@ -211,17 +207,13 @@ def execute(message):
     # an array of goals 
     goals = task_handler.parse_goals(message.goals)
 
-    # will iterate the according to simulation or real life
+    # will iterate to learn 
     for ii in range(number_iterations):
         rospy.loginfo("\n\nThis is iteration {}\n\n".format(ii))
 
         # choosing a random goal from task request message
         goal = goals[np.random.choice(len(goals))]
-        rospy.loginfo(
-            "Info[CDB_execution_node.execute]: The goal has been selected : {}".format(
-                goal
-            )
-        )
+        rospy.loginfo("Info[CDB_execution_node.execute]: The goal has been selected : {}".format(goal))
 
         # getting problem and solution for this iteration
         model = task_handler.get_problem(grid_map, start, goal)
@@ -232,21 +224,31 @@ def execute(message):
         level = model.check_level_optimality()
         rospy.loginfo("\n\nLevel of optimality is {}\n\n".format(level))
 
+        # initialize current state as None
+        current_state = None
+
         # loop until the task is completed 
         while not task_handler.is_goal(current_state, goal):
+            # get the most recent state
             new_state = task_handler.get_state(SSP_STATE_MESSAGE)
-            
+
             if new_state != current_state:
                 # get the optimal action for the current state
                 current_state = new_state
                 state_index = state_map[current_state]
                 current_action = policy[state_index]
 
-                response = None
+                # if the level of autonomy needs some human interaction (any level other than unsupervised = 3)
                 if current_action[1] != 3:
-                    generate_new_policy_flag, model = get_human_interaction(current_state, current_action, model, message.is_sim)
+                    # detemines the level of human interaction needed and retrives user input 
+                    generate_new_policy_flag = get_human_interaction(current_action, message.is_sim)
+                    # if the action has been denied, then it needs to be removed from the transition function 
                     if generate_new_policy_flag:
+                        rospy.loginfo("Removing action from transition function... ")
+                        model.remove_transition(current_state, current_action)
                         policy, state_map = task_handler.get_solution(model)
+                        # reset the current state to get a fresh new state
+                        current_state = None
                 
                 # LoA is 3 which means that it can act fully autonomously 
                 else:
@@ -255,6 +257,8 @@ def execute(message):
                         current_state[0][0] + current_action[0][0],
                         current_state[0][1] + current_action[0][1],
                     )
+
+                    # get the target state position in reference to the map frame
                     target_pose = task_handler.get_pose(target_state)
                     x = target_pose[0]
                     y = target_pose[1]
@@ -263,22 +267,19 @@ def execute(message):
                     next_location = MoveBaseGoal()
                     next_location.target_pose.header.frame_id = "map"
                     next_location.target_pose.header.stamp = rospy.Time.now()
-                    next_location.target_pose.pose = Pose(
-                        Point(x, y, 0), Quaternion(0, 0, 0, 1)
-                    )
-                    # verify that the correct location is being published
-                    print(next_location)
+                    next_location.target_pose.pose = Pose(Point(x, y, 0), Quaternion(0, 0, 0, 1))
 
                     NAVIGATION_SERVICE.send_goal(next_location)
 
                     status = NAVIGATION_SERVICE.wait_for_result()
+                    # checks that the goal was sent out properly 
                     if not status:
                         raise RuntimeError("Failed to reach the action server")
 
             rospy.sleep(wait_duration)
 
         rospy.loginfo("Info[CDB_execution_node.execute]: Completed the task")
-        
+                
         # after completeing the task, send the robot back to the start position
         go_back_to_start(start)
         current_state = None

@@ -14,7 +14,7 @@
 
     <!-- Our custom model -->
     <include>
-      <uri>model://cafe_table</uri>
+      <uri>model://large_campus</uri>
     </include>
   </world>
 </sdf>
