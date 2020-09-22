@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import json
 import os
 import numpy as np
@@ -281,9 +281,24 @@ def execute(message):
                     # determine the next location based off of current action and current state
                     target_state = (
                         current_state[0][0] + current_action[0][0],
-                        current_state[0][1] + current_action[0][1],
+                        current_state[0][1] + current_action[0][1]
                     )
 
+
+                    # TODO: Move this function to the top
+                    # TODO: Eliminate reliance on SSP_STATE_MESSAGE
+                    def get_quaternion(current_location, successor_location):
+                        import math
+                        from tf.transformations import quaternion_from_euler
+
+                        x_displacement = successor_location[0] - current_location[0]
+                        y_displacement = successor_location[1] - current_location[1]
+                        target_yaw = math.atan2(x_displacement, y_displacement)
+
+                        yaw_displacement = target_yaw - SSP_STATE_MESSAGE.robot_status.yaw
+
+                        return quaternion_from_euler(0, 0, yaw_displacement)
+ 
                     # get the target state position in reference to the map frame
                     target_pose = task_handler.get_pose(target_state)
                     x = target_pose[0]
@@ -294,6 +309,7 @@ def execute(message):
                     next_location.target_pose.header.frame_id = "map"
                     next_location.target_pose.header.stamp = rospy.Time.now()
                     next_location.target_pose.pose = Pose(Point(x, y, 0), Quaternion(0, 0, 0, 1))
+                    # next_location.target_pose.pose = Pose(Point(x, y, 0), get_quaternion(current_state[0], target_state))
 
                     NAVIGATION_SERVICE.send_goal(next_location)
 
