@@ -11,6 +11,9 @@ from pyCAS.msg import RobotStatus
 # Global variables
 DISTANCE_THRESHOLD = 0.25
 ODOMETRY_MESSAGE = Odometry()
+#TODO: Hack for now. For some reason it does not always get the start position. 
+# It is hard to reproduce the problem because it seems random. Will remove this later. 
+START = (1, 1)
 
 
 def odometry_message_callback(message):
@@ -46,6 +49,9 @@ def get_nearest_location(topological_map, current_location, position_transforms)
         horizontal_distance = map_state_x - map_current_location_x
         vertical_distance = map_state_y - map_current_location_y
         distance = math.sqrt(horizontal_distance ** 2 + vertical_distance ** 2)
+
+        if state == '(1, 1)':
+            print(distance)
 
         # compare the distance to the distance threshold
         if distance < DISTANCE_THRESHOLD:
@@ -117,6 +123,7 @@ def main():
                 location = location_info
                 previous_location = location
             else: 
+                previous_location = START
                 location = previous_location
             
             # get the orientation of the robot
