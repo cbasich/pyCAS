@@ -9,7 +9,7 @@ from pyCAS.msg import Interaction, ObstacleStatus, RobotStatus
 from IPython import embed
 
 # GLobal variables
-DISTANCE_THRESHOLD = 0.15
+DISTANCE_THRESHOLD = 0.25
 ODOMETRY_MESSAGE = Odometry()
 INTERACTION_MESSAGE = Interaction()
 

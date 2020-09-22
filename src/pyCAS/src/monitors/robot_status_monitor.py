@@ -9,7 +9,7 @@ from tf.transformations import euler_from_quaternion
 from pyCAS.msg import RobotStatus
 
 # Global variables
-DISTANCE_THRESHOLD = 0.15
+DISTANCE_THRESHOLD = 0.25
 ODOMETRY_MESSAGE = Odometry()
 
 
