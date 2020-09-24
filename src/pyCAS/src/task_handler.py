@@ -226,8 +226,14 @@ class CASTaskHandler(object):
         if os.path.exists(file_path):
             rospy.loginfo("Loading the policy file: {}".format(file_path))
             with open(file_path, 'rb') as f:
-                policy, state_map = pickle.load(f, encoding='bytes')
-                rospy.loginfo(policy)
+                policy, state_map, V, Q = pickle.load(f, encoding='bytes')
+
+                # Manually set the variables of the CAS model here - sorry Connor and Allyson
+                model.pi = policy
+                model.state_map = state_map
+                model.V = V
+                model.Q = Q
+
                 return policy, state_map
 
         rospy.loginfo("Info[task_handler.get_solution]: Instantiating solver... ")
@@ -235,9 +241,11 @@ class CASTaskHandler(object):
 
         state_map = model.state_map
         policy = model.pi
+        V = model.V
+        Q = model.Q
 
         rospy.loginfo("Saving the policy file: {}".format(file_path))
         with open(file_path, 'wb') as f:
-            pickle.dump((policy,state_map), f, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump((policy, state_map, V, Q), f, protocol=pickle.HIGHEST_PROTOCOL)
 
         return policy, state_map
