@@ -62,16 +62,18 @@
   </include>
 
   <!-- AMCL localization -->
-  <!-- <include file="$(find turtlebot3_navigation)/launch/amcl.launch"/--> 
+  <include file="$(find turtlebot3_navigation)/launch/amcl.launch">
+    <arg name="initial_pose_x" value="0.0"/>
+    <arg name="initial_pose_y" value="0.160"/>
+    <arg name="initial_pose_a" value="4.71"/>
+  </include>
 
   <!-- fake localization -->
-  <node pkg="fake_localization" type="fake_localization" name="fake_localization">
+  <!-- <node pkg="fake_localization" type="fake_localization" name="fake_localization">
     <remap from="base_pose_ground_truth" to="odom" />
     <param name="delta_x" value="-2.0"/>
     <param name="delta_y" value="1.8"/>
-
-
-  </node>
+  </node> -->
 
   <!-- visualization and mapping -->
   <node pkg="rviz" type="rviz" name="rviz" args="-d $(find pyCAS)/rviz/default.rviz" />

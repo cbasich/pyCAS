@@ -236,7 +236,7 @@ def execute(message):
 
         # choosing a random goal from task request message
         goal = goals[np.random.choice(len(goals))]
-        rospy.loginfo("Info[CDB_execution_node.execute]: The goal has been selected : {}".format(goal))
+        rospy.loginfo("Info[CDB_execution_node.execute]: The goal has been selected: {}".format(goal))
 
         # getting problem and solution for this iteration
         model = task_handler.get_problem(grid_map, start, goal)
