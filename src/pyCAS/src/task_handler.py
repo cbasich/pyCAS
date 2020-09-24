@@ -226,5 +226,6 @@ class CASTaskHandler(object):
         model.solve()
         state_map = model.state_map
         policy = model.pi
-
+        with open(os.path.join(current_file_path, '..', 'domains', 'CDB', 'params', 'policy.pkl'), 'rb') as f:
+            pickle.dump((policy,state_map), f, protocol=pickle.HIGHEST_PROTOCOL)
         return policy, state_map
