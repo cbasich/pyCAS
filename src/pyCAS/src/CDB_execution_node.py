@@ -273,22 +273,18 @@ def execute(message):
                         current_state[0][1] + current_action[0][1]
                     )
 
-
                     # TODO: Move this function to the top
-                    # TODO: Eliminate reliance on SSP_STATE_MESSAGE
-                    # def get_quaternion(current_location, successor_location):
-                    #     from scipy.spatial.transform import Rotation as R
-                    #     import math
+                    def get_quaternion(current_location, successor_location):
+                        from scipy.spatial.transform import Rotation as R
+                        import math
 
-                    #     x_displacement = successor_location[0] - current_location[0]
-                    #     y_displacement = successor_location[1] - current_location[1]
-                    #     target_yaw = math.atan2(x_displacement, y_displacement)
+                        x_displacement = successor_location[1] - current_location[1]
+                        y_displacement = successor_location[0] - current_location[0]
+                        target_yaw = math.atan2(-y_displacement, x_displacement)
 
-                    #     yaw_displacement = (target_yaw - SSP_STATE_MESSAGE.robot_status.yaw) / (180 * math.pi)
-
-                    #     components = R.from_euler('z', yaw_displacement, degrees=True).as_quat()
+                        components = R.from_euler('z', target_yaw).as_quat()
                     
-                    #     return Quaternion(components[0], components[1], components[2], components[3])
+                        return Quaternion(components[0], components[1], components[2], components[3])
  
                     # get the target state position in reference to the map frame
                     target_pose = task_handler.get_pose(target_state)
