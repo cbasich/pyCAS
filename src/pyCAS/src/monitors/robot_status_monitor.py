@@ -50,9 +50,6 @@ def get_nearest_location(topological_map, current_location, position_transforms)
         vertical_distance = map_state_y - map_current_location_y
         distance = math.sqrt(horizontal_distance ** 2 + vertical_distance ** 2)
 
-        if state == '(1, 1)':
-            print(distance)
-
         # compare the distance to the distance threshold
         if distance < DISTANCE_THRESHOLD:
             # parse the state from the topological map - '(row, col)' to (int(row), int(col)

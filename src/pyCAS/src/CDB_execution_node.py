@@ -52,7 +52,7 @@ def update_interaction(door_status_boolean):
     INTERACTION_PUBLISHER.publish(interaction)
 
 
-def get_human_interaction(model, current_state, current_action, is_sim):
+def get_human_interaction(current_state, current_action, is_sim):
     """
     params:
         Current action: ((+/- increment row, +/- increment col), LoA) or (('open'), LoA)
@@ -107,10 +107,6 @@ def get_human_interaction(model, current_state, current_action, is_sim):
             # verify the obstacle has been moved if real-world experiment 
             if not is_sim:
                 input('Press any key to confirm that the door has been opened: ')
-
-            # Update the dataset. TODO: Move this to a "data/learning monitor"
-            feedback = "yes"
-            model.update_data(current_state, current_action, feedback)
             
             # assumes door has been opened and updates interaction message
             update_interaction(True)
@@ -120,8 +116,6 @@ def get_human_interaction(model, current_state, current_action, is_sim):
             # make sure human interaction message has door status = "closed "
             update_interaction(False)
             generate_new_policy_flag = 1
-            feedback = "no"
-            model.update_data(current_state, current_action, feedback)
 
         else:
             rospy.loginfo("[ERROR]: Invalid input...")
@@ -139,15 +133,10 @@ def get_human_interaction(model, current_state, current_action, is_sim):
         if response[0] == "y" or response[0] == "Y":
             # assumes door has been opened and updates interaction message
             update_interaction(True)
-            feedback = "yes"
-            model.update_data(current_state, current_action, feedback)
         
         # if response is no, then the action will be removed from the transition 
         elif response[0] == "n" or response[0] == "N":
             generate_new_policy_flag = 1
-            feedback = "no"
-            model.update_data(current_state, current_action, feedback)
-        
     return generate_new_policy_flag 
 
 
@@ -267,7 +256,7 @@ def execute(message):
                     # set default door status interaction to "closed " 
                     update_interaction(False)
                     # detemines the level of human interaction needed and retrives user input 
-                    generate_new_policy_flag = get_human_interaction(model, current_state, current_action, message.is_sim)
+                    generate_new_policy_flag = get_human_interaction(current_state, current_action, message.is_sim)
                     # if the action has been denied, then it needs to be removed from the transition function 
                     if generate_new_policy_flag:
                         rospy.loginfo("Removing action from transition function... ")

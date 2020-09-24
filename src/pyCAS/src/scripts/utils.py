@@ -59,7 +59,7 @@ def FVI(mdp, eps = 0.001):
     return results
 
 
-def build_gam(df, distr='binomial', link='logit', fast=False, input_classifier=None):
+def build_gam(df, distr='binomial', link='logit', fast=True, input_classifier=None):
     """
         This function is for building a GAM classifier.
         
@@ -116,7 +116,7 @@ def build_gam(df, distr='binomial', link='logit', fast=False, input_classifier=N
 
 
 def init_open_data():
-    with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
+    with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'w+') as f:
         f.write('level,obstacle,doorid,feedback')
         for level in ['level1','level2']:
             for obstacle in ['door']:
@@ -126,5 +126,5 @@ def init_open_data():
                         f.write("\n" + entry)
 
 def init_full_open_data():
-    with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'a+') as f:
+    with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'w+') as f:
         f.write('level,obstacle,doorid,doortype,doorcolor,feedback')
