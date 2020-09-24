@@ -5,6 +5,8 @@ import numpy as np
 import rospy
 import roslib
 import actionlib
+import math
+from scipy.spatial.transform import Rotation as R
 
 # ROS messages
 from geometry_msgs.msg import Point, Pose, Quaternion
@@ -168,7 +170,15 @@ def go_back_to_start(start):
         raise RuntimeError("Failed to reach the action server")
 
 
-    ### EXECUTE ###
+def get_heading(current_location, successor_location):
+    x_displacement = successor_location[1] - current_location[1]
+    y_displacement = successor_location[0] - current_location[0]
+    target_yaw = math.atan2(-y_displacement, x_displacement)
+
+    components = R.from_euler('z', target_yaw).as_quat()
+
+    return Quaternion(components[0], components[1], components[2], components[3])
+
 
 def execute(message):
     """
@@ -272,19 +282,6 @@ def execute(message):
                         current_state[0][0] + current_action[0][0],
                         current_state[0][1] + current_action[0][1]
                     )
-
-                    # TODO: Move this function to the top
-                    def get_quaternion(current_location, successor_location):
-                        from scipy.spatial.transform import Rotation as R
-                        import math
-
-                        x_displacement = successor_location[1] - current_location[1]
-                        y_displacement = successor_location[0] - current_location[0]
-                        target_yaw = math.atan2(-y_displacement, x_displacement)
-
-                        components = R.from_euler('z', target_yaw).as_quat()
-                    
-                        return Quaternion(components[0], components[1], components[2], components[3])
  
                     # get the target state position in reference to the map frame
                     target_pose = task_handler.get_pose(target_state)
@@ -295,8 +292,7 @@ def execute(message):
                     next_location = MoveBaseGoal()
                     next_location.target_pose.header.frame_id = "map"
                     next_location.target_pose.header.stamp = rospy.Time.now()
-                    next_location.target_pose.pose = Pose(Point(x, y, 0), Quaternion(0, 0, 0, 1))
-                    # next_location.target_pose.pose = Pose(Point(x, y, 0), get_quaternion(current_state[0], target_state))
+                    next_location.target_pose.pose = Pose(Point(x, y, 0), get_heading(current_state[0], target_state))
 
                     NAVIGATION_SERVICE.send_goal(next_location)
 
