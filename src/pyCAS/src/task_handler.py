@@ -220,12 +220,14 @@ class CASTaskHandler(object):
         # CAS model that has already been initiated by get_problem
         if os.path.exists(os.path.join(current_file_path, '..', 'domains', 'CDB', 'params', 'policy.pkl')):
             with open(os.path.join(current_file_path, '..', 'domains', 'CDB', 'params', 'policy.pkl'), 'rb') as f:
-                policy, state_map = pickle.load(f, encoding='bytes')
-                return policy, state_map
+                rospy.loginfo("Info[task_handler.get_solution]: Loading existing policy and statemap...")
+                info = pickle.load(f, encoding='bytes')
+                return info[0], info[1]
         rospy.loginfo("Info[task_handler.get_solution]: Instantiating solver... ")
         model.solve()
         state_map = model.state_map
         policy = model.pi
         with open(os.path.join(current_file_path, '..', 'domains', 'CDB', 'params', 'policy.pkl'), 'rb') as f:
+            rospy.loginfo("Info[task_handler.get_solution]: Saving policy and statemap...")
             pickle.dump((policy,state_map), f, protocol=pickle.HIGHEST_PROTOCOL)
         return policy, state_map
