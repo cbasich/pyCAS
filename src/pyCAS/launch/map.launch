@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<launch>
+  <!-- Arguments -->
+  <arg name="map_file" default="$(find pyCAS)/domains/CDB_robot/maps/campus_2.yaml" />
+
+  <!-- visualization and mapping -->
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find pyCAS)/rviz/default.rviz" />
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+ 
+</launch> 

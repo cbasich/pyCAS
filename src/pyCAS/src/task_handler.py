@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import sys
 import rospy
 import math
 import json
-import pickle
+import pickle5 as pickle
 
 # adding the current path to sys.path for relative importing
 current_file_path = os.path.dirname(os.path.realpath(__file__))
@@ -192,8 +192,8 @@ class CASTaskHandler(object):
         file_path = os.path.join(current_file_path, '..', 'domains', 'CDB_robot', 'params', 'models.pkl')
         if os.path.exists(file_path):
             rospy.loginfo("Loading the model file: {}".format(file_path))
-            with open(file_path) as f:
-                cas_model = pickle.load(f, encoding = 'bytes')[0]
+            with open(file_path, 'rb') as f:
+                cas_model = pickle.load(f, encoding = 'bytes')[2]
                 return cas_model
 
         rospy.loginfo("Info[task_handler.get_problem]: Instantiating the domain model...")
@@ -226,7 +226,8 @@ class CASTaskHandler(object):
         if os.path.exists(file_path):
             rospy.loginfo("Loading the policy file: {}".format(file_path))
             with open(file_path, 'rb') as f:
-                policy, state_map = pickle.load(f, encoding='bytes')[0]
+                data = pickle.load(f, encoding='bytes')[2]
+                policy, state_map = data['policy'], data['state_map']
 
                 # Manually set the variables of the CAS model here - sorry Connor and Allyson
                 model.pi = policy
