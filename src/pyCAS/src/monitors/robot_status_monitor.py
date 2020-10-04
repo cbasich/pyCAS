@@ -9,7 +9,7 @@ from tf.transformations import euler_from_quaternion
 from pyCAS.msg import RobotStatus
 
 # Global variables
-DISTANCE_THRESHOLD = 0.25
+DISTANCE_THRESHOLD = 0.15
 ODOMETRY_MESSAGE = Odometry()
 #TODO: Hack for now. For some reason it does not always get the start position. 
 # It is hard to reproduce the problem because it seems random. Will remove this later. 

@@ -3,7 +3,7 @@
   <!-- Arguments -->
   <arg name="map_file" default="$(find pyCAS)/domains/CDB_robot/maps/campus_2.yaml" />
   <arg name="model" default="burger"/>
-  <arg name="move_forward_only" default="true"/>
+  <arg name="move_forward_only" default="false"/>
   <!-- pyCAS arguments -->
   <arg name="obstacle_map" default="$(find pyCAS)/domains/CDB_robot/maps/obstacle_info.json"/>
   <arg name="grid_map" default="$(find pyCAS)/domains/CDB_robot/maps/campus_2.txt"/>
@@ -62,19 +62,19 @@
   </include>
 
   <!-- AMCL localization -->
-  <!-- <include file="$(find turtlebot3_navigation)/launch/amcl.launch">
-    <arg name="initial_pose_x" value="-0.5"/>
-    <arg name="initial_pose_y" value="-2.4"/>
+  <include file="$(find turtlebot3_navigation)/launch/amcl.launch">
+    <arg name="initial_pose_x" value="0.625"/>
+    <arg name="initial_pose_y" value="2.4"/>
     <arg name="initial_pose_a" value="4.71"/>
-  </include> -->
+  </include>
 
   <!--fake localization -->
-  <node pkg="fake_localization" type="fake_localization" name="fake_localization">
+  <!-- <node pkg="fake_localization" type="fake_localization" name="fake_localization">
     <remap from="base_pose_ground_truth" to="odom" />
     <param name="delta_x" value="0.5"/>
     <param name="delta_y" value="2.4"/>
-    <param name="delta_yaw" value="-4.7"/>
-  </node>
+    <param name="delta_yaw" value="-4.6"/>
+  </node> -->
 
   <!-- <node pkg="tf" type="static_transform_publisher" name="laser_to_baselink" args="0 0 0 3.14159 0 0 /laser /base_link 50"/> -->
 
@@ -92,7 +92,7 @@
     <rosparam file="$(find turtlebot3_navigation)/param/global_costmap_params.yaml" command="load" />
     <rosparam file="$(find turtlebot3_navigation)/param/dwa_local_planner_params_burger.yaml" command="load" />
     <remap from="cmd_vel" to="mobile_base/commands/velocity"/>
-    <param name="recovery_behavior_enabled" value="false"/> 
-    <param name="clearing_rotation_allowed" value="false"/>
+    <!-- <param name="recovery_behavior_enabled" value="false"/> 
+    <param name="clearing_rotation_allowed" value="false"/> -->
   </include>
 </launch>

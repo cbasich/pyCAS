@@ -6,6 +6,8 @@ import rospy
 import roslib
 import actionlib
 import math
+import time
+from IPython import embed
 from scipy.spatial.transform import Rotation as R
 
 # ROS messages
@@ -244,62 +246,74 @@ def execute(message):
         rospy.loginfo("Info[CDB_execution_node.instantiate]: Retrieved solution...")
 
         # checks the percent of the correct actions
-        level = model.check_level_optimality()
-        rospy.loginfo("\n\nLevel of optimality is {}\n\n".format(level))
+        # level = model.check_level_optimality()
+        # rospy.loginfo("\n\nLevel of optimality is {}\n\n".format(level))
 
         # initialize current state as None
-        current_state = None
-
+        current_state = ((1, 1), 3)
+        
         # loop until the task is completed 
         while not task_handler.is_goal(current_state, goal):
+            previous_state = current_state
+            action = policy[state_map[current_state]]
+            if action[0] == 'open':
+                time.sleep(5)
+                current_state = ((current_state[0], current_state[1], current_state[2], 'door-open'), 3)
+                continue
+            current_state = model.generate_successor(current_state, action)
+            target_state = (current_state[0][0], current_state[0][1])
+            target_pose = task_handler.get_pose(target_state)
+            x = target_pose[0]
+            y = target_pose[1]
+
+            # publish the next location to the move base planner 
+            next_location = MoveBaseGoal()
+            next_location.target_pose.header.frame_id = "map"
+            next_location.target_pose.header.stamp = rospy.Time.now()
+            next_location.target_pose.pose = Pose(Point(x, y, 0), get_heading(previous_state[0], target_state))
+            
+            rospy.loginfo("This is the goal: {}".format(next_location))
+            NAVIGATION_SERVICE.send_goal(next_location)
+
+            status = NAVIGATION_SERVICE.wait_for_result()
+            # checks that the goal was sent out properly 
+            if not status:
+                raise RuntimeError("Failed to reach the action server")
             # get the most recent state
-            new_state = task_handler.get_state(SSP_STATE_MESSAGE)
+            # new_state = task_handler.get_state(current_state)
+        
+            #     # get the optimal action for the current state
+            #     current_state = new_state
+            #     state_index = state_map[current_state]
+            #     current_action = policy[state_index]
 
-            if new_state != current_state:
-                # get the optimal action for the current state
-                current_state = new_state
-                state_index = state_map[current_state]
-                current_action = policy[state_index]
+            #     rospy.loginfo("Encountered new state: {}".format(current_state))
+            #     rospy.loginfo("Selected new action: {}".format(current_action))
 
-                # if the level of autonomy needs some human interaction (any level other than unsupervised = 3)
-                if current_action[1] != 3:
-                    # set default door status interaction to "closed " 
-                    update_interaction(False)
-                    # detemines the level of human interaction needed and retrives user input 
-                    generate_new_policy_flag = get_human_interaction(current_state, current_action, message.is_sim)
-                    # if the action has been denied, then it needs to be removed from the transition function 
-                    if generate_new_policy_flag:
-                        rospy.loginfo("Removing action from transition function... ")
-                        model.remove_transition(current_state, current_action)
-                        policy, state_map = task_handler.get_solution(model)
-                        # reset the current state to get a fresh new state
-                        current_state = None
+            #     # if the level of autonomy needs some human interaction (any level other than unsupervised = 3)
+            #     if current_action[1] != 3:
+            #         # set default door status interaction to "closed " 
+            #         update_interaction(False)
+            #         # detemines the level of human interaction needed and retrives user input 
+            #         generate_new_policy_flag = get_human_interaction(current_state, current_action, message.is_sim)
+            #         # if the action has been denied, then it needs to be removed from the transition function 
+            #         if generate_new_policy_flag:
+            #             rospy.loginfo("Removing action from transition function... ")
+            #             model.remove_transition(current_state, current_action)
+            #             policy, state_map = task_handler.get_solution(model)
+            #             # reset the current state to get a fresh new state
+            #             current_state = None
                 
                 # LoA is 3 which means that it can act fully autonomously 
-                else:
+       
                     # determine the next location based off of current action and current state
-                    target_state = (
-                        current_state[0][0] + current_action[0][0],
-                        current_state[0][1] + current_action[0][1]
-                    )
+                    # target_state = (
+                    #     current_state[0][0] + current_action[0][0],
+                    #     current_state[0][1] + current_action[0][1]
+                    # )
  
                     # get the target state position in reference to the map frame
-                    target_pose = task_handler.get_pose(target_state)
-                    x = target_pose[0]
-                    y = target_pose[1]
 
-                    # publish the next location to the move base planner 
-                    next_location = MoveBaseGoal()
-                    next_location.target_pose.header.frame_id = "map"
-                    next_location.target_pose.header.stamp = rospy.Time.now()
-                    next_location.target_pose.pose = Pose(Point(x, y, 0), get_heading(current_state[0], target_state))
-
-                    NAVIGATION_SERVICE.send_goal(next_location)
-
-                    status = NAVIGATION_SERVICE.wait_for_result()
-                    # checks that the goal was sent out properly 
-                    if not status:
-                        raise RuntimeError("Failed to reach the action server")
 
             rospy.sleep(wait_duration)
 
