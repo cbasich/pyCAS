@@ -257,8 +257,11 @@ def execute(message):
             previous_state = current_state
             action = policy[state_map[current_state]]
             if action[0] == 'open':
-                time.sleep(5)
-                current_state = ((current_state[0], current_state[1], current_state[2], 'door-open'), 3)
+                time.sleep(1)
+                if len(current_state[0]) == 5:
+                    current_state = ((current_state[0][0], current_state[0][1], current_state[0][2], 'door-open', current_state[0][4]), 3)    
+                else:
+                    current_state = ((current_state[0][0], current_state[0][1], current_state[0][2], 'door-open'), 3)
                 continue
             current_state = model.generate_successor(current_state, action)
             target_state = (current_state[0][0], current_state[0][1])

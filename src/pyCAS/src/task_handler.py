@@ -17,6 +17,7 @@ from models.CDB_robot.autonomy_model import AutonomyModel
 from models.CDB_robot.feedback_model import FeedbackModel
 from models.CDB_robot.competence_aware_system import CAS
 
+EXPERIMENT = 2
 
 # Globals
 FEEDBACK_DATA_PATH = os.path.join(current_file_path, "..", "..", "domains", "CDB_robot", "feedback")
@@ -193,7 +194,7 @@ class CASTaskHandler(object):
         if os.path.exists(file_path):
             rospy.loginfo("Loading the model file: {}".format(file_path))
             with open(file_path, 'rb') as f:
-                cas_model = pickle.load(f, encoding = 'bytes')[2]
+                cas_model = pickle.load(f, encoding = 'bytes')[EXPERIMENT]
                 return cas_model
 
         rospy.loginfo("Info[task_handler.get_problem]: Instantiating the domain model...")
@@ -226,7 +227,7 @@ class CASTaskHandler(object):
         if os.path.exists(file_path):
             rospy.loginfo("Loading the policy file: {}".format(file_path))
             with open(file_path, 'rb') as f:
-                data = pickle.load(f, encoding='bytes')[2]
+                data = pickle.load(f, encoding='bytes')[EXPERIMENT]
                 policy, state_map = data['policy'], data['state_map']
 
                 # Manually set the variables of the CAS model here - sorry Connor and Allyson
