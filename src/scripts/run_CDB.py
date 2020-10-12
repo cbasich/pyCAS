@@ -223,7 +223,7 @@ def interfaceWithHuman(state, action, info, interact=True):
             if info['doortype'] == 'pull':
                 feedback = 'no'
             else:
-                if info['doorsize'] == 'small' or (info['doorsize'] == 'medium' and info['region'] == 'b1'):
+                if info['doorsize'] == 'small' or (info['doorsize'] == 'medium' and info['region'] in ['b1','b2']):
                     feedback = 'yes'
                 else:
                     feedback = 'no'

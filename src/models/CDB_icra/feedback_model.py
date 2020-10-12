@@ -4,7 +4,7 @@ import pandas as pd
 import itertools as it
 
 from IPython import embed
-from sklearn.metrics import log_loss, f1_score
+from sklearn.metrics import matthews_corrcoef
 
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
@@ -132,7 +132,7 @@ class FeedbackModel():
         unused_features = full_features.drop(used_features)
         return unused_features
 
-    def find_candidates(self, delta=0.1, thresh=30):
+    def find_candidates(self, delta=0.05, thresh=100):
         """
         params:
             delta  - Defines the probability threshold needed for (s,a) to not be a candidate.
@@ -149,9 +149,6 @@ class FeedbackModel():
 
         with open(os.path.join(MAP_PATH, 'map_info.json')) as F:
             map_info = json.load(F)
-
-        with open(os.path.join(PARAM_PATH, 'used_features.txt')) as F:
-            used_features = F.readline().split(',')
 
         candidates = []
         for state in self.lambda_.keys():
@@ -197,6 +194,7 @@ class FeedbackModel():
             returns:
                 discriminators - A list of features.
         """
+        print("Finding most likely discriminator...")
         state, action, level = candidate
 
         # First, for a given candidate, procure its unused features
@@ -206,41 +204,84 @@ class FeedbackModel():
             return None
             
         # Second, compute the correlation matrix over each unused feature
-        # and the feedback.
-        # TODO: Include all *pairs* of features as rows in the matrix.
-        # TODO: There is an issue right now with features that take on <= 2
-        #       integral values (i.e. level) in the presence of objects. The issue
-        #       is that during the one hot encoding, each value (i.e. level 1, level 2)
-        #       is not assigned a separate row. So there is a correlation only for 'feature'
-        #       whereas the other features have a correlation for each 'feature-value'.
-        #       This may present problems below when calculating the discriminator matrix.
-        #       The real todo is check if that is the case or not.
         D = pd.read_csv(os.path.join(FEEDBACK_PATH, action + "_full.data"))
-        _corr = pd.get_dummies( D[np.append(unused_features, 'feedback')] ).corr()
+
+        tmp = pd.get_dummies( D[np.append(unused_features, 'feedback')])
+        cols = tmp.columns.values
+        for i in range(len(cols)):
+            f1 = cols[i]
+            for j in range(i+1, len(cols)):
+                f2 = cols[j]
+                try:
+                    if f1[:f1.index('_')] != f2[:f2.index('_')] and 'feedback' not in f1 and 'feedback' not in f2:
+                        f3 = f1 + ',' + f2
+                        tmp[f3] = tmp[f1] * tmp[f2]
+                except:
+                    if f1 != f2 and 'feedback' not in f1 and 'feedback' not in f2:
+                        f3 = f1 + ',' + f2
+                        tmp[f3] = tmp[f1] * tmp[f2] 
+
+        _corr = tmp.corr()
         _corr = _corr[[c for c in _corr.columns.values if 'feedback' in c]]
         _corr = _corr.drop([c for c in _corr.axes[0].values if 'feedback' in c], axis = 0)
-        # embed()
+        _corr = _corr.fillna(0)
+
+        print("Built correlation matrix...")
 
         # Third, build the discrimantor matrix for each feature or pair
         # of features present in the correlation matrix. Right now we are simply
         # doing this by taking the max over all feature-values, and then summing
         # over each feature value's max correlation with the feedback for the
         # relevant Feature.
-        _disc = {f: 0 for f in unused_features}
+        _disc = dict()
+        for i in range(len(unused_features)):
+            f1 = unused_features[i]
+            _disc[f1] = 0
+            for j in range(i+1, len(unused_features)):
+                f2 = unused_features[j]
+                _disc[(f1 + ',' + f2)] = 0
         for row_name in _corr.axes[0].values:
-            try:
-                f = row_name[:row_name.index('_')]
-                _disc[f] += np.max(_corr.loc[row_name])
-            except:
-                _disc[row_name] += np.max(_corr.loc[row_name])
+            if ',' in row_name:
+                feature_values = row_name.split(',')
+                feature_value_1, feature_value_2 = feature_values[0], feature_values[1]
+                if '_' in feature_value_1:
+                    feature_1 = feature_value_1[:feature_value_1.index('_')]
+                else:
+                    feature_1 = feature_value_1
+                if '_' in feature_value_2:
+                    feature_2 = feature_value_2[:feature_value_2.index('_')]
+                else:
+                    feature_2 = feature_value_2
+                pairwise_feature = feature_1 + ',' + feature_2
+                _disc[pairwise_feature] += np.max(_corr.loc[row_name])
+            else:
+                if '_' in row_name:
+                    f = row_name[:row_name.index('_')]
+                    _disc[f] += np.max(_corr.loc[row_name])
+                else:
+                    _disc[row_name] += np.max(_corr.loc[row_name])
+
+        print("Built discrimination matrix...")
 
         indices = list(_corr.index.values)
         for f in _disc.keys():
-            _disc[f] /= len([v for v in indices if f in v])
-        discriminators = unused_features[np.argpartition(np.array(list(_disc.values())), -k)[-k:]]
+            count = 0
+            if ',' in f:
+                F = f.split(',')
+                f1, f2 = F[0], F[1]
+                count = len([v for v in indices if (f1 in v and f2 in v)])
+            else:
+                count = len([v for v in indices if (f in v and ',' not in v)])
+            _disc[f] /= count
+
+        print("Normalized discrimiation matrix...")
+
+        discriminators = np.array(list(_disc.keys()))[np.argpartition(np.array(list(_disc.values())), -min(k, len(list(_disc.values()))))[-min(k, len(list(_disc.values()))):]]
 
         D_train = D.sample(frac=0.75)
         D_test = D.drop(D_train.index)
+
+        # embed()
 
         return self.test_discriminators(D_train, D_test, D.columns.drop(np.append(unused_features, 'feedback')), discriminators)
  
@@ -258,41 +299,107 @@ class FeedbackModel():
                 d*             - The discriminator which produced the classifier with the highest
                                  performance on the test data.
         """
+        print("Testing discriminators....")
         lambdas = [(self.build_lambda(D_train, used_features, discriminator), discriminator) for discriminator in discriminators]
         scores = [self.test_lambda(lambda_, lambda_map, D_test, used_features, discriminator) for (lambda_, lambda_map), discriminator in lambdas]
 
-        d = discriminators[np.argmax(scores)]
+        print("Checkpoint 1.5")
+        # embed()
+
+        best_score = np.max(scores)
+        best_discrims = []
+        for i in range(len(discriminators)):
+            if scores[i] == best_score:
+                best_discrims.append(discriminators[i])
+        d = best_discrims[0]
+        for discriminator in best_discrims:
+            if ',' not in discriminator:
+                d = discriminator
+                break
 
         print("Checking discriminator " + str(d) + "...")
+        print("Checkpoint 2")
+        # embed()
 
-        if 'door' in D_train['obstacle'].values:
-            curr_score = self.test_lambda(self.DM.helper.open_GAM, self.DM.helper.open_GAM_map, D_test, used_features, discriminator = None) 
-            if np.max(scores) < curr_score:
+        if 'traffic' in D_train.columns:
+            curr_score = self.test_lambda(self.DM.helper.cross_GAM, self.DM.helper.cross_GAM_map, D_test, used_features, discriminator = None)
+            if np.max(scores) < curr_score or np.max(scores) < 0.5:
                 return None
         else:
-            curr_score = self.test_lambda(self.DM.helper.cross_GAM, self.DM.helper.cross_GAM_map, D_test, used_features, discriminator = None)
-            if np.max(score) < curr_score:
+            curr_score = self.test_lambda(self.DM.helper.open_GAM, self.DM.helper.open_GAM_map, D_test, used_features, discriminator = None) 
+            if np.max(scores) < curr_score or np.max(scores) < 0.5:
                 return None
 
+        print("Checkpoint 3")
+        # embed()
         return d
 
     def build_lambda(self, D_train, used_features, discriminator):
-        train = D_train[np.append(used_features, [discriminator, 'feedback'])]
+        """
+            params:
+                D_train         - The data matrix that is going to be used to train the classifiers.
+                used_features   - The set of features that are currently being used by the system
+                discriminator   - The feauture(s) we are testing adding to the feedback profile.
 
-        gam, gam_map = build_gam(train)
+            returns:
+                lambda_         - The GAM produced when training with the new discriminator added on D_train.
+                lambda_map      - The conversion map for the gam.
+        """
+        print("Building lambda for discriminator {}".format(discriminator))
+        if ',' in discriminator:
+            discriminator_values = discriminator.split(',')
+            train = D_train[np.append(used_features, discriminator_values + ['feedback'])]
+        else:
+            train = D_train[np.append(used_features, [discriminator, 'feedback'])]
+        # embed()
+        lambda_, lambda_map = build_gam(train, fast=False)
 
-        return (gam, gam_map)
+        return (lambda_, lambda_map)
 
     def test_lambda(self, lambda_, lambda_map, D_test, used_features, discriminator):
+        """
+            params:
+                lambda_         - The feedback profile we are testing.
+                lambda_map      - The conversion map for the feedback profile.
+                D_test          - The test split of our dataset.
+                used_features   - The set of features that are currently being used by the system.
+                discriminator   - The feature(s) we are testing adding to the feedback profile.
+
+            return:
+                The f1 score of the new feedback profile. 
+        """
+        print("Testing discriminator {}".format(discriminator))
+        if lambda_ is None:
+            return -1.
+
         if discriminator == None:
             X = D_test[used_features]
         else:
-            X = D_test[np.append(used_features, discriminator)]
+            if ',' in discriminator:
+                discriminator_values = discriminator.split(',')
+                X = D_test[np.append(used_features, discriminator_values)]
+            else:
+                X = D_test[np.append(used_features, discriminator)]
         y = D_test['feedback'] == 'yes'
         y_true = np.array(y, int)
-        X_ = np.array([[lambda_map[f] for f in x] for x in X.values])
+
+        X_ = []
+        for x in X.values:
+            x_arr = []
+            for f in x:
+                if type(f) == float:
+                    x_arr.append(f)
+                else:
+                    x_arr.append(lambda_map[f])
+            X_.append(x_arr)
+
+        X_ = np.array(X_)
 
         predictions = lambda_.predict(X_)
         y_pred = predictions > 0.5
 
-        return f1_score(y_true, y_pred)
+        print("Checkpoint 1")
+        # if matthews_corrcoef(y_true, y_pred) > 0.5:
+        #     embed()
+
+        return matthews_corrcoef(y_true, y_pred)

@@ -73,12 +73,15 @@ class CampusDeliveryBotHelper():
     def __init__(self, DM):
         self.DM = DM
         self.map_info = self.DM.map_info
+        self.build_gams()
+
+    def build_gams(self):
         try:
             build_gams()
         except Exception:
             print("Failed to build GAMs, using previously stored models.")
         self.cross_GAM, self.open_GAM, self.cross_GAM_map, self.open_GAM_map = load_gams()
-
+        
     def level_optimal(self, state, action):
         """
             params:
@@ -103,7 +106,7 @@ class CampusDeliveryBotHelper():
             and self.get_state_feature_value(state, 'region') == 'b2')))
         or (action[0] == 'cross' and (state[3] == 'busy' or (state[3] == 'light'
             and (self.get_state_feature_value(state, 'visibility') == 'low')
-            or self.timeofday in self.get_state_feature_value(state, 'pedestrians'))))):
+            or self.DM.timeofday in self.get_state_feature_value(state, 'pedestrians'))))):
             return level == 0
 
         return level == 3
@@ -125,8 +128,12 @@ class CampusDeliveryBotHelper():
                 function will need to be updated.
 
         """
-        with open( os.path.join(PARAM_PATH, 'used_features.txt')) as F:
-            used_features = F.readline().split(',')
+        if len(state) > 2 and 'door' in state[3]:
+            df = pd.read_csv(open(os.path.join(FEEDBACK_PATH, 'open.data'),'rb'))
+            used_features = list(df.columns.values)
+        elif len(state) > 2 and 'door' not in state[3]:
+            df = pd.read_csv(open(os.path.join(FEEDBACK_PATH, 'cross.data'),'rb'))
+            used_features = list(df.columns.values)
 
         features = [self.get_state_feature_value(state, feature) for feature in used_features if self.get_state_feature_value(state, feature) != None]
         if 'crosswalk' in features:
@@ -169,6 +176,8 @@ class CampusDeliveryBotHelper():
         """
         if feature == 'timeofday':
             return self.DM.timeofday
+        elif feature == 'traffic' and self.map_info[str((state[0], state[1]))]['obstacle'] == 'crosswalk':
+            return state[3]
         try:
             return self.map_info[str((state[0], state[1]))][feature]
         except Exception:
@@ -193,15 +202,14 @@ class CampusDeliveryBotHelper():
         """
         state, action, _ = candidate
 
-        with open( os.path.join(PARAM_PATH, 'used_features.txt'), mode='a+') as f:
-            f.write("," + str(feature))
-        with open( os.path.join(PARAM_PATH, 'used_features.txt'), mode='r+') as f:
-            used_features = f.readline().split(',')
-
         df = pd.read_csv( open(os.path.join(FEEDBACK_PATH, action+'.data')))
         df_full = pd.read_csv( open(os.path.join(FEEDBACK_PATH, action+'_full.data')))
-
-        X = df_full[[f for f in used_features if f in df_full.columns.values]]
+        # embed()
+        if ',' in feature:
+            features = feature.split(',')
+            X = df_full[[f for f in list(df.columns.values) if f != 'feedback'] + features]
+        else:
+            X = df_full[[f for f in list(df.columns.values) if f != 'feedback'] + [feature]]
         X['feedback'] = df_full['feedback']
 
         X.to_csv(os.path.join(FEEDBACK_PATH, action+'.data'),index=False)

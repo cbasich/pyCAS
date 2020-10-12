@@ -55,10 +55,11 @@ class CAS():
 
         self._states = self.generate_states()
         self._actions = self.generate_actions()
-        self._init = (self.DM.init, 3)
-        self._goals = list(it.product(self.DM.goals, self.AM.L))
-        self._transitions = self.compute_transitions()
-        self._costs = self.compute_costs()
+        self._init, self._goals, self._transitions, self._costs = None, None, None, None
+        self.set_init()
+        self.set_goals()
+        self.compute_transitions()
+        self.compute_costs()
 
         self.transitions_base = self.transitions.copy()
         self.check_validity()
@@ -99,6 +100,14 @@ class CAS():
     @property
     def goals(self):
         return self._goals
+
+
+    def set_init(self):
+        self._init = (self.DM.init, 3)
+
+
+    def set_goals(self):
+        self._goals = list(it.product(self.DM.goals, [3]))
 
 
     def generate_actions(self):
@@ -159,7 +168,7 @@ class CAS():
                             T[s_bar][a_bar][s_bar] = 1.
                         if np.sum(T[s_bar][a_bar]) != 1.:
                             embed()
-        return T
+        self._transitions = T
 
 
     @property
@@ -211,7 +220,7 @@ class CAS():
 
                 # Add the human cost penalty
                 C[s][a] += self.HM.rho(state, action)
-        return C
+        self._costs = C
 
 
     @property
@@ -336,8 +345,10 @@ class CAS():
                                  or (self.DM.helper.get_state_feature_value(state, 'doorsize') == 'medium'
                                  and self.DM.helper.get_state_feature_value(state, 'region') == 'b2')))
                             or (action[0] == 'cross' and (state[3] == 'busy' or (state[3] == 'light'
-                                and self.DM.helper.get_state_feature_value(state, 'visibility') == 'low')))
-                            or self.HM.lambda_[state][action][2] < 0.95):
+                                and self.DM.helper.get_state_feature_value(state, 'visibility') == 'low')))):
+                                self.potential[s][a][L[level_index]] = 0.0
+                                break
+                            elif self.HM.lambda_[state][action][2] < 0.95:
                                 break
 
                         if L[level_index] == 0 and len(state) > 2:
@@ -348,8 +359,10 @@ class CAS():
                                  and self.DM.helper.get_state_feature_value(state, 'region') != 'b2')))
                             or (state[3] == 'empty' or state[3] == 'light'
                                 and (self.DM.helper.get_state_feature_value(state, 'visibility') == 'high')
-                                and action == 'cross')
-                            or self.HM.lambda_[state][action][1] > 0.25):
+                                and action == 'cross')):
+                                self.potential[s][a][L[level_index]] = 0.0
+                                break
+                            elif self.HM.lambda_[state][action][1] > 0.25:
                                 break
 
                         self.AM.kappa[state][action] = L[level_index]

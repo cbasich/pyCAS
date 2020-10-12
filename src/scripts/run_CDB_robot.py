@@ -14,16 +14,18 @@ sys.path.append(os.path.join(current_file_path, '..'))
 import utils
 import process_data
 
-from models.CDB_robot.competence_aware_system import CAS
-from models.CDB_robot import autonomy_model, feedback_model, domain_model
+from models.CDB_robot import autonomy_model, feedback_model, domain_model, competence_aware_system
 
 OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB_robot')
 FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'feedback')
 PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'params')
 MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_robot', 'maps')
 
+global new_feedback
 
 def main(grid_file, N, update=False, interact=False, logging=False, verbose=True, start=None, end=None):
+    embed()
+    quit()
     if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open.data') ):
         init_open_data()
     if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data') ):
@@ -36,39 +38,60 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
     except Exception:
         pass
 
+    global new_feedback
+    new_feedback = False
+
     offices = ['A', 'B']
+    end = 'B'
+    print("Building domain model...")
+    DM = domain_model.DeliveryBotDomain(grid_file, start)
+    DM.set_goal(end)
+    print("Building autonomy model...")
+    AM = autonomy_model.AutonomyModel(DM, [0, 1, 2, 3])
+    print("Building feedback model...")
+    HM = feedback_model.FeedbackModel(DM, AM, ['+', '-', '/', None], ['open'])
+    print("Building CAS...")
+    CAS = competence_aware_system.CAS(DM, AM, HM, persistence=0.90)
 
+    # embed()
+    # quit()
+    
     for i in range(N):
-        end = np.random.choice(offices)
-
-        print("Building environment for destination {}...".format(end))
-        print("Building domain model...")
-        DM = domain_model.DeliveryBotDomain(grid_file, start, end)
-        print("Building autonomy model...")
-        AM = autonomy_model.AutonomyModel(DM, [0, 1, 2, 3])
-        print("Building feedback model...")
-        HM = feedback_model.FeedbackModel(DM, AM, ['+', '-', '/', None], ['open'])
-        print("Building CAS...")
-        environment = CAS(DM, AM, HM, persistence=0.75)
-
+        if new_feedback:
+            DM.helper.build_gams()
+        DM.compute_transitions()
+        CAS.compute_transitions()
+        DM.compute_costs()
+        CAS.compute_costs()
         solver = 'FVI'
         print("Solving mdp...")
-        print(environment.solve(solver=solver))
+        print(CAS.solve(solver=solver))
 
-        # embed()
+        if (7,5) in DM.goals and CAS.check_level_optimality() == 1.0:
+            break
+
+        saved_models = None
+        try:
+            saved_models = pickle.load( open(os.path.join(OUTPUT_PATH, 'saved_models.pkl'), mode='rb'), encoding='bytes')
+            saved_models[max(saved_models.keys())+1] = CAS
+        except Exception:
+            saved_models = {0: CAS}
+        pickle.dump(saved_models, open(os.path.join(OUTPUT_PATH, 'saved_models.pkl'), mode='wb'), protocol=pickle.HIGHEST_PROTOCOL)
+
+        new_feedback = False
 
         if logging:
             with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'), mode='a+') as expected_cost_file:
-                expected_cost_file.write(str(environment.V[environment.states.index(environment.init)]) + "\n")
+                expected_cost_file.write(str(CAS.V[CAS.states.index(CAS.init)]) + "\n")
 
-            alo_value = environment.check_level_optimality() * 100.0
+            alo_value = CAS.check_level_optimality() * 100.0
             all_level_optimality.append(alo_value)
 
             with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_alo.txt'), mode = 'a+') as all_level_optimality_file:
                 all_level_optimality_file.write("," + str(alo_value))
 
         print("Beginning simulation...")
-        costs = execute_policy(environment, 1, i, interact, verbose=verbose)
+        costs = execute_policy(CAS, 1, i, interact, verbose=verbose)
 
         if logging:
             with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), mode = 'a+') as cost_file:
@@ -77,19 +100,19 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
                 cost_file.write("\n")
 
         print("Updating parameters...")
-        environment.update_kappa()
-        environment.save_kappa()
+        CAS.update_kappa()
+        CAS.save_kappa()
 
         if update:
             print("Identifying candidates...")
-            candidates, init_state_candidate_count = environment.HM.find_candidates()
+            candidates, init_state_candidate_count = CAS.HM.find_candidates()
             if len(candidates) > 0:
                 candidate = candidates[np.random.randint(len(candidates))]
                 print(candidate)
 
                 print("Identifying potential discriminators...")
                 try:
-                    discriminator = environment.HM.get_most_likely_discriminator(candidate)
+                    discriminator = CAS.HM.get_most_likely_discriminator(candidate)
                 except Exception:
                     discriminator = None
 
@@ -97,9 +120,14 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
                     print("No discriminator found...")
                 else:
                     print("Found discriminator " + str(discriminator) + ".\n")
-                    environment.DM.helper.add_feature(discriminator, candidate)
+                    CAS.DM.helper.add_feature(discriminator, candidate)
                     with open(os.path.join(OUTPUT_PATH, 'execution_trace.txt'), mode = 'a+') as f:
                         f.write("Discriminator added: " + str(discriminator) + "\n")
+                    DM = domain_model.DeliveryBotDomain(grid_file, start)
+                    DM.set_goal(end)
+                    AM = autonomy_model.AutonomyModel(DM, [0, 1, 2, 3])
+                    HM = feedback_model.FeedbackModel(DM, AM, ['+', '-', '/', None], ['open'])
+                    CAS = competence_aware_system.CAS(DM, AM, HM, persistence=0.90)
             else:
                 print("No candidates...")
 
@@ -109,9 +137,16 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
             with open(os.path.join(OUTPUT_PATH, 'init_state_candidate_count.txt'), mode = 'a+') as f:
                 f.write(str(init_state_candidate_count) + ",")
 
+        if (i+1) % 50 == 0:
+            end = 'B'
+        else:
+            end = np.random.choice(offices)
+        DM.set_goal(end)
+        CAS.set_goals()
+
     if logging:
         tmp_dic = {}
-        visited_level_optimality, feedback_count = process_results(environment)
+        visited_level_optimality, feedback_count = process_results(CAS)
         tmp_dic["visited_LO"] = visited_level_optimality
         tmp_dic["feedback_count"] = feedback_count
         with open(os.path.join(OUTPUT_PATH, "competence_graph_info.pkl"), 'wb') as f:
@@ -220,6 +255,9 @@ def updateData(action, used_features, unused_features, feedback, flagged):
     if feedback is None:
         print("Feedback is NONE")
         pass
+
+    global new_feedback
+    new_feedback = True
 
     data_string = ",".join([str(f) for f in used_features])
     full_data_string = data_string 

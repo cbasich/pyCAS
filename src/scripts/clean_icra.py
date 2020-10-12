@@ -25,7 +25,7 @@ def clean_outputs():
 
 def clean_features():
     with open(os.path.join(current_file_path, '..', '..', 'domains', 'CDB_icra', 'params', 'used_features.txt'), 'w+') as f:
-        f.write('level,obstacle')
+        f.write('level,region,traffic')
 
 def main():
     clean_feedback()
