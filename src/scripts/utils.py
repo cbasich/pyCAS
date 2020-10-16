@@ -48,7 +48,7 @@ def FVI(mdp, eps = 0.001):
     return results
 
 
-def build_gam(df, distr='binomial', link='logit', fast=True, input_classifier=None):
+def build_gam(df, distr='binomial', link='logit', fast=False, input_classifier=None):
     """
         This function is for building a GAM classifier.
         
@@ -91,6 +91,8 @@ def build_gam(df, distr='binomial', link='logit', fast=True, input_classifier=No
                 gam_map[key] = X[:,i][np.where(Xv[:,i] == key)[0]][0]
     terms = s(0)
     for i in range(df.shape[1]-1):
+        if i != 0:
+            terms += s(i)
         for j in range(i+1, df.shape[1]-1):
             terms += te(i,j)
 
@@ -102,6 +104,7 @@ def build_gam(df, distr='binomial', link='logit', fast=True, input_classifier=No
         try:
             gam = GAM(terms, distribution=distr, link=link).gridsearch(X,y)
         except Exception:
+            embed()
             return None, gam_map
             # gam = GAM(terms, distribution=distr, link=link).fit(X,y)
     return gam, gam_map

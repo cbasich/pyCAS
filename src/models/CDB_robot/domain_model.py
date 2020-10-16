@@ -27,7 +27,7 @@ def read_gw_map(filename):
     return grid
 
 class DeliveryBotDomain():
-    def __init__(self, filename, start, destination, gamma=1.0):
+    def __init__(self, filename, start, gamma=1.0):
         self.gamma = gamma
         self.grid = read_gw_map(os.path.join(MAP_PATH, filename))
         with open(os.path.join(MAP_PATH, 'map_info.json')) as F:
@@ -41,36 +41,37 @@ class DeliveryBotDomain():
         except Exception:
             pass
 
-        self.init = None
-
         self.actions = DIRECTIONS + ['open']
-        self.states, self.goals = self.generate_states(start, destination)
+        self.states, self.init, self.goals = None, None, []
+        self.generate_states()
+        self.set_init(start)
         
-        self.transitions = self.generate_transitions()
-        self.costs = self.generate_costs()
+        self.transitions, self.costs = None, None
+        self.compute_transitions()
+        self.compute_costs()
 
         self.check_validity()
         self.helper = CampusDeliveryBotHelper(self)
 
-    def generate_states(self, start, destination):
+    def generate_states(self):
         S = set(it.product(range(self.rows), range(self.cols)))
 
         used_features = open(os.path.join(PARAM_PATH, "used_features.txt")).readline().split(",")
-        states, goals = set(), set()
+        states = set()
 
         for s in S:
             x,y = s[0],s[1]
             if self.grid[x][y] == 'D':
                 tmp_states = set()
                 if 'doortype' in used_features and 'doorcolor' in used_features:
-                    f1 = self.map_info[str((x,y))]['doortype']
-                    f2 = self.map_info[str((x,y))]['doorcolor']
+                    f1 = self.map_info[str((x, y))]['doortype']
+                    f2 = self.map_info[str((x, y))]['doorcolor']
                     tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed'], [f1], [f2]))
                 elif 'doortype' in used_features:
-                    f = self.map_info[str((x,y))]['doortype']
+                    f = self.map_info[str((x, y))]['doortype']
                     tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed'], [f]))
                 elif 'doorcolor' in used_features:
-                    f = self.map_info[str((x,y))]['doorcolor']
+                    f = self.map_info[str((x, y))]['doorcolor']
                     tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed'], [f]))
                 else:
                     tmp_states = set(it.product([x], [y], list(REV_MAPPING.keys()), ['door-open', 'door-closed']))
@@ -91,28 +92,23 @@ class DeliveryBotDomain():
                     for a in self.actions:
                         self.kappa[s][a] = 3
             elif not self.grid[x][y] == 'X':
-                if start == self.grid[x][y]:
-                    self.init = s
-                elif destination == self.grid[x][y]:
-                    goals.add(s)
                 states.add(s)
                 if s not in self.kappa.keys():
                     self.kappa[s] = {}
                     for a in self.actions:
                         self.kappa[s][a] = 3
 
-        return list(states), list(goals)
+        self.states = list(states)
 
-    def generate_costs(self):
-        C = np.array([[1.0 for a in range(len(self.actions))] 
-                           for s in range(len(self.states))])
+    def set_init(self, start):
+        loc = np.where(np.array(self.grid) == start)
+        self.init = (loc[0][0], loc[1][0])
 
-        for goal in self.goals:
-            C[self.states.index(goal)] *= 0.0
+    def set_goal(self, destination):
+        loc = np.where(np.array(self.grid) == destination)
+        self.goals = [(loc[0][0], loc[1][0])]
 
-        return C
-
-    def generate_transitions(self):
+    def compute_transitions(self):
         T = np.array([[[0.0 for sp in range(len(self.states))]
                             for a in range(len(self.actions))]
                             for s in range(len(self.states))])
@@ -134,8 +130,16 @@ class DeliveryBotDomain():
                 if np.sum(T[s][a]) == 0.0:
                     T[s][a][s] = 1.0
 
-        return T
+        self.transitions = T
 
+    def compute_costs(self):
+        C = np.array([[1.0 for a in range(len(self.actions))] 
+                           for s in range(len(self.states))])
+
+        for goal in self.goals:
+            C[self.states.index(goal)] *= 0.0
+
+        self.costs = C
 
     def move(self, state, action, statePrime):
         xp, yp = state[0] + action[0], state[1] + action[1]

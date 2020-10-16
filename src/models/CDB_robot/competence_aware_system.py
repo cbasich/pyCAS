@@ -55,10 +55,11 @@ class CAS():
 
         self._states = self.generate_states()
         self._actions = self.generate_actions()
-        self._init = (self.DM.init, 3)
-        self._goals = list(it.product(self.DM.goals, self.AM.L))
-        self._transitions = self.compute_transitions()
-        self._costs = self.compute_costs()
+        self._init, self._goals, self._transitions, self._costs = None, None, None, None
+        self.set_init()
+        self.set_goals()
+        self.compute_transitions()
+        self.compute_costs()
 
         self.transitions_base = self.transitions.copy()
         self.check_validity()
@@ -90,15 +91,19 @@ class CAS():
     def states(self):
         return self._states
 
-
     @property
     def init(self):
         return self._init
 
-
     @property
     def goals(self):
         return self._goals
+
+    def set_init(self):
+        self._init = (self.DM.init, 3)
+
+    def set_goals(self):
+        self._goals = list(it.product(self.DM.goals, [3]))
 
 
     def generate_actions(self):
@@ -159,7 +164,7 @@ class CAS():
                             T[s_bar][a_bar][s_bar] = 1.
                         if np.sum(T[s_bar][a_bar]) != 1.:
                             embed()
-        return T
+        self._transitions = T
 
 
     @property
@@ -211,7 +216,7 @@ class CAS():
 
                 # Add the human cost penalty
                 C[s][a] += self.HM.rho(state, action)
-        return C
+        self._costs = C
 
 
     @property
@@ -331,15 +336,25 @@ class CAS():
                 for level_index in tmp:
                     if np.random.uniform() <= self.potential[s][a][L[level_index]]:
                         if L[level_index] == 3 and len(state) > 2:
-                            if ((state[3] == 'door-closed' and action == 'open'
-                                and self.DM.helper.get_state_feature_value(state,'doortype') == 'pull')
-                                or self.HM.lambda_[state][action][2] < 0.95):
+                            if (state[3] == 'door-closed' and action == 'open'
+                                and self.DM.helper.get_state_feature_value(state,'doortype') == 'pull'):
+                                self.potential[s][a][L[level_index]] = 0.0
+                                break
+                            # elif self.HM.lambda_[state][action][2] < 0.95:
+                            #     break
+
+                        if L[level_index] == 1 and len(state) > 2:
+                            if (state[3] == 'door-closed' and action == 'open'
+                                and self.DM.helper.get_state_feature_value(state,'doortype') == 'push'):
+                                self.potential[s][a][L[level_index]] = 0.0
                                 break
 
                         if L[level_index] == 0 and len(state) > 2:
-                            if ((state[3] == 'door-closed' and action == 'open'
-                                and self.DM.helper.get_state_feature_value(state, 'doortype') == 'push')
-                            or self.HM.lambda_[state][action][1] > 0.25):
+                            if (state[3] == 'door-closed' and action == 'open'
+                                and self.DM.helper.get_state_feature_value(state, 'doortype') == 'push'):
+                                self.potential[s][a][L[level_index]] = 0.0
+                                break
+                            elif self.HM.lambda_[state][action][1] > 0.25:
                                 break
 
                         self.AM.kappa[state][action] = L[level_index]
@@ -435,10 +450,11 @@ class CAS():
         """
         total, correct = 0., 0.
         for s, state in enumerate(self.states):
-            if len(state[0]) < 3 or 'open' in state[0][3]:
-                continue
-            total += 1
-            action = self.pi[s]
-            correct = correct + self.DM.helper.level_optimal(state, action)
+            for a, action in enumerate(self.actions):
+                if len(state[0]) < 3 or 'open' in state[0][3]:
+                    continue
+                total += 1
+                # action = self.pi[s]
+                correct = correct + self.DM.helper.level_optimal(state, action)
 
         return correct/total

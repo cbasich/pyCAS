@@ -109,7 +109,7 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
                 # embed()
                 print("Identifying potential discriminators...")
                 # try:
-                discriminator = CAS.HM.get_most_likely_discriminator(candidate, 4)
+                discriminator = CAS.HM.get_most_likely_discriminator(candidate, 3)
                 # except Exception:
                 #     discriminator = None
 
@@ -251,8 +251,8 @@ def interfaceWithHuman(state, action, info, timeofday, interact=True):
             if info['doortype'] == 'pull':
                 feedback = 'no'
             else:
-                if ((info['doorheight'] * info['doorwidth'] < 17) 
-                 or (17 <= info['doorheight'] * info['doorwidth'] <= 22 and info['region'] in ['b1','b2'])):
+                if ((info['doorsize'] == 'small') 
+                 or (info['doorsize'] == 'medium' and info['region'] in ['b1','b2'])):
                     feedback = 'yes'
                 else:
                     feedback = 'no'
@@ -341,7 +341,7 @@ def init_open_data():
 
 def init_full_open_data():
     with open( os.path.join(FEEDBACK_PATH, 'open_full.data'), 'a+') as f:
-        f.write('level,region,doorheight,doorwidth,doorcolor,doortype,timeofday,feedback')
+        f.write('level,region,doorsize,doorcolor,doortype,timeofday,feedback')
 
 
 def process_results(CAS):

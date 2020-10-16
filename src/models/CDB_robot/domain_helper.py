@@ -60,11 +60,15 @@ class CampusDeliveryBotHelper():
     def __init__(self, DM):
         self.DM = DM
         self.map_info = self.DM.map_info
+        self.build_gams()
+
+    def build_gams(self):
         try:
             build_gams()
         except Exception:
             print("Failed to build GAMs, using previously stored models.")
         self.open_GAM, self.open_GAM_map = load_gams()
+
 
     def level_optimal(self, state, action):
         """

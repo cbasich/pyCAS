@@ -4,7 +4,7 @@ import pandas as pd
 import itertools as it
 
 from IPython import embed
-from sklearn.metrics import matthews_corrcoef
+from sklearn.metrics import matthews_corrcoef, adjusted_mutual_info_score
 
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
@@ -132,7 +132,7 @@ class FeedbackModel():
         unused_features = full_features.drop(used_features)
         return unused_features
 
-    def find_candidates(self, delta=0.05, thresh=100):
+    def find_candidates(self, delta=0.05, thresh=60):
         """
         params:
             delta  - Defines the probability threshold needed for (s,a) to not be a candidate.
@@ -184,7 +184,7 @@ class FeedbackModel():
 
         return candidates, init_state_candidate_count
 
-    def get_most_likely_discriminator(self, candidate, k):
+    def get_most_likely_discriminator(self, candidate, k, scoring_function='mRMR'):
         """y
             params:
                 D - The data matrix being used to produce the discriminators.
@@ -205,9 +205,31 @@ class FeedbackModel():
             
         # Second, compute the correlation matrix over each unused feature
         D = pd.read_csv(os.path.join(FEEDBACK_PATH, action + "_full.data"))
+        
+        if scoring_function == 'mRMR':
+            _disc = dict()
+            for i in range(len(unused_features)):
+                f1 = unused_features[i]
+                _disc[f1] = self.mRMR(D, f1)
+                for j in range(i+1, len(unused_features)):
+                    f2 = unused_features[j]
+                    _disc[(f1 + ',' + f2)] = self.mRMR(D, [f1, f2])
 
-        tmp = pd.get_dummies( D[np.append(unused_features, 'feedback')])
-        cols = tmp.columns.values
+        if scoring_function == 'd_index':
+            _disc = d_index(D, unused_features)
+
+        discriminators = np.array(list(_disc.keys()))[np.argpartition(np.array(list(_disc.values())), -min(k, len(list(_disc.values()))))[-min(k, len(list(_disc.values()))):]]
+        
+        D_train = D.sample(frac=0.75)
+
+        D_test = D.drop(D_train.index)
+
+        return self.test_discriminators(D_train, D_test, D.columns.drop(np.append(unused_features, 'feedback')), discriminators)
+
+
+    def d_index(self, df, features):
+        X = pd.get_dummies( df[np.append(features, 'feedback')] )
+        cols = X.columns.values
         for i in range(len(cols)):
             f1 = cols[i]
             for j in range(i+1, len(cols)):
@@ -215,18 +237,18 @@ class FeedbackModel():
                 try:
                     if f1[:f1.index('_')] != f2[:f2.index('_')] and 'feedback' not in f1 and 'feedback' not in f2:
                         f3 = f1 + ',' + f2
-                        tmp[f3] = tmp[f1] * tmp[f2]
+                        X[f3] = X[f1] * X[f2]
                 except:
                     if f1 != f2 and 'feedback' not in f1 and 'feedback' not in f2:
                         f3 = f1 + ',' + f2
-                        tmp[f3] = tmp[f1] * tmp[f2] 
+                        X[f3] = X[f1] * X[f2] 
 
-        _corr = tmp.corr()
+        _corr = X.corr()
         _corr = _corr[[c for c in _corr.columns.values if 'feedback' in c]]
         _corr = _corr.drop([c for c in _corr.axes[0].values if 'feedback' in c], axis = 0)
         _corr = _corr.fillna(0)
 
-        print("Built correlation matrix...")
+        # print("Built correlation matrix...")
 
         # Third, build the discrimantor matrix for each feature or pair
         # of features present in the correlation matrix. Right now we are simply
@@ -261,7 +283,7 @@ class FeedbackModel():
                 else:
                     _disc[row_name] += np.max(_corr.loc[row_name])
 
-        print("Built discrimination matrix...")
+        # print("Built discrimination matrix...")
 
         indices = list(_corr.index.values)
         for f in _disc.keys():
@@ -274,16 +296,30 @@ class FeedbackModel():
                 count = len([v for v in indices if (f in v and ',' not in v)])
             _disc[f] /= count
 
-        print("Normalized discrimiation matrix...")
+        return _disc
 
-        discriminators = np.array(list(_disc.keys()))[np.argpartition(np.array(list(_disc.values())), -min(k, len(list(_disc.values()))))[-min(k, len(list(_disc.values()))):]]
 
-        D_train = D.sample(frac=0.75)
-        D_test = D.drop(D_train.index)
+    def mRMR(self, df, features):
+        X = pd.get_dummies(df[features])
+        try:
+            y = (np.array(list(df['feedback'])) == 'yes').astype(int)
+        except Exception:
+            embed()
+        relevance = 0
+        for f in X.columns.values:
+            x = np.array(list(X[f]))
+            relevance += adjusted_mutual_info_score(x, y)
+        relevance /= len(X.columns.values)
 
-        # embed()
+        repetition = 0
+        for i in range(len(X.columns.values)):
+            for j in range(i+1, len(X.columns.values)):
+                x_i = np.array(list(X[X.columns.values[i]]))
+                x_j = np.array(list(X[X.columns.values[j]]))
+                repetition += adjusted_mutual_info_score(x_i, x_j)
+        repetition /= (len(X.columns.values) ** 2)
 
-        return self.test_discriminators(D_train, D_test, D.columns.drop(np.append(unused_features, 'feedback')), discriminators)
+        return relevance - repetition
  
     def test_discriminators(self, D_train, D_test, used_features, discriminators):
         """
@@ -304,7 +340,6 @@ class FeedbackModel():
         scores = [self.test_lambda(lambda_, lambda_map, D_test, used_features, discriminator) for (lambda_, lambda_map), discriminator in lambdas]
 
         print("Checkpoint 1.5")
-        # embed()
 
         best_score = np.max(scores)
         best_discrims = []
@@ -319,7 +354,6 @@ class FeedbackModel():
 
         print("Checking discriminator " + str(d) + "...")
         print("Checkpoint 2")
-        # embed()
 
         if 'traffic' in D_train.columns:
             curr_score = self.test_lambda(self.DM.helper.cross_GAM, self.DM.helper.cross_GAM_map, D_test, used_features, discriminator = None)
@@ -331,7 +365,6 @@ class FeedbackModel():
                 return None
 
         print("Checkpoint 3")
-        # embed()
         return d
 
     def build_lambda(self, D_train, used_features, discriminator):
@@ -351,7 +384,7 @@ class FeedbackModel():
             train = D_train[np.append(used_features, discriminator_values + ['feedback'])]
         else:
             train = D_train[np.append(used_features, [discriminator, 'feedback'])]
-        # embed()
+
         lambda_, lambda_map = build_gam(train, fast=False)
 
         return (lambda_, lambda_map)

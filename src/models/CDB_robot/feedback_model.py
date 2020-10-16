@@ -132,7 +132,7 @@ class FeedbackModel():
         unused_features = full_features.drop(used_features)
         return unused_features
 
-    def find_candidates(self, delta=0.1, thresh=30):
+    def find_candidates(self, delta=0.1, thresh=15):
         """
         params:
             delta  - Defines the probability threshold needed for (s,a) to not be a candidate.

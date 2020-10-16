@@ -99,10 +99,8 @@ class CampusDeliveryBotHelper():
 
         if ((state[3] == 'door-closed' and action[0] == 'open'
             and (self.get_state_feature_value(state, 'doortype') == 'pull'
-            or (self.get_state_feature_value(state, 'doorheight') 
-             * self.get_state_feature_value(state, 'doorwidth') > 22)
-            or ((17 < self.get_state_feature_value(state, 'doorheight')
-               * self.get_state_feature_value(state, 'doorwidth') < 22)
+            or (self.get_state_feature_value(state, 'doorsize') == 'large')
+            or (self.get_state_feature_value(state, 'doorsize') == 'medium'
             and self.get_state_feature_value(state, 'region') == 'b2')))
         or (action[0] == 'cross' and (state[3] == 'busy' or (state[3] == 'light'
             and (self.get_state_feature_value(state, 'visibility') == 'low')

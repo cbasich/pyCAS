@@ -2,289 +2,330 @@
     "(3, 9)": {
         "region": "b1",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "brown",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 5.374,
+        "doorwidth": 2.691
     },
     "(4, 3)": {
         "region": "b1",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "brown",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 4.861,
+        "doorwidth": 2.73
     },
     "(4, 5)": {
         "region": "b1",
         "obstacle": "door",
-        "doorsize": "medium",
         "doorcolor": "black",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 7.091,
+        "doorwidth": 3.084
     },
     "(4, 8)": {
         "region": "b1",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "brown",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 5.521,
+        "doorwidth": 2.909
     },
     "(5, 11)": {
         "region": "b1",
         "obstacle": "door",
-        "doorsize": "large",
         "doorcolor": "blue",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 7.557,
+        "doorwidth": 3.021
     },
     "(6, 5)": {
         "region": "b1",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "brown",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 5.582,
+        "doorwidth": 2.999
     },
     "(7, 4)": {
         "region": "b1",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "brown",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 4.775,
+        "doorwidth": 2.958
     },
     "(8, 9)": {
         "region": "b1",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "brown",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 5.593,
+        "doorwidth": 2.704
     },
     "(9, 11)": {
         "region": "b1",
         "obstacle": "door",
-        "doorsize": "large",
         "doorcolor": "blue",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 6.766,
+        "doorwidth": 3.967
     },
     "(10, 6)": {
         "region": "b1",
         "obstacle": "door",
-        "doorsize": "medium",
         "doorcolor": "black",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 7.093,
+        "doorwidth": 2.915
     },
     "(10, 9)": {
         "region": "b1",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "brown",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 5.86,
+        "doorwidth": 2.624
     },
     "(11, 4)": {
         "region": "b1",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "brown",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 5.207,
+        "doorwidth": 2.937
     },
     "(11, 10)": {
         "region": "b1",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "brown",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 4.885,
+        "doorwidth": 3.314
     },
     "(3, 18)": {
         "region": "b2",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "red",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 4.488,
+        "doorwidth": 3.24
     },
     "(3, 23)": {
         "region": "b2",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "blue",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 5.071,
+        "doorwidth": 3.236
     },
     "(6, 17)": {
         "region": "b2",
         "obstacle": "door",
-        "doorsize": "large",
         "doorcolor": "red",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 6.077,
+        "doorwidth": 4.151
     },
     "(6, 19)": {
         "region": "b2",
         "obstacle": "door",
-        "doorsize": "medium",
         "doorcolor": "black",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 7.783,
+        "doorwidth": 2.624
     },
     "(6, 22)": {
         "region": "b2",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "red",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 5.597,
+        "doorwidth": 2.332
     },
     "(6, 24)": {
         "region": "b2",
         "obstacle": "door",
-        "doorsize": "large",
         "doorcolor": "blue",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 7.916,
+        "doorwidth": 3.214
     },
     "(9, 18)": {
         "region": "b2",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "brown",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 5.956,
+        "doorwidth": 2.667
     },
     "(9, 23)": {
         "region": "b2",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "blue",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 4.457,
+        "doorwidth": 3.005
     },
     "(18, 21)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "large",
         "doorcolor": "brown",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 6.684,
+        "doorwidth": 3.356
     },
     "(21, 20)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "blue",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 4.299,
+        "doorwidth": 3.779
     },
     "(23, 22)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "red",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 4.061,
+        "doorwidth": 3.948
     },
     "(24, 12)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "large",
         "doorcolor": "brown",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 6.682,
+        "doorwidth": 3.437
     },
     "(24, 19)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "medium",
         "doorcolor": "black",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 7.653,
+        "doorwidth": 2.647
     },
     "(24, 23)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "red",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 5.522,
+        "doorwidth": 2.423
     },
     "(25, 14)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "red",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 4.597,
+        "doorwidth": 3.193
     },
     "(25, 24)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "large",
         "doorcolor": "brown",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 6.502,
+        "doorwidth": 3.859
     },
     "(26, 13)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "blue",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 5.117,
+        "doorwidth": 3.163
     },
     "(26, 17)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "black",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 5.39,
+        "doorwidth": 2.923
     },
     "(26, 21)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "red",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 4.245,
+        "doorwidth": 3.131
     },
     "(27, 15)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "medium",
         "doorcolor": "black",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 6.694,
+        "doorwidth": 3.042
     },
     "(28, 7)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "red",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 5.032,
+        "doorwidth": 3.237
     },
     "(28, 11)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "blue",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 4.59,
+        "doorwidth": 3.688
     },
     "(28, 19)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "black",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 5.248,
+        "doorwidth": 3.034
     },
     "(29, 14)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "blue",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 4.125,
+        "doorwidth": 3.619
     },
     "(30, 6)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "red",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 4.312,
+        "doorwidth": 3.427
     },
     "(30, 13)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "blue",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 5.421,
+        "doorwidth": 2.598
     },
     "(30, 19)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "small",
         "doorcolor": "brown",
-        "doortype": "pull"
+        "doortype": "pull",
+        "doorheight": 4.652,
+        "doorwidth": 3.068
     },
     "(32, 9)": {
         "region": "b3",
         "obstacle": "door",
-        "doorsize": "large",
         "doorcolor": "brown",
-        "doortype": "push"
+        "doortype": "push",
+        "doorheight": 7.253,
+        "doorwidth": 3.842
     },
     "(6, 14)": {
         "region": "r1",
