@@ -341,10 +341,10 @@ class CAS():
                         if L[level_index] == 3 and len(state) > 2:
                             if ((state[3] == 'door-closed' and action == 'open'
                                 and (self.DM.helper.get_state_feature_value(state,'doortype') == 'pull'
-                                 or self.DM.helper.get_state_feature_value(state, 'doorsize') == 'heavy'
+                                 or self.DM.helper.get_state_feature_value(state, 'doorsize') == 'large'
                                  or (self.DM.helper.get_state_feature_value(state, 'doorsize') == 'medium'
                                  and self.DM.helper.get_state_feature_value(state, 'region') == 'b2')))
-                            or (action[0] == 'cross' and (state[3] == 'busy' or (state[3] == 'light'
+                                or (action[0] == 'cross' and (state[3] == 'busy' or (state[3] == 'light'
                                 and self.DM.helper.get_state_feature_value(state, 'visibility') == 'low')))):
                                 self.potential[s][a][L[level_index]] = 0.0
                                 break
@@ -354,7 +354,7 @@ class CAS():
                         if L[level_index] == 0 and len(state) > 2:
                             if ((state[3] == 'door-closed' and action == 'open'
                                 and self.DM.helper.get_state_feature_value(state, 'doortype') == 'push'
-                                and (self.DM.helper.get_state_feature_value(state, 'doorsize') == 'light'
+                                and (self.DM.helper.get_state_feature_value(state, 'doorsize') == 'small'
                                  or (self.DM.helper.get_state_feature_value(state, 'doorsize') == 'medium'
                                  and self.DM.helper.get_state_feature_value(state, 'region') != 'b2')))
                             or (state[3] == 'empty' or state[3] == 'light'

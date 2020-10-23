@@ -104,7 +104,7 @@ def build_gam(df, distr='binomial', link='logit', fast=False, input_classifier=N
         try:
             gam = GAM(terms, distribution=distr, link=link).gridsearch(X,y)
         except Exception:
-            embed()
+            # embed()
             return None, gam_map
             # gam = GAM(terms, distribution=distr, link=link).fit(X,y)
     return gam, gam_map

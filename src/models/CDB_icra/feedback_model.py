@@ -211,9 +211,9 @@ class FeedbackModel():
             for i in range(len(unused_features)):
                 f1 = unused_features[i]
                 _disc[f1] = self.mRMR(D, f1)
-                for j in range(i+1, len(unused_features)):
-                    f2 = unused_features[j]
-                    _disc[(f1 + ',' + f2)] = self.mRMR(D, [f1, f2])
+                # for j in range(i+1, len(unused_features)):
+                #     f2 = unused_features[j]
+                #     _disc[(f1 + ',' + f2)] = self.mRMR(D, [f1, f2])
 
         if scoring_function == 'd_index':
             _disc = d_index(D, unused_features)
@@ -357,11 +357,11 @@ class FeedbackModel():
 
         if 'traffic' in D_train.columns:
             curr_score = self.test_lambda(self.DM.helper.cross_GAM, self.DM.helper.cross_GAM_map, D_test, used_features, discriminator = None)
-            if np.max(scores) < curr_score or np.max(scores) < 0.5:
+            if np.max(scores) < curr_score + 0.05 or np.max(scores) < 0.5 or curr_score == -1.0:
                 return None
         else:
             curr_score = self.test_lambda(self.DM.helper.open_GAM, self.DM.helper.open_GAM_map, D_test, used_features, discriminator = None) 
-            if np.max(scores) < curr_score or np.max(scores) < 0.5:
+            if np.max(scores) < curr_score + 0.05 or np.max(scores) < 0.5 or curr_score == -1.0:
                 return None
 
         print("Checkpoint 3")

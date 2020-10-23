@@ -1,15 +1,15 @@
-import os, sys
+import os, sys,  pickle
 
 import numpy as np
 
 from matplotlib import pyplot as plt
 from IPython import embed
 
-OUTPUT_PATH = os.path.join('..','..','output','CDB')
+OUTPUT_PATH = os.path.join('..','..','output','CDB_icra')
 
 def generate_cost_graphs():
-    cost_file = open(os.path.join(OUTPUT_PATH,'map_1_costs.txt'), mode = 'r+')
-    expected_cost_file = open(os.path.join(OUTPUT_PATH, 'map_1_expected_costs.txt'), mode = 'r+')
+    cost_file = open(os.path.join(OUTPUT_PATH,'large_campus_costs.txt'), mode = 'r+')
+    expected_cost_file = open(os.path.join(OUTPUT_PATH, 'large_campus_expected_costs.txt'), mode = 'r+')
 
     costs, expected_costs = [], []
 
@@ -48,10 +48,10 @@ def generate_cost_graphs():
 
 def generate_competence_graphs():
     alo_vanilla, alo_update, vlo_vanilla, vlo_update, fc_vanilla, fc_update = [], [], [], [], [], []
-    with open(os.path.join(OUTPUT_PATH, 'vanilla', 'map_1_alo.txt'), mode = 'r+') as f:
+    with open(os.path.join(OUTPUT_PATH, 'vanilla', 'large_campus_alo.txt'), mode = 'r+') as f:
         alo_vanilla = np.array([float(x) for x in f.readline().split(',')])
-    with open(os.path.join(OUTPUT_PATH, 'update', 'map_1_alo.txt'), mode = 'r+') as f:
-        alo_vupdate = np.array([float(x) for x in f.readline().split(',')])
+    with open(os.path.join(OUTPUT_PATH, 'update', 'large_campus_alo.txt'), mode = 'r+') as f:
+        alo_update = np.array([float(x) for x in f.readline().split(',')])
 
     with open(os.path.join(OUTPUT_PATH, 'vanilla', 'competence_graph_info.pkl'), mode = 'rb') as f:
         tmp = pickle.load(f, encoding='bytes')
@@ -59,7 +59,7 @@ def generate_competence_graphs():
         fc_vanilla = tmp['feedback_count']
     with open(os.path.join(OUTPUT_PATH, 'update', 'competence_graph_info.pkl'), mode = 'rb') as f:
         tmp = pickle.load(f, encoding='bytes')
-        vlo_upadte = tmp['visited_LO']
+        vlo_update = tmp['visited_LO']
         fc_update = tmp['feedback_count']
 
     fig, ax1 = plt.subplots()
@@ -84,7 +84,7 @@ def generate_competence_graphs():
 
     lines, labels = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
-    ax2.legend(lines + lines2, labels + labels2, loc=4, fontsize=14)
+    ax1.legend(lines + lines2, labels + labels2, loc=4, fontsize=14)
 
     filepath = os.path.join(OUTPUT_PATH, 'competence_graph.png')
     plt.savefig(filepath)
@@ -110,4 +110,5 @@ def generate_candidate_count_graphs():
     plt.close(fig)
 
 if __name__ == '__main__':
-    generate_cost_graphs()
+    # generate_cost_graphs()
+    generate_competence_graphs()

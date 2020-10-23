@@ -65,7 +65,11 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
     HM = feedback_model.FeedbackModel(DM, AM, ['+', '-', '/', None], ['cross', 'open'])
     CAS = competence_aware_system.CAS(DM, AM, HM, persistence = 0.75)
 
+    # embed()
+    # quit()
+
     for i in range(N):
+        print("Starting episode {} with state {} and goal {}...\n".format(i, start, end))
         if new_feedback:
             DM.helper.build_gams()
             DM.compute_transitions()
@@ -137,7 +141,9 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
         while start == end:
             end = np.random.choice(offices)
 
+        DM.set_init(start)
         DM.set_goal(end)
+        CAS.set_init()
         CAS.set_goals()
 
     if logging:
