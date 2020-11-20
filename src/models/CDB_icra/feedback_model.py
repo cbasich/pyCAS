@@ -365,6 +365,9 @@ class FeedbackModel():
                 return None
 
         print("Checkpoint 3")
+        if d == 'doorcolor' or (d == 'timeofday' and 'traffic' not in D_train.columns):
+            embed()
+            
         return d
 
     def build_lambda(self, D_train, used_features, discriminator):

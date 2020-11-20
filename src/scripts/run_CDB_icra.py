@@ -389,7 +389,7 @@ def process_results(CAS):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--map_file', type=str, default='small_campus.txt')
+    parser.add_argument('-m', '--map_file', type=str, default='large_campus.txt')
     parser.add_argument('-n', '--num_runs', type=int, default=1)
     parser.add_argument('-u', '--update', type=int, default=1)
     parser.add_argument('-i', '--interact', type=int, default=0)

@@ -1,1 +1,1 @@
-level,obstacle,doorid
+level,obstacle,doorid,doortype

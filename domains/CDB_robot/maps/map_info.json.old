@@ -1,25 +1,25 @@
 {
     "(1, 4)": {
-        "obstacle":  "door",
-        "doortype":  "push",
+        "obstacle": "door",
+        "doortype": "push",
         "doorcolor": "brown",
         "doorid": "door1"
     },
     "(3, 2)": {
-        "obstacle":  "door",
-        "doortype":  "push",
+        "obstacle": "door",
+        "doortype": "push",
         "doorcolor": "brown",
         "doorid": "door2"
     },
-    "(4, 4)": {
-        "obstacle":  "door",
-        "doortype":  "pull",
+    "(3, 4)": {
+        "obstacle": "door",
+        "doortype": "pull",
         "doorcolor": "brown",
         "doorid": "door3"
     },
-    "(7, 4)": {
-        "obstacle":  "door",
-        "doortype":  "pull",
+    "(5, 4)": {
+        "obstacle": "door",
+        "doortype": "pull",
         "doorcolor": "brown",
         "doorid": "door4"
     }
