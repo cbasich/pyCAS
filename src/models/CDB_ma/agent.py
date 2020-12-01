@@ -57,6 +57,7 @@ class Agent():
 
 
     def rollout(self, num_trials=1):
+        level_optimality = self.CAS.check_level_optimality()
         initial_policy = self.CAS.pi
         initial_transition_matrix = self.CAS.transitions.copy()
 
@@ -103,7 +104,7 @@ class Agent():
             costs.append(cost)
             self.CAS.set_transitions(initial_transition_matrix)
 
-        return costs
+        return (costs, level_optimality)
 
     def save(self):
         with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(self.id)), mode='wb') as f:

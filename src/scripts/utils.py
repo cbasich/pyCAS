@@ -13,7 +13,11 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import OneHotEncoder, normalize, StandardScaler
 
 from scipy.stats import entropy
-y
+
+current_file_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(current_file_path, '..'))
+AGENT_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_ma', 'agents')
+
 def FVI(mdp, eps = 0.001):
     """
         This is a fast value iteration using vectorized operations only.
@@ -65,10 +69,10 @@ def _train_model_naive(agent_id, X, y, action):
             other_id += 1
             continue
         with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
-            other_agent = pkl.load(f, encoding='bytes')
+            other_agent = pickle.load(f, encoding='bytes')
             other_X, other_y = _load_dataset(action, other_id)
-            X = np.append(X, other_X)
-            y = np.append(y, other_y)
+            X = np.concatenate((X, other_X))
+            y = np.concatenate((y, other_y.reshape(-1,)))
             other_id += 1
 
     return svm.SVR(C=1.0, epsilon=0.2).fit(X,y)
@@ -76,27 +80,28 @@ def _train_model_naive(agent_id, X, y, action):
 
 def _train_model_soft_labeling(agent_id, target_X, y, action, h):
     other_id = 0
-    y -= 0.500000
-    X_unique = target_X[np.unique(target_X)]
+    # y = float(y) - 0.500000
+    # embed()
+    X_unique = target_X[np.unique(target_X, axis=0, return_index=True)[1]]
     target_weight = np.ones(len(target_X))
     while os.path.exists(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id))):
         if other_id == agent_id:
             other_id += 1
             continue
         with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
-            other_agent = pkl.load(f, encoding='bytes')
-            other_X, other_y = _load_dataset(action, other_id)
-            target_probs = h.predict(X_unique)
-            other_probs = other_agent.CAS.HM.get_classifier(action).predict(X_unique)
-            KLD = entropy(target_probs, qk=other_probs)
-            y = np.append(y, (other_y - 0.500000))
-            target_weight.append(np.ones(len(other_y)) * KLD)
+            other_agent = pickle.load(f, encoding='bytes')
+        other_X, other_y = _load_dataset(action, other_id)
+        target_probs = h.predict(X_unique)
+        other_probs = other_agent.CAS.HM.get_classifier(action).predict(X_unique)
+        KLD = entropy(target_probs, qk=other_probs)
+        y = np.concatenate((y, other_y.reshape(-1,))) #(other_y - 0.500000)))
+        target_weight = np.concatenate((target_weight, np.ones(len(other_y)) * KLD))
     return svm.SVR(C=1.0, epsilon=0.2).fit(target_X, y, sample_weight=target_weight)
 
 
 def _train_model_multi_source(agent_id, target_X, target_y, action, num_iters=10):
     source_datasets = []
-    source_weight = []
+    source_weights = []
     target_weight = np.ones(len(target_X))
     n = 0
     other_id = 0
@@ -105,7 +110,7 @@ def _train_model_multi_source(agent_id, target_X, target_y, action, num_iters=10
             other_id += 1
             continue
         with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
-            other_agent = pkl.load(f, encoding='bytes')
+            other_agent = pickle.load(f, encoding='bytes')
             other_X, other_y = _load_dataset(action, other_id)
         source_datasets.append((other_X, other_y))
         n += len(other_X)
@@ -119,9 +124,9 @@ def _train_model_multi_source(agent_id, target_X, target_y, action, num_iters=10
         for weight in source_weights:
             weight /= np.sum(weight)
         for k in range(len(source_datasets)):
-            combined_X = np.append(source_datasets[k][0], target_X)
-            combined_y = np.append(source_datasets[k][1], target_y)
-            combined_weight = np.append(source_weights[k], target_weight)
+            combined_X = np.concatenate((source_datasets[k][0], target_X))
+            combined_y = np.concatenate((source_datasets[k][1].reshape(-1,), target_y))
+            combined_weight = np.concatenate((source_weights[k], target_weight))
             weak_classifier = svm.SVC().fit(combined_X, combined_y, sample_weight=combined_weight)
             y_pred = weak_classifier.predict(target_X)
             error = np.dot(target_weight, target_y == y_pred) / np.sum(target_weight)
@@ -132,16 +137,16 @@ def _train_model_multi_source(agent_id, target_X, target_y, action, num_iters=10
         # This should maybe only happen for the source that led to best classifier instead of all?
         for k in range(len(source_datasets)):
             y_pred = best_classifier[0].predict(source_datasets[k][0])
-            source_weights[k] *= np.exp(-1.0 * alpha_S * np.abs(y_pred - source_datasets[k][1]))
+            source_weights[k] *= np.exp(-1.0 * alpha_S * (y_pred ^ source_datasets[k][1].reshape(-1,)))
 
         y_pred = best_classifier[0].predict(target_X)
-        target_weight *= np.exp(alpha_T * np.abs(y_pred - target_y))
+        target_weight *= np.exp(alpha_T * (y_pred ^ target_y))
 
     return svm.SVR(C=1.0, epsilon=0.2).fit(target_X, target_y, sample_weight=target_weight)
 
 
 def _train_model_multi_task(agent_id, target_X, target_y, action, num_iters=10):
-    target_weight = np.ones(len(target_dataset))
+    target_weight = np.ones(len(target_X))
     source_classifiers = []
     other_id = 0
     while os.path.exists(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id))):
@@ -174,10 +179,10 @@ def _load_dataset(action, other_id):
         agent = pickle.load(f, encoding='bytes')
 
     if action == 'open':
-        X = agent.CAS.HM.open_enc.transform(agent.CAS.HM.open_data[:,:-1])
+        X = agent.CAS.HM.open_enc.transform(agent.CAS.HM.open_data[:,:-1]).toarray()
         y = agent.CAS.HM.open_data[:,-1:] == 'yes'
     elif action == 'cross':
-        X = agent.CAS.HM.cross_enc.transform(agent.CAS.HM.cross_data[:,:-1])
+        X = agent.CAS.HM.cross_enc.transform(agent.CAS.HM.cross_data[:,:-1]).toarray()
         y = agent.CAS.HM.cross_data[:,-1:] == 'yes'
 
     return X, y

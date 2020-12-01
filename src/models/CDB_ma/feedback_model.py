@@ -10,7 +10,7 @@ from sklearn.metrics import matthews_corrcoef, adjusted_mutual_info_score
 current_file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_file_path, '..'))
 
-from scripts.utils import _train_model, _train_model_naive, _train_model_multi_task, _train_model_multi_source
+from scripts.utils import _train_model, _train_model_naive, _train_model_soft_labeling, _train_model_multi_task, _train_model_multi_source
 
 DOMAIN_PATH = os.path.join(current_file_path, '..', '..', '..', 'domains', 'CDB_icra')
 FEEDBACK_PATH = os.path.join(DOMAIN_PATH, 'feedback')
@@ -77,16 +77,14 @@ class FeedbackModel():
         assert (action == 'open' or action == 'cross')
         classifier = None
 
-        # embed()
-
         if action == 'open':
-            X = self.open_enc.transform(self.open_data[:,:-1])
+            X = self.open_enc.transform(self.open_data[:,:-1]).toarray()
             y = self.open_data[:,-1:] == 'yes'
         elif action == 'cross':
-            X = self.cross_enc.transform(self.cross_data[:,:-1])
+            X = self.cross_enc.transform(self.cross_data[:,:-1]).toarray()
             y = self.cross_data[:,-1:] == 'yes'
         y = y.reshape(-1,)
-        # embed()
+
         if training_method is None:
             classifier = _train_model(X, y)
         elif training_method == 'naive':
@@ -94,13 +92,17 @@ class FeedbackModel():
         elif training_method == 'multi_task':
             classifier = _train_model_multi_task(agent_id, X, y, action)
         elif training_method == 'multi_source':
-            classifier = _train_model_multi_source(aget_id, X, y, action)
-        elif transfer_method == 'soft_labeling':
+            classifier = _train_model_multi_source(agent_id, X, y, action)
+        elif training_method == 'soft_labeling':
             if action == 'open':
                 classifier = _train_model_soft_labeling(agent_id, X, y, action, self.open_classifier)
             elif action == 'cross':
                 classifier = _train_model_soft_labeling(agent_id, X, y, action, self.cross_classifier)
-        return classifier
+        
+        if action == 'open':
+            self.open_classifier = classifier
+        elif action == 'cross':
+            self.cross_classifier = classifier
 
 
     def generate_lambda(self):

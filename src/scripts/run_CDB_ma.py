@@ -18,7 +18,7 @@ import process_data
 from models.CDB_ma import autonomy_model, feedback_model, domain_model, competence_aware_system, agent
 
 OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB_ma')
-AGENT_PATH = os.path.join(current_file_path, '..', '..',' domains', 'CDB_ma', 'agents')
+AGENT_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_ma', 'agents')
 MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_ma', 'maps')
 
 
@@ -30,12 +30,14 @@ def rollout(agent):
     return agent.rollout()
 
 
-def train(agent, training_method):
+def train(info):
+    agent = info['agent']
+    training_method = info['training_method']
     agent.CAS.HM.train(agent.id, 'open', training_method)
     agent.CAS.HM.train(agent.id, 'cross', training_method)
 
 
-def main(n_agents, num_episodes, training_method=None, frequency=10, n_jobs=4):
+def main(n_agents, num_episodes, training_method='naive', frequency=1, n_jobs=4):
     agents = []
     for i in range(n_agents):
         if os.path.exists(os.path.join(AGENT_PATH, 'agent_{}'.format(i))):
@@ -55,14 +57,18 @@ def main(n_agents, num_episodes, training_method=None, frequency=10, n_jobs=4):
             CAS = competence_aware_system.CAS(DM, AM, HM, persistence=0.75)
             Alfred.set_cas_model(CAS)
             Alfred.set_authority_epsilon((i+1) * 0.02)
-            # Alfred.save()
+            Alfred.save()
             agents.append(Alfred)
+
+    # embed()
+    # quit()
+
     results = []
     for i in range(num_episodes):
         with mp.Pool(n_jobs) as pool:
             results.append(pool.map(rollout, agents))
             if i % frequency == 0 and i != 0:
-                pool.map(train, [(agent, training_method) for agent in agents])
+                pool.map(train, [{'agent': agent, 'training_method': training_method} for agent in agents])
     print(results)
 
 if __name__ == '__main__':
@@ -71,4 +77,4 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--num_agents', type=int, default=4)
     args = parser.parse_args()
 
-    main(4,21)
+    main(4,6)
