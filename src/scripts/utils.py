@@ -156,8 +156,10 @@ def _train_model_multi_task(agent_id, target_X, target_y, action, num_iters=10):
         with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
             agent = pickle.load(f, encoding='bytes')
             source_classifiers.append(agent.CAS.HM.get_classifier(action))
-
+        other_id += 1
     for t in range(min(len(source_classifiers), num_iters)):
+        if len(source_classifiers) < 1:
+            break
         weak_classifiers = set()
         target_weight /= np.sum(target_weight)
         for h in source_classifiers:
@@ -168,7 +170,7 @@ def _train_model_multi_task(agent_id, target_X, target_y, action, num_iters=10):
         best_classifier = min(weak_classifiers, key=lambda item: item[1])
         source_classifiers.remove(best_classifier[0])
         alpha_T = 0.5 * np.log((1 - error) / error)
-        target_weight *= np.eps(-1.0 * alpha_T * target_y * y_pred)
+        target_weight *= np.exp(-1.0 * alpha_T * target_y * y_pred)
 
     return svm.SVR(C=1.0, epsilon=0.2).fit(target_X, target_y, sample_weight=target_weight)
 

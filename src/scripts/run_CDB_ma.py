@@ -37,7 +37,7 @@ def train(info):
     agent.CAS.HM.train(agent.id, 'cross', training_method)
 
 
-def main(n_agents, num_episodes, training_method='naive', frequency=1, n_jobs=4):
+def main(n_agents, num_episodes, training_method='multi_task', frequency=1, n_jobs=4):
     agents = []
     for i in range(n_agents):
         if os.path.exists(os.path.join(AGENT_PATH, 'agent_{}'.format(i))):
@@ -65,6 +65,7 @@ def main(n_agents, num_episodes, training_method='naive', frequency=1, n_jobs=4)
 
     results = []
     for i in range(num_episodes):
+        print("Starting episode {}\n".format(i))
         with mp.Pool(n_jobs) as pool:
             results.append(pool.map(rollout, agents))
             if i % frequency == 0 and i != 0:
@@ -77,4 +78,4 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--num_agents', type=int, default=4)
     args = parser.parse_args()
 
-    main(4,6)
+    main(4,21)
