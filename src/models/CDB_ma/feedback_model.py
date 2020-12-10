@@ -26,7 +26,7 @@ class FeedbackModel():
         self.open_features = ['region', 'doorsize', 'doortype']
         self.cross_features= ['region', 'traffic', 'visibility', 'timeofday']
         self.open_data, self.cross_data = self._initialize_data('open'), self._initialize_data('cross')
-        self.open_data_recent, self.cross_data_recent = np.array([]), np.array([])
+        # self.open_data_recent, self.cross_data_recent = np.array([]), np.array([])
         self.open_enc = OneHotEncoder(handle_unknown='ignore').fit(self.open_data[:,:-1])
         self.cross_enc = OneHotEncoder(handle_unknown='ignore').fit(self.cross_data[:,:-1])
         self.open_classifier, self.cross_classifier, self.lambda_, self.T_H= None, None, None, None
@@ -34,36 +34,36 @@ class FeedbackModel():
 
     def _initialize_data(self, action):
         if action == 'open':
-            return np.array([list(item) for item in it.product(['1', '2'], ['b1', 'b2', 'b3'], 
+            return np.array([list(item) for item in it.product([1, 2], ['b1', 'b2', 'b3'], 
                 ['small', 'medium', 'large'], ['push', 'pull'], ['yes', 'no'])])
         elif action == 'cross':
-            return np.array([list(item) for item in it.product(['1', '2'], ['r1', 'r2'], ['empty', 'light', 'busy'], 
+            return np.array([list(item) for item in it.product([1, 2], ['r1', 'r2'], ['empty', 'light', 'busy'], 
                 ['low', 'high'], ['morning', 'midday', 'afternoon'], ['yes', 'no'])])
         else:
             return None
 
 
-    def _update_data(self, state, action, feedback):
-        if action == 'open':
-            entry = [action[1]] + [self.CAS.DM.helper.get_state_feature_value(state[0], f)
-                        for f in self.open_features if self.CAS.DM.helper.get_state_feature_value(state[0], f) != None] + [feedback]
-            self.open_data = np.append(self.open_data, entry, axis = 0)
-            self.open_data_recent = np.append(self.open_data_recent, entry, axis = 0)
-            if (action[1] == 1 and self.CAS.flags[CAS.states.index(state)][CAS.DM.actions.index(action[0])] == False):
+    def _update_data(self, state, action, feedback, flagged):
+        if action[0] == 'open':
+            entry = [str(action[1])] + [self.DM.helper.get_state_feature_value(state[0], f)
+                        for f in self.open_features if self.DM.helper.get_state_feature_value(state[0], f) != None] + [feedback]
+            self.open_data = np.append(self.open_data, [entry], axis = 0)
+            # self.open_data_recent = np.append(self.open_data_recent, [entry], axis = 0)
+            if (action[1] == 1 and flagged == False):
                 entry_copy = entry
                 entry_copy[0] = 2
-                self.open_data = np.append(self.open_data, entry_copy, axis = 0)
-                self.open_data_recent = np.append(self.open_data_recent, entry_copy, axis = 0)
-        elif action == 'cross':
-            entry = [action[1]] + [self.CAS.DM.helper.get_state_feature_value(state[0], f)
-                        for f in self.cross_features if self.CAS.DM.helper.get_state_feature_value(state[0], f) != None] + [feedback]
-            self.cross_data = np.append(self.cross_data, entry, axis = 0)
-            self.cross_data_recent = np.append(self.cross_data_recent, entry, axis = 0)
-            if (action[1] == 1 and self.CAS.flags[CAS.states.index(state)][CAS.DM.actions.index(action[0])] == False):
+                self.open_data = np.append(self.open_data, [entry_copy], axis = 0)
+                # self.open_data_recent = np.append(self.open_data_recent, [entry_copy], axis = 0)
+        elif action[0] == 'cross':
+            entry = [str(action[1])] + [self.DM.helper.get_state_feature_value(state[0], f)
+                        for f in self.cross_features if self.DM.helper.get_state_feature_value(state[0], f) != None] + [feedback]
+            self.cross_data = np.append(self.cross_data, [entry], axis = 0)
+            # self.cross_data_recent = np.append(self.cross_data_recent, [entry], axis = 0)
+            if (action[1] == 1 and flagged == False):
                 entry_copy = entry
                 entry_copy[0] = 2
-                self.cross_data = np.append(self.cross_data, entry_copy, axis = 0)
-                self.cross_data_recent = np.append(self.cross_data_recent, entry_copy, axis = 0)
+                self.cross_data = np.append(self.cross_data, [entry_copy], axis = 0)
+                # self.cross_data_recent = np.append(self.cross_data_recent, [entry_copy], axis = 0)
 
 
     def get_classifier(self, action):

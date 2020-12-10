@@ -88,7 +88,8 @@ class Agent():
                     feedback = self._interface_with_human(domain_state, action, 
                                         map_info[str((domain_state[0], domain_state[1]))], self.CAS.DM.timeofday)
                     if trial == num_trials - 1:
-                        self.CAS.HM._update_data(state, action, feedback)
+                        flagged = self.CAS.flags[self.CAS.states.index(state)][self.CAS.DM.actions.index(action[0])]
+                        self.CAS.HM._update_data(state, action, feedback, flagged)
 
                     if feedback == 'no':
                         self.CAS.remove_transition(state, action)

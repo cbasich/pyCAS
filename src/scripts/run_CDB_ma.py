@@ -37,7 +37,7 @@ def train(info):
     agent.CAS.HM.train(agent.id, 'cross', training_method)
 
 
-def main(n_agents, num_episodes, training_method='multi_task', frequency=1, n_jobs=4):
+def main(n_agents, num_episodes, training_method='multi_task', frequency=10, n_jobs=4):
     agents = []
     for i in range(n_agents):
         if os.path.exists(os.path.join(AGENT_PATH, 'agent_{}'.format(i))):
@@ -60,8 +60,8 @@ def main(n_agents, num_episodes, training_method='multi_task', frequency=1, n_jo
             Alfred.save()
             agents.append(Alfred)
 
-    # embed()
-    # quit()
+    embed()
+    quit()
 
     results = []
     for i in range(num_episodes):
@@ -71,6 +71,8 @@ def main(n_agents, num_episodes, training_method='multi_task', frequency=1, n_jo
             if i % frequency == 0 and i != 0:
                 pool.map(train, [{'agent': agent, 'training_method': training_method} for agent in agents])
     print(results)
+
+    embed()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
