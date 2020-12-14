@@ -123,16 +123,24 @@ class FeedbackModel():
                 if not action in lambda_[state].keys():
                     lambda_[state][action] = {}
                 for level in [1,2]:
-                    try:
-                        features = [level] + self.DM.helper.extract_state_features(state)
-                        if action == 'open':
-                            p = self.open_classifier._predict(features, action)
-                        elif action == 'cross':
-                            p = self.cross_classifier._predict(features, action)
-                    except Exception:
-                        p = 0.5
+                    # try:
+                    features = [level] + self.DM.helper.extract_state_features(state)
+                    p = self._predict(features, action)
+                    # except Exception:
+                    #     p = 0.5
                     lambda_[state][action][level] = p
         self.lambda_ = lambda_
+
+
+    def update_lambda(self):
+        """
+            This function updates lambda to save time rather than regenerating every call.
+        """
+        for state in self.lambda_.keys():
+            for action in self.lambda_[state].keys():
+                for level in self.lambda_[state][action].keys():
+                    features = [level] + self.DM.helper.extract_state_features(state)
+                    self.lambda_[state][action][level] = self._predict(features, action)
 
 
     def _predict(self, features, action):
@@ -147,12 +155,15 @@ class FeedbackModel():
                 means the probability of *no* override, and for level 1, means the probability 
                 of approval. We return -1.0 if this is an input that we don't have data for.
         """
-        if action == 'open':
-            x = self.open_enc.transform(features)
-        elif action == 'cross':
-            x = self.cross_enc.transform(features)
-
-        return self.classifier.predict(x)
+        try:
+            if action == 'open':
+                x = self.open_enc.transform([features])
+                return self.open_classifier.predict(x.toarray())
+            elif action == 'cross':
+                x = self.cross_enc.transform([features])
+                return self.cross_classifier.predict(x.toarray())
+        except:
+            return 0.5
 
 
     def predict(self, state, action, sigma):

@@ -22,27 +22,36 @@ AGENT_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_ma', 'a
 MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_ma', 'maps')
 
 
-def rollout(agent):
+def rollout(agent_id):
+    with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(agent_id)), mode='rb') as f:
+        agent = pickle.load(f, encoding='bytes')
     agent.CAS.DM.set_random_task()
     agent.CAS.HM.generate_T_H()
     agent.CAS.reset()
     agent.CAS.solve()
-    return agent.rollout()
+    output = agent.rollout()
+    agent.save()
+    return output
 
 
 def train(info):
-    agent = info['agent']
+    agent_id = info['agent_id']
     training_method = info['training_method']
+    with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(agent_id)), mode='rb') as f:
+        agent = pickle.load(f, encoding='bytes')
     agent.CAS.HM.train(agent.id, 'open', training_method)
     agent.CAS.HM.train(agent.id, 'cross', training_method)
+    agent.CAS.HM.update_lambda()
+    agent.CAS.update_kappa()
+    # agent.CAS.save_kappa()
+    agent.save()
 
 
-def main(n_agents, num_episodes, training_method='multi_task', frequency=10, n_jobs=4):
-    agents = []
+def main(n_agents, num_episodes, training_method=None, frequency=10, n_jobs=4):
+    agent_ids = []
     for i in range(n_agents):
-        if os.path.exists(os.path.join(AGENT_PATH, 'agent_{}'.format(i))):
-            with open(os.path.join(AGENT_PATH, 'agent_{}'.format(i))) as f:
-                agents.append(pickle.load(f, encoding='bytes'))
+        if os.path.exists(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(i))):
+            agent_ids.append(i)
         else:
             Alfred = agent.Agent(i)
             DM = domain_model.DomainModel('small_campus.txt')
@@ -58,18 +67,19 @@ def main(n_agents, num_episodes, training_method='multi_task', frequency=10, n_j
             Alfred.set_cas_model(CAS)
             Alfred.set_authority_epsilon((i+1) * 0.02)
             Alfred.save()
-            agents.append(Alfred)
+            agent_ids.append(Alfred.id)
 
-    embed()
-    quit()
+    # embed()
+    # quit()
 
     results = []
     for i in range(num_episodes):
         print("Starting episode {}\n".format(i))
         with mp.Pool(n_jobs) as pool:
-            results.append(pool.map(rollout, agents))
+            results.append(pool.map(rollout, agent_ids))
             if i % frequency == 0 and i != 0:
-                pool.map(train, [{'agent': agent, 'training_method': training_method} for agent in agents])
+                pool.map(train, [{'agent_id': agent_id, 'training_method': training_method} for agent_id in agent_ids])
+        print(results[-1:])
     print(results)
 
     embed()
@@ -80,4 +90,4 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--num_agents', type=int, default=4)
     args = parser.parse_args()
 
-    main(4,21)
+    main(4, 101)

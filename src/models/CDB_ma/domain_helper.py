@@ -64,12 +64,12 @@ class Helper():
                 function will need to be updated.
 
         """
-        if str((state[0], state[1])) not in map_info.keys():
+        if str((state[0], state[1])) not in self.map_info.keys():
             return None
         else:
-            if map_info[str((state[0], state[1]))]['obstacle'] == 'door':
+            if self.map_info[str((state[0], state[1]))]['obstacle'] == 'door':
                 classes = ['region', 'doorsize', 'doortype']
-            elif map_info[str((state[0], state[1]))]['obstacle'] == 'crosswalk':
+            elif self.map_info[str((state[0], state[1]))]['obstacle'] == 'crosswalk':
                 classes = ['region', 'visibility', 'timeofday', 'traffic']
 
         features = [self.get_state_feature_value(state, feature) for feature 

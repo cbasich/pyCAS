@@ -337,7 +337,7 @@ class CAS():
         """
         for s, state in enumerate(self.DM.states):
             for a, action in enumerate(self.DM.actions):
-                if action not in self.HM.flagged:
+                if action not in self.HM.flagged_actions:
                     continue
 
                 level = self.AM.kappa[state][action]
