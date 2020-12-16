@@ -94,8 +94,10 @@ def _train_model_soft_labeling(agent_id, target_X, y, action, h):
         target_probs = h.predict(X_unique)
         other_probs = other_agent.CAS.HM.get_classifier(action).predict(X_unique)
         KLD = entropy(target_probs, qk=other_probs)
+        target_X = np.concatenate((target_X, other_X))
         y = np.concatenate((y, other_y.reshape(-1,))) #(other_y - 0.500000)))
         target_weight = np.concatenate((target_weight, np.ones(len(other_y)) * KLD))
+        other_id += 1
     return svm.SVR(C=1.0, epsilon=0.2).fit(target_X, y, sample_weight=target_weight)
 
 

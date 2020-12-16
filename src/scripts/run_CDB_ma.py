@@ -47,7 +47,7 @@ def train(info):
     agent.save()
 
 
-def main(n_agents, num_episodes, training_method=None, frequency=10, n_jobs=4):
+def main(n_agents, num_episodes, training_method='soft_labeling', frequency=10, n_jobs=4):
     agent_ids = []
     for i in range(n_agents):
         if os.path.exists(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(i))):
@@ -90,4 +90,4 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--num_agents', type=int, default=4)
     args = parser.parse_args()
 
-    main(4, 101)
+    main(4, 11)
