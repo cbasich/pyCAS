@@ -79,9 +79,9 @@ def _train_model_naive(agent_id, X, y, action):
 
 
 def _train_model_soft_labeling(agent_id, target_X, y, action, h):
+    # TODO: When doing this training method, we have to add back 0.5 to all predicted values.
     other_id = 0
-    # y = float(y) - 0.500000
-    # embed()
+    y = y.astype(float) - 0.50000
     X_unique = target_X[np.unique(target_X, axis=0, return_index=True)[1]]
     target_weight = np.ones(len(target_X))
     while os.path.exists(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id))):
@@ -91,6 +91,7 @@ def _train_model_soft_labeling(agent_id, target_X, y, action, h):
         with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
             other_agent = pickle.load(f, encoding='bytes')
         other_X, other_y = _load_dataset(action, other_id)
+        other_y = other_y.astype(float) - 0.5000
         target_probs = h.predict(X_unique)
         other_probs = other_agent.CAS.HM.get_classifier(action).predict(X_unique)
         KLD = entropy(target_probs, qk=other_probs)

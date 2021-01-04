@@ -56,12 +56,8 @@ class CAS():
         self._states = self.generate_states()
         self._actions = self.generate_actions()
         self._init, self._goals, self._transitions, self._costs = None, None, None, None
-        # self.set_init()
-        # self.set_goals()
-        # self.compute_transitions()
-        # self.compute_costs()
         self.transitions_base = None
-        # self.check_validity()
+        self.check_validity()
 
         self.flags = [[False for a in range(len(self.DM.actions))] for s in range(len(self.states))]
         self.potential = np.array([[[0.0 for l in self.AM.L] for a in self.DM.actions] for s in self.DM.states])
@@ -373,7 +369,7 @@ class CAS():
                                 and action == 'cross')):
                                 self.potential[s][a][L[level_index]] = 0.0
                                 break
-                            elif self.HM.lambda_[state][action][1] > 0.25:
+                            elif self.HM.lambda_[state][action][1] > 0.10:
                                 break
 
                         self.AM.kappa[state][action] = L[level_index]

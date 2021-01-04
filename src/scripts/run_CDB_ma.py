@@ -22,35 +22,44 @@ AGENT_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_ma', 'a
 MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_ma', 'maps')
 
 
-def rollout(agent_id):
-    with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(agent_id)), mode='rb') as f:
+def save_agent(agent, training_method):
+    if training_method is None:
+        training_method = 'None'
+    with open(os.path.join(AGENT_PATH, training_method, 'agent_{}.pkl'.format(agent.id)), mode='rb') as f:
+        pickle.dump(agent, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+def rollout(info):
+    agent_id = info['agent_id']
+    training_method = info['training_method']
+    with open(os.path.join(AGENT_PATH, training_method, 'agent_{}.pkl'.format(agent_id)), mode='rb') as f:
         agent = pickle.load(f, encoding='bytes')
     agent.CAS.DM.set_random_task()
     agent.CAS.HM.generate_T_H()
     agent.CAS.reset()
     agent.CAS.solve()
     output = agent.rollout()
-    agent.save()
     return output
 
 
 def train(info):
     agent_id = info['agent_id']
     training_method = info['training_method']
-    with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(agent_id)), mode='rb') as f:
+    with open(os.path.join(AGENT_PATH, training_method, 'agent_{}.pkl'.format(agent_id)), mode='rb') as f:
         agent = pickle.load(f, encoding='bytes')
     agent.CAS.HM.train(agent.id, 'open', training_method)
     agent.CAS.HM.train(agent.id, 'cross', training_method)
     agent.CAS.HM.update_lambda()
     agent.CAS.update_kappa()
-    # agent.CAS.save_kappa()
-    agent.save()
+    save_agent(agent, training_method)
+    # agent.save()
 
 
-def main(n_agents, num_episodes, training_method='soft_labeling', frequency=10, n_jobs=4):
+def main(n_agents, num_episodes, training_method='all', frequency=10, n_jobs=4):
+    if training_method == 'None':
+        training_method = None
     agent_ids = []
     for i in range(n_agents):
-        if os.path.exists(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(i))):
+        if os.path.exists(os.path.join(AGENT_PATH, training_method, 'agent_{}.pkl'.format(i))):
             agent_ids.append(i)
         else:
             Alfred = agent.Agent(i)
@@ -69,25 +78,37 @@ def main(n_agents, num_episodes, training_method='soft_labeling', frequency=10, 
             Alfred.save()
             agent_ids.append(Alfred.id)
 
-    # embed()
-    # quit()
 
-    results = []
-    for i in range(num_episodes):
-        print("Starting episode {}\n".format(i))
-        with mp.Pool(n_jobs) as pool:
-            results.append(pool.map(rollout, agent_ids))
-            if i % frequency == 0 and i != 0:
-                pool.map(train, [{'agent_id': agent_id, 'training_method': training_method} for agent_id in agent_ids])
-        print(results[-1:])
-    print(results)
+    if training_method == 'all':
+        for training_method in [None, 'naive', 'soft_labeling', 'multi_task', 'multi_source']:
+            results = []
+            for i in range(num_episodes):
+                print("Starting episode {}".format(i))
+                with mp.Pool(n_jobs) as pool:
+                    results.append(pool.map(rollout, [{'agent_id': agent_id, 'training_method': training_method} for agent_id in agent_ids]))
+                    if i % frequency == 0 and i != 0:
+                        pool.map(train, [{'agent_id': agent_id, 'training_method': training_method} for agent_id in agent_ids])
+            with open(os.path.join(OUTPUT_PATH, training_method, 'output.txt'), mode='a+') as f:
+                f.write(results)
 
-    embed()
+    else:
+        results = []
+        for i in range(num_episodes):
+            print("Starting episode {}".format(i))
+            with mp.Pool(n_jobs) as pool:
+                results.append(pool.map(rollout, [{'agent_id': agent_id, 'training_method': training_method} for agent_id in agent_ids]))
+                if i % frequency == 0 and i != 0:
+                    pool.map(train, [{'agent_id': agent_id, 'training_method': training_method} for agent_id in agent_ids])
+
+        with open(os.path.join(OUTPUT_PATH, training_method, 'output.txt'), mode='a+') as f:
+            f.write(results)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--map_file', type=str, default='large_campus.txt')
     parser.add_argument('-n', '--num_agents', type=int, default=4)
+    parser.add_argument('-t', '--training_method', type=str, default='None')
     args = parser.parse_args()
 
-    main(4, 11)
+    main(4, 301)

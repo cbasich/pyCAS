@@ -30,6 +30,7 @@ class FeedbackModel():
         self.open_enc = OneHotEncoder(handle_unknown='ignore').fit(self.open_data[:,:-1])
         self.cross_enc = OneHotEncoder(handle_unknown='ignore').fit(self.cross_data[:,:-1])
         self.open_classifier, self.cross_classifier, self.lambda_, self.T_H= None, None, None, None
+        self.training_method = training_method
 
 
     def _initialize_data(self, action):
@@ -158,10 +159,16 @@ class FeedbackModel():
         try:
             if action == 'open':
                 x = self.open_enc.transform([features])
-                return self.open_classifier.predict(x.toarray())
+                if training_method == 'soft_labeling':
+                    return self.open_classifier.predict(x.toarray()) + 0.5000
+                else:
+                    return self.open_classifier.predict(x.toarray())
             elif action == 'cross':
                 x = self.cross_enc.transform([features])
-                return self.cross_classifier.predict(x.toarray())
+                if training_method == 'soft_labeling':
+                    return self.cross_classifier.predict(x.toarray()) + 0.5000
+                else:
+                    return self.cross_classifier.predict(x.toarray())
         except:
             return 0.5
 
