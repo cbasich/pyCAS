@@ -74,7 +74,7 @@ class FeedbackModel():
             return self.cross_classifier
 
 
-    def train(self, agent_id, action, training_method=None):
+    def train(self, agent_id, action, training_method='none'):
         assert (action == 'open' or action == 'cross')
         classifier = None
 
@@ -86,7 +86,7 @@ class FeedbackModel():
             y = self.cross_data[:,-1:] == 'yes'
         y = y.reshape(-1,)
 
-        if training_method is None:
+        if training_method == 'none':
             classifier = _train_model(X, y)
         elif training_method == 'naive':
             classifier = _train_model_naive(agent_id, X, y, action)
