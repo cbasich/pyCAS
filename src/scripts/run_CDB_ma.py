@@ -37,6 +37,7 @@ def rollout(info):
     agent.CAS.reset()
     agent.CAS.solve()
     output = agent.rollout()
+    save_agent(agent, training_method)
     return output
 
 
@@ -59,7 +60,7 @@ def train(info):
 
 def main(n_agents, num_episodes, map_file, training_method='all', frequency=10, n_jobs=4):
     if training_method == 'all':
-        for method in ['none', 'naive', 'soft_labeling', 'multi_task', 'multi_source']:
+        for method in ['none', 'naive', 'multi_task', 'multi_source']:
             agent_ids = []
             for i in range(n_agents):
                 if os.path.exists(os.path.join(AGENT_PATH, method, 'agent_{}.pkl'.format(i))):
@@ -127,9 +128,9 @@ def main(n_agents, num_episodes, map_file, training_method='all', frequency=10, 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--map_file', type=str, default='large_campus.txt')
+    parser.add_argument('-m', '--map_file', type=str, default='small_campus.txt')
     parser.add_argument('-n', '--num_agents', type=int, default=4)
-    parser.add_argument('-e', '--num_episodes', type=int, default=20)
+    parser.add_argument('-e', '--num_episodes', type=int, default=100)
     parser.add_argument('-f', '--frequency', type=int, default=10)
     parser.add_argument('-t', '--training_method', type=str, default='all')
     args = parser.parse_args()

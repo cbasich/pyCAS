@@ -94,7 +94,7 @@ def _train_model_soft_labeling(agent_id, target_X, y, action, h):
         other_y = other_y.astype(float) - 0.5000
         target_probs = h.predict(X_unique)
         other_probs = other_agent.CAS.HM.get_classifier(action).predict(X_unique)
-        KLD = entropy(target_probs, qk=other_probs)
+        KLD = entropy(other_probs + 0.5000, qk=target_probs + 0.5000)
         target_X = np.concatenate((target_X, other_X))
         y = np.concatenate((y, other_y.reshape(-1,))) #(other_y - 0.500000)))
         target_weight = np.concatenate((target_weight, np.ones(len(other_y)) * KLD))

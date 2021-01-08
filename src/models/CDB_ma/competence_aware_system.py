@@ -343,7 +343,6 @@ class CAS():
                 else:
                     L = [level-1, level, level+1]
                 self.update_potential(state, s, action, a, L)
-
                 for level_index in np.argsort(-1.0 * np.array([self.potential[s][a][l] for l in L])):
                     if np.random.uniform() <= self.potential[s][a][L[level_index]]:
                         if L[level_index] == 3 and len(state) > 2:
@@ -375,7 +374,6 @@ class CAS():
 
                         self.AM.kappa[state][action] = L[level_index]
                         self.potential[s][a][L[level_index]] = 0.0
-
                         if L[1] == 1 and L[level_index] == 2:
                             self.flags[s][a] = True
                         break

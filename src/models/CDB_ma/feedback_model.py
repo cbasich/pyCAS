@@ -49,7 +49,7 @@ class FeedbackModel():
             entry = [str(action[1])] + [self.DM.helper.get_state_feature_value(state[0], f)
                         for f in self.open_features if self.DM.helper.get_state_feature_value(state[0], f) != None] + [feedback]
             self.open_data = np.append(self.open_data, [entry], axis = 0)
-            # self.open_data_recent = np.append(self.open_data_recent, [entry], axis = 0)
+                # self.open_data_recent = np.append(self.open_data_recent, [entry], axis = 0)
             if (action[1] == 1 and flagged == False):
                 entry_copy = entry
                 entry_copy[0] = 2
@@ -159,16 +159,10 @@ class FeedbackModel():
         try:
             if action == 'open':
                 x = self.open_enc.transform([features])
-                if training_method == 'soft_labeling':
-                    return self.open_classifier.predict(x.toarray()) + 0.5000
-                else:
-                    return self.open_classifier.predict(x.toarray())
+                return self.open_classifier.predict(x.toarray())[0]
             elif action == 'cross':
                 x = self.cross_enc.transform([features])
-                if training_method == 'soft_labeling':
-                    return self.cross_classifier.predict(x.toarray()) + 0.5000
-                else:
-                    return self.cross_classifier.predict(x.toarray())
+                return self.cross_classifier.predict(x.toarray())[0]
         except:
             return 0.5
 
@@ -183,6 +177,8 @@ class FeedbackModel():
             p = self.lambda_[state][action][2]
         elif sigma == '/':
             p = 1 - self.lambda_[state][action][2]
+        # if self.training_method == 'soft_labeling':
+        #     p += 0.5000
         return p if 0. <= p <= 1. else 0.
 
 
