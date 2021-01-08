@@ -159,16 +159,10 @@ class FeedbackModel():
         try:
             if action == 'open':
                 x = self.open_enc.transform([features])
-                if training_method == 'soft_labeling':
-                    return self.open_classifier.predict(x.toarray()) + 0.5000
-                else:
-                    return self.open_classifier.predict(x.toarray())
+                return self.open_classifier.predict(x.toarray())
             elif action == 'cross':
                 x = self.cross_enc.transform([features])
-                if training_method == 'soft_labeling':
-                    return self.cross_classifier.predict(x.toarray()) + 0.5000
-                else:
-                    return self.cross_classifier.predict(x.toarray())
+                return self.cross_classifier.predict(x.toarray())
         except:
             return 0.5
 
@@ -183,6 +177,8 @@ class FeedbackModel():
             p = self.lambda_[state][action][2]
         elif sigma == '/':
             p = 1 - self.lambda_[state][action][2]
+        if self.training_method == 'soft_labeling':
+            p += 0.5000
         return p if 0. <= p <= 1. else 0.
 
 
