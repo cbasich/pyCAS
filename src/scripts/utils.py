@@ -133,7 +133,7 @@ def _train_model_multi_source(agent_id, target_X, target_y, action, num_iters=5)
             combined_weight = np.concatenate((source_weights[k], target_weight))
             weak_classifier = svm.SVC().fit(combined_X, combined_y, sample_weight=combined_weight)
             y_pred = weak_classifier.predict(target_X)
-            error = np.dot(target_weight, target_y == y_pred) / np.sum(target_weight)
+            error = np.dot(target_weight, target_y != y_pred) / np.sum(target_weight)
             weak_classifiers.add((weak_classifier, error))
         best_classifier = min(weak_classifiers, key=lambda item: item[1])
         alpha_T = 0.5 * np.log((1 - best_classifier[1]) / best_classifier[1])
@@ -168,7 +168,7 @@ def _train_model_multi_task(agent_id, target_X, target_y, action, num_iters=10):
         target_weight /= np.sum(target_weight)
         for h in source_classifiers:
             y_pred = h.predict(target_X) > 0.5
-            error = np.dot(target_weight, target_y == y_pred)
+            error = np.dot(target_weight, target_y != y_pred)
             # TODO insert the epsilon > 1/2 clause?
             weak_classifiers.add((h, error))
         best_classifier = min(weak_classifiers, key=lambda item: item[1])
