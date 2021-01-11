@@ -19,7 +19,7 @@ class Agent():
         self.id = ID
         self.authority_epsilon = 0.0
         self.CAS = None
-
+        self.competence_history = []
 
     def set_authority_epsilon(self, eps):
         self.authority_epsilon = eps
@@ -104,7 +104,7 @@ class Agent():
 
             costs.append(cost)
             self.CAS.set_transitions(initial_transition_matrix)
-
+        self.competence_history.append(level_optimality)
         return (costs, level_optimality)
 
     def save(self):
