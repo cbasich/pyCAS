@@ -57,7 +57,7 @@ class CAS():
         self._actions = self.generate_actions()
         self._init, self._goals, self._transitions, self._costs = None, None, None, None
         self.transitions_base = None
-        self.check_validity()
+        #  self.check_validity()
 
         self.flags = [[False for a in range(len(self.DM.actions))] for s in range(len(self.states))]
         self.potential = np.array([[[0.0 for l in self.AM.L] for a in self.DM.actions] for s in self.DM.states])
@@ -282,7 +282,8 @@ class CAS():
                 save on computation. This would be less efficient in general but more *correct*.
         """
         sbar = self.states.index((state, 3))
-        abar = self.actions.index((self.DM.actions[a], l))
+        abar = self.actions.index((action, l))
+        
         T = self.transitions[sbar][abar]
         q = self.costs[sbar][abar] + np.sum(np.array(self.V * T))
         return q
@@ -342,7 +343,6 @@ class CAS():
                 else:
                     L = [level-1, level, level+1]
                 self.update_potential(state, s, action, a, L)
-
                 for level_index in np.argsort(-1.0 * np.array([self.potential[s][a][l] for l in L])):
                     if np.random.uniform() <= self.potential[s][a][L[level_index]]:
                         if L[level_index] == 3 and len(state) > 2:
@@ -374,7 +374,6 @@ class CAS():
 
                         self.AM.kappa[state][action] = L[level_index]
                         self.potential[s][a][L[level_index]] = 0.0
-
                         if L[1] == 1 and L[level_index] == 2:
                             self.flags[s][a] = True
                         break

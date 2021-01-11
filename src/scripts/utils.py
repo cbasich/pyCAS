@@ -64,13 +64,13 @@ def _train_model(X, y):
 
 def _train_model_naive(agent_id, X, y, action):
     other_id = 0
-    while os.path.exists(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id))):
+    while os.path.exists(os.path.join(AGENT_PATH, 'naive', 'agent_{}.pkl'.format(other_id))):
         if other_id == agent_id:
             other_id += 1
             continue
-        with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
+        with open(os.path.join(AGENT_PATH, 'naive', 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
             other_agent = pickle.load(f, encoding='bytes')
-            other_X, other_y = _load_dataset(action, other_id)
+            other_X, other_y = _load_dataset(action, other_id, 'naive')
             X = np.concatenate((X, other_X))
             y = np.concatenate((y, other_y.reshape(-1,)))
             other_id += 1
@@ -84,17 +84,17 @@ def _train_model_soft_labeling(agent_id, target_X, y, action, h):
     y = y.astype(float) - 0.50000
     X_unique = target_X[np.unique(target_X, axis=0, return_index=True)[1]]
     target_weight = np.ones(len(target_X))
-    while os.path.exists(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id))):
+    while os.path.exists(os.path.join(AGENT_PATH, 'soft_labeling', 'agent_{}.pkl'.format(other_id))):
         if other_id == agent_id:
             other_id += 1
             continue
-        with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
+        with open(os.path.join(AGENT_PATH, 'soft_labeling', 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
             other_agent = pickle.load(f, encoding='bytes')
-        other_X, other_y = _load_dataset(action, other_id)
+        other_X, other_y = _load_dataset(action, other_id, 'soft_labeling')
         other_y = other_y.astype(float) - 0.5000
         target_probs = h.predict(X_unique)
         other_probs = other_agent.CAS.HM.get_classifier(action).predict(X_unique)
-        KLD = entropy(target_probs, qk=other_probs)
+        KLD = entropy(other_probs + 0.5000, qk=target_probs + 0.5000)
         target_X = np.concatenate((target_X, other_X))
         y = np.concatenate((y, other_y.reshape(-1,))) #(other_y - 0.500000)))
         target_weight = np.concatenate((target_weight, np.ones(len(other_y)) * KLD))
@@ -102,19 +102,19 @@ def _train_model_soft_labeling(agent_id, target_X, y, action, h):
     return svm.SVR(C=1.0, epsilon=0.2).fit(target_X, y, sample_weight=target_weight)
 
 
-def _train_model_multi_source(agent_id, target_X, target_y, action, num_iters=10):
+def _train_model_multi_source(agent_id, target_X, target_y, action, num_iters=5):
     source_datasets = []
     source_weights = []
     target_weight = np.ones(len(target_X))
     n = 0
     other_id = 0
-    while os.path.exists(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id))):
+    while os.path.exists(os.path.join(AGENT_PATH, 'multi_source', 'agent_{}.pkl'.format(other_id))):
         if other_id == agent_id:
             other_id += 1
             continue
-        with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
+        with open(os.path.join(AGENT_PATH, 'multi_source', 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
             other_agent = pickle.load(f, encoding='bytes')
-            other_X, other_y = _load_dataset(action, other_id)
+            other_X, other_y = _load_dataset(action, other_id, 'multi_source')
         source_datasets.append((other_X, other_y))
         n += len(other_X)
         source_weights.append(np.ones(len(other_y)))
@@ -152,11 +152,11 @@ def _train_model_multi_task(agent_id, target_X, target_y, action, num_iters=10):
     target_weight = np.ones(len(target_X))
     source_classifiers = []
     other_id = 0
-    while os.path.exists(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id))):
+    while os.path.exists(os.path.join(AGENT_PATH, 'multi_task', 'agent_{}.pkl'.format(other_id))):
         if other_id == agent_id:
             other_id += 1
             continue
-        with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
+        with open(os.path.join(AGENT_PATH, 'multi_task', 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
             agent = pickle.load(f, encoding='bytes')
             source_classifiers.append(agent.CAS.HM.get_classifier(action))
         other_id += 1
@@ -178,9 +178,9 @@ def _train_model_multi_task(agent_id, target_X, target_y, action, num_iters=10):
     return svm.SVR(C=1.0, epsilon=0.2).fit(target_X, target_y, sample_weight=target_weight)
 
 
-def _load_dataset(action, other_id):
+def _load_dataset(action, other_id, method):
     agent = None
-    with open(os.path.join(AGENT_PATH, 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
+    with open(os.path.join(AGENT_PATH, method, 'agent_{}.pkl'.format(other_id)), mode='rb') as f:
         agent = pickle.load(f, encoding='bytes')
 
     if action == 'open':
