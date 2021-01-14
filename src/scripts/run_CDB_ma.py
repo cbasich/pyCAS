@@ -59,8 +59,10 @@ def train(info):
 
 
 def main(n_agents, num_episodes, map_file, training_method='all', frequency=10, n_jobs=4):
+    # embed()
+    # quit()
     if training_method == 'all':
-        for method in ['none', 'naive', 'multi_task', 'multi_source']:
+        for method in ['none', 'naive', 'soft_labeling', 'multi_task', 'multi_source']:
             agent_ids = []
             for i in range(n_agents):
                 if os.path.exists(os.path.join(AGENT_PATH, method, 'agent_{}.pkl'.format(i))):
