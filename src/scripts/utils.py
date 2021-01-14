@@ -106,7 +106,7 @@ def _train_model_soft_labeling(agent_id, target_X, y, action, h):
 def _train_model_multi_source(agent_id, target_X, target_y, action, num_iters=5):
     source_datasets = []
     source_weights = []
-    target_weight = np.ones(len(target_X))
+    target_weight = 1. 
     n = 0
     other_id = 0
     while os.path.exists(os.path.join(AGENT_PATH, 'multi_source', 'agent_{}.pkl'.format(other_id))):
@@ -118,22 +118,24 @@ def _train_model_multi_source(agent_id, target_X, target_y, action, num_iters=5)
             other_X, other_y = _load_dataset(action, other_id, 'multi_source')
         source_datasets.append((other_X, other_y))
         n += len(other_X)
-        source_weights.append(np.ones(len(other_y)))
+        source_weights.append(1.)
         other_id += 1
+    source_weights = np.array(source_weights)
     alpha_S = 0.5 * np.log(1 + np.sqrt(2 * np.log(n / num_iters)))
 
     for t in range(num_iters):
         weak_classifiers = set()
-        target_weight /= np.sum(target_weight)
-        for weight in source_weights:
-            weight /= np.sum(weight)
+        norm_const = target_weight + sum(source_weights)
+        target_weight /= norm_const
+        source_weights /= norm_const
         for k in range(len(source_datasets)):
             combined_X = np.concatenate((source_datasets[k][0], target_X))
             combined_y = np.concatenate((source_datasets[k][1].reshape(-1,), target_y))
-            combined_weight = np.concatenate((source_weights[k], target_weight))
+            combined_weight = np.concatenate((source_weights[k] * np.ones(len(source_datasets[k][0])), target_weight * np.ones(len(target_X))))
             weak_classifier = svm.SVC().fit(combined_X, combined_y, sample_weight=combined_weight)
             y_pred = weak_classifier.predict(target_X)
-            error = np.dot(target_weight, target_y != y_pred) / np.sum(target_weight)
+            error = sum((target_weight * np.array(target_y != y_pred).astype(float)) / (target_weight * len(target_X)))
+            # error = np.dot(target_weight, target_y != y_pred) / target_weight
             weak_classifiers.add((weak_classifier, error))
         best_classifier = min(weak_classifiers, key=lambda item: item[1])
         alpha_T = 0.5 * np.log((1 - best_classifier[1]) / best_classifier[1])
@@ -141,12 +143,13 @@ def _train_model_multi_source(agent_id, target_X, target_y, action, num_iters=5)
         # This should maybe only happen for the source that led to best classifier instead of all?
         for k in range(len(source_datasets)):
             y_pred = best_classifier[0].predict(source_datasets[k][0])
-            source_weights[k] *= np.exp(-1.0 * alpha_S * (y_pred ^ source_datasets[k][1].reshape(-1,)))
+            source_weights[k] *= np.exp(-1.0 * alpha_S * np.sum(y_pred ^ source_datasets[k][1].reshape(-1,))/len(y_pred)) 
+            # source_weights[k] *= np.exp(-1.0 * alpha_S * (y_pred ^ source_datasets[k][1].reshape(-1,)))
 
         y_pred = best_classifier[0].predict(target_X)
-        target_weight *= np.exp(alpha_T * (y_pred ^ target_y))
+        target_weight *= np.exp(alpha_T * np.sum(y_pred ^ target_y) / len(y_pred))
 
-    return svm.SVR(C=1.0, epsilon=0.2).fit(target_X, target_y, sample_weight=target_weight)
+    return svm.SVR(C=1.0, epsilon=0.2).fit(target_X, target_y, sample_weight=target_weight * np.ones(len(target_X)))
 
 
 def _train_model_multi_task(agent_id, target_X, target_y, action, num_iters=10):
