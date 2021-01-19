@@ -83,7 +83,6 @@ def main(n_agents, num_episodes, map_file, training_method='all', frequency=10, 
                     Alfred.set_authority_epsilon((i+1) * 0.02)
                     save_agent(Alfred, method)
                     agent_ids.append(Alfred.id)
-
             results = []
             for i in range(num_episodes):
                 print("Starting episode {}".format(i))
@@ -91,9 +90,6 @@ def main(n_agents, num_episodes, map_file, training_method='all', frequency=10, 
                     results.append(pool.map(rollout, [{'agent_id': agent_id, 'training_method': method} for agent_id in agent_ids]))
                     if (i+1) % frequency == 0:
                         pool.map(train, [{'agent_id': agent_id, 'training_method': method} for agent_id in agent_ids])
-            with open(os.path.join(OUTPUT_PATH, method, 'output.txt'), mode='a+') as f:
-                f.write(str(results))
-
     else:
         agent_ids = []
         for i in range(n_agents):
@@ -115,8 +111,6 @@ def main(n_agents, num_episodes, map_file, training_method='all', frequency=10, 
                 Alfred.set_authority_epsilon((i+1) * 0.02)
                 save_agent(Alfred, training_method)
                 agent_ids.append(Alfred.id)
-
-    
         results = []
         for i in range(num_episodes):
             print("Starting episode {}".format(i))
@@ -124,8 +118,6 @@ def main(n_agents, num_episodes, map_file, training_method='all', frequency=10, 
                 results.append(pool.map(rollout, [{'agent_id': agent_id, 'training_method': training_method} for agent_id in agent_ids]))
                 if (i+1) % frequency == 0:
                     pool.map(train, [{'agent_id': agent_id, 'training_method': training_method} for agent_id in agent_ids])
-            with open(os.path.join(OUTPUT_PATH, training_method, 'output.txt'), mode='a+') as f:
-                f.write(str(results))
 
 
 if __name__ == '__main__':
