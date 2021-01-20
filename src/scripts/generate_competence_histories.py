@@ -31,8 +31,9 @@ def main(training_method):
                 with open(os.path.join(AGENT_PATH, method, 'agent_{}.pkl'.format(agent_id)), mode='rb') as f:
                     agent = pickle.load(f, encoding='bytes')
                     competence_history = agent.competence_history
-                    competence_values[i] = competence_history
-            with open(os.path.join(OUTPUT_PATH, method, 'competence_history.json)', mode='w+')) as f:
+                    competence_values[agent_id] = competence_history
+                agent_id += 1
+            with open(os.path.join(OUTPUT_PATH, method, 'competence_history.json'), mode='w+') as f:
                 json.dump(competence_values, f, indent=4)
     else:
         competence_values = {}
@@ -41,8 +42,9 @@ def main(training_method):
             with open(os.path.join(AGENT_PATH, training_method, 'agent_{}.pkl'.format(agent_id)), mode='rb') as f:
                 agent = pickle.load(f, encoding='bytes')
                 competence_history = agent.competence_history
-                competence_values[i] = competence_history
-        with open(os.path.join(OUTPUT_PATH, training_method, 'competence_history.json)', mode='w+')) as f:
+                competence_values[agent_id] = competence_history
+            agent_id += 1
+        with open(os.path.join(OUTPUT_PATH, training_method, 'competence_history.json'), mode='w+') as f:
             json.dump(competence_values, f, indent=4)
 
 
