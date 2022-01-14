@@ -1,0 +1,1122 @@
+BEGINNING EPISODE0
+BEGINNING TRIAL
+((2, 18), 3) | ((1, 0), 3)
+((3, 18, 'SOUTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((3, 18, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((3, 18, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+((4, 18), 3) | ((1, 0), 3)
+((5, 18), 3) | ((1, 0), 3)
+((6, 18), 3) | ((0, -1), 3)
+((6, 17, 'WEST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((6, 17, 'WEST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 16), 3) | ((0, -1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'empty'), 3) | ('cross', 1)
+Feedback: no
+((6, 14, 'WEST', 'empty'), 3) | ((0, 1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'empty'), 3) | ((0, 1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'light'), 3) | ('cross', 1)
+Feedback: no
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'busy'), 3) | ('cross', 1)
+Feedback: no
+((6, 14, 'WEST', 'busy'), 3) | ('cross', 0)
+((6, 13), 3) | ((1, 0), 3)
+((7, 13), 3) | ((1, 0), 3)
+((8, 13), 3) | ((1, 0), 3)
+((9, 13), 3) | ((0, -1), 3)
+((9, 12), 3) | ((0, -1), 3)
+((9, 11, 'WEST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((9, 11, 'WEST', 'door-closed'), 3) | ('open', 0)
+((9, 11, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((9, 10), 3) | ((1, 0), 3)
+((10, 10), 3) | ((1, 0), 3)
+((11, 10, 'SOUTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((11, 10, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((11, 10, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+BEGINNING EPISODE1
+BEGINNING TRIAL
+((12, 10), 3) | ((-1, 0), 3)
+((11, 10, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((11, 10, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((11, 10, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((10, 10), 3) | ((-1, 0), 3)
+((9, 10), 3) | ((0, 1), 3)
+((9, 11, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((9, 11, 'EAST', 'door-closed'), 3) | ((0, -1), 3)
+((9, 10), 3) | ((-1, 0), 3)
+((8, 10), 3) | ((-1, 0), 3)
+((7, 10), 3) | ((-1, 0), 3)
+((6, 10), 3) | ((-1, 0), 3)
+((5, 10), 3) | ((0, 1), 3)
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 0)
+((5, 11, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((5, 12), 3) | ((1, 0), 3)
+((6, 12), 3) | ((0, 1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'busy'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'busy'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'empty'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'empty'), 3) | ('cross', 0)
+((6, 15), 3) | ((0, 1), 3)
+((6, 16), 3) | ((0, 1), 3)
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 18), 3) | ((0, 1), 3)
+((6, 19, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((6, 19, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 20), 3) | ((0, 1), 3)
+((6, 21), 3) | ((0, 1), 3)
+((6, 22, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((6, 22, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 23), 3) | ((-1, 0), 3)
+((5, 23), 3) | ((-1, 0), 3)
+((4, 23), 3) | ((-1, 0), 3)
+((3, 23, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((3, 23, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((3, 23, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+BEGINNING EPISODE2
+BEGINNING TRIAL
+((2, 23), 3) | ((1, 0), 3)
+((3, 23, 'SOUTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((3, 23, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((3, 23, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+((4, 23), 3) | ((1, 0), 3)
+((5, 23), 3) | ((1, 0), 3)
+((6, 23), 3) | ((0, -1), 3)
+((6, 22, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((6, 22, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 21), 3) | ((0, -1), 3)
+((6, 20), 3) | ((0, -1), 3)
+((6, 19, 'WEST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((6, 19, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 18), 3) | ((-1, 0), 3)
+((5, 18), 3) | ((-1, 0), 3)
+((4, 18), 3) | ((-1, 0), 3)
+((3, 18, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((3, 18, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((3, 18, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+BEGINNING EPISODE3
+BEGINNING TRIAL
+((12, 4), 3) | ((-1, 0), 3)
+((11, 4, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((11, 4, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((11, 4, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((10, 4), 3) | ((0, 1), 3)
+((10, 5), 3) | ((0, 1), 3)
+((10, 6, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((10, 6, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((10, 7), 3) | ((0, 1), 3)
+((10, 8), 3) | ((0, 1), 3)
+((10, 9, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((10, 9, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((10, 10), 3) | ((-1, 0), 3)
+((9, 10), 3) | ((0, 1), 3)
+((9, 11, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((9, 11, 'EAST', 'door-closed'), 3) | ((0, -1), 3)
+((9, 10), 3) | ((-1, 0), 3)
+((8, 10), 3) | ((-1, 0), 3)
+((7, 10), 3) | ((-1, 0), 3)
+((6, 10), 3) | ((-1, 0), 3)
+((5, 10), 3) | ((0, 1), 3)
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 0)
+((5, 11, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((5, 12), 3) | ((1, 0), 3)
+((6, 12), 3) | ((0, 1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'empty'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'busy'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'light'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'light'), 3) | ('cross', 0)
+((6, 15), 3) | ((0, 1), 3)
+((6, 16), 3) | ((0, 1), 3)
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 18), 3) | ((0, 1), 3)
+((6, 19, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((6, 19, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 20), 3) | ((0, 1), 3)
+((6, 21), 3) | ((0, 1), 3)
+((6, 22, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((6, 22, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 23), 3) | ((1, 0), 3)
+((7, 23), 3) | ((1, 0), 3)
+((8, 23), 3) | ((1, 0), 3)
+((9, 23, 'SOUTH', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((9, 23, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+BEGINNING EPISODE4
+BEGINNING TRIAL
+((4, 2), 3) | ((0, 1), 3)
+((4, 3, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((4, 3, 'EAST', 'door-closed'), 3) | ('open', 0)
+((4, 3, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 4), 3) | ((0, 1), 3)
+((4, 5, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((4, 5, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 6), 3) | ((0, 1), 3)
+((4, 7), 3) | ((0, 1), 3)
+((4, 8, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((4, 8, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 9), 3) | ((0, 1), 3)
+((4, 10), 3) | ((1, 0), 3)
+((5, 10), 3) | ((0, 1), 3)
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((5, 11, 'EAST', 'door-closed'), 3) | ((0, -1), 3)
+((5, 10), 3) | ((1, 0), 3)
+((6, 10), 3) | ((1, 0), 3)
+((7, 10), 3) | ((1, 0), 3)
+((8, 10), 3) | ((1, 0), 3)
+((9, 10), 3) | ((0, 1), 3)
+((9, 11, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((9, 11, 'EAST', 'door-closed'), 3) | ('open', 0)
+((9, 11, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((9, 12), 3) | ((1, 0), 3)
+((10, 12), 3) | ((1, 0), 3)
+((11, 12), 3) | ((1, 0), 3)
+((12, 12), 3) | ((0, 1), 3)
+((12, 13), 3) | ((0, 1), 3)
+((12, 14, 'EAST', 'empty'), 3) | ('cross', 1)
+Feedback: yes
+((12, 15), 3) | ((0, 1), 3)
+((12, 16), 3) | ((0, 1), 3)
+((12, 17), 3) | ((0, 1), 3)
+((12, 18), 3) | ((0, 1), 3)
+((12, 19), 3) | ((0, 1), 3)
+((12, 20), 3) | ((0, 1), 3)
+((12, 21), 3) | ((0, 1), 3)
+((12, 22), 3) | ((0, 1), 3)
+((12, 23), 3) | ((0, 1), 3)
+((12, 24), 3) | ((0, 1), 3)
+((12, 25), 3) | ((-1, 0), 3)
+((11, 25), 3) | ((-1, 0), 3)
+((10, 25), 3) | ((-1, 0), 3)
+((9, 25), 3) | ((-1, 0), 3)
+((8, 25), 3) | ((-1, 0), 3)
+((7, 25), 3) | ((-1, 0), 3)
+((6, 25), 3) | ((0, -1), 3)
+((6, 24, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((6, 24, 'WEST', 'door-closed'), 3) | ('open', 0)
+((6, 24, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 23), 3) | ((-1, 0), 3)
+((5, 23), 3) | ((-1, 0), 3)
+((4, 23), 3) | ((-1, 0), 3)
+((3, 23, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((3, 23, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((3, 23, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+BEGINNING EPISODE5
+BEGINNING TRIAL
+((8, 8), 3) | ((0, 1), 3)
+((8, 9, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((8, 9, 'EAST', 'door-closed'), 3) | ('open', 0)
+((8, 9, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((8, 10), 3) | ((1, 0), 3)
+((9, 10), 3) | ((0, 1), 3)
+((9, 11, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((9, 11, 'EAST', 'door-closed'), 3) | ((0, -1), 3)
+((9, 10), 3) | ((-1, 0), 3)
+((8, 10), 3) | ((-1, 0), 3)
+((7, 10), 3) | ((-1, 0), 3)
+((6, 10), 3) | ((-1, 0), 3)
+((5, 10), 3) | ((0, 1), 3)
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 0)
+((5, 11, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((5, 12), 3) | ((1, 0), 3)
+((6, 12), 3) | ((0, 1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'empty'), 3) | ('cross', 1)
+Feedback: no
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('cross', 1)
+Feedback: no
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'empty'), 3) | ('cross', 0)
+((6, 15), 3) | ((0, 1), 3)
+((6, 16), 3) | ((0, 1), 3)
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 18), 3) | ((-1, 0), 3)
+((5, 18), 3) | ((-1, 0), 3)
+((4, 18), 3) | ((-1, 0), 3)
+((3, 18, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((3, 18, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((3, 18, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+BEGINNING EPISODE6
+BEGINNING TRIAL
+((10, 18), 3) | ((-1, 0), 3)
+((9, 18, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((9, 18, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((9, 18, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((8, 18), 3) | ((-1, 0), 3)
+((7, 18), 3) | ((-1, 0), 3)
+((6, 18), 3) | ((0, -1), 3)
+((6, 17, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((6, 17, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 16), 3) | ((0, -1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'empty'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'WEST', 'empty'), 3) | ((0, 1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'light'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'busy'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'WEST', 'busy'), 3) | ('cross', 0)
+((6, 13), 3) | ((0, -1), 3)
+((6, 12), 3) | ((-1, 0), 3)
+((5, 12), 3) | ((0, -1), 3)
+((5, 11, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((5, 11, 'WEST', 'door-closed'), 3) | ('open', 0)
+((5, 11, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((5, 10), 3) | ((-1, 0), 3)
+((4, 10), 3) | ((0, -1), 3)
+((4, 9), 3) | ((-1, 0), 3)
+((3, 9, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((3, 9, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((3, 9, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+BEGINNING EPISODE7
+BEGINNING TRIAL
+((4, 2), 3) | ((0, 1), 3)
+((4, 3, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((4, 3, 'EAST', 'door-closed'), 3) | ('open', 0)
+((4, 3, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 4), 3) | ((0, 1), 3)
+((4, 5, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((4, 5, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 6), 3) | ((0, 1), 3)
+((4, 7), 3) | ((0, 1), 3)
+((4, 8, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((4, 8, 'EAST', 'door-closed'), 3) | ('open', 0)
+((4, 8, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 9), 3) | ((0, 1), 3)
+((4, 10), 3) | ((1, 0), 3)
+((5, 10), 3) | ((0, 1), 3)
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 0)
+((5, 11, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((5, 12), 3) | ((1, 0), 3)
+((6, 12), 3) | ((0, 1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'empty'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 0)
+((6, 15), 3) | ((0, 1), 3)
+((6, 16), 3) | ((0, 1), 3)
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 18), 3) | ((1, 0), 3)
+((7, 18), 3) | ((1, 0), 3)
+((8, 18), 3) | ((1, 0), 3)
+((9, 18, 'SOUTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((9, 18, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((9, 18, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+BEGINNING EPISODE8
+BEGINNING TRIAL
+((12, 4), 3) | ((-1, 0), 3)
+((11, 4, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((11, 4, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((11, 4, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((10, 4), 3) | ((-1, 0), 3)
+((9, 4), 3) | ((-1, 0), 3)
+((8, 4), 3) | ((-1, 0), 3)
+((7, 4, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((7, 4, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((6, 4), 3) | ((0, 1), 3)
+((6, 5, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((6, 5, 'EAST', 'door-closed'), 3) | ('open', 0)
+((6, 5, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+BEGINNING EPISODE9
+BEGINNING TRIAL
+((12, 4), 3) | ((-1, 0), 3)
+((11, 4, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((11, 4, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((11, 4, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((10, 4), 3) | ((-1, 0), 3)
+((9, 4), 3) | ((-1, 0), 3)
+((8, 4), 3) | ((-1, 0), 3)
+((7, 4, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((7, 4, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((6, 4), 3) | ((-1, 0), 3)
+((5, 4), 3) | ((-1, 0), 3)
+((4, 4), 3) | ((0, 1), 3)
+((4, 5, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((4, 5, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 6), 3) | ((0, 1), 3)
+((4, 7), 3) | ((0, 1), 3)
+((4, 8, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((4, 8, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 9), 3) | ((-1, 0), 3)
+((3, 9, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((3, 9, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((3, 9, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+BEGINNING EPISODE10
+BEGINNING TRIAL
+((10, 23), 3) | ((-1, 0), 3)
+((9, 23, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((9, 23, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((8, 23), 3) | ((-1, 0), 3)
+((7, 23), 3) | ((-1, 0), 3)
+((6, 23), 3) | ((-1, 0), 3)
+((5, 23), 3) | ((-1, 0), 3)
+((4, 23), 3) | ((-1, 0), 3)
+((3, 23, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((3, 23, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((3, 23, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+BEGINNING EPISODE11
+BEGINNING TRIAL
+((2, 9), 3) | ((1, 0), 3)
+((3, 9, 'SOUTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((3, 9, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((3, 9, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+((4, 9), 3) | ((0, 1), 3)
+((4, 10), 3) | ((1, 0), 3)
+((5, 10), 3) | ((1, 0), 3)
+((6, 10), 3) | ((1, 0), 3)
+((7, 10), 3) | ((1, 0), 3)
+((8, 10), 3) | ((1, 0), 3)
+((9, 10), 3) | ((1, 0), 3)
+((10, 10), 3) | ((1, 0), 3)
+((11, 10, 'SOUTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((11, 10, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((11, 10, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+BEGINNING EPISODE12
+BEGINNING TRIAL
+((2, 18), 3) | ((1, 0), 3)
+((3, 18, 'SOUTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((3, 18, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((3, 18, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+((4, 18), 3) | ((1, 0), 3)
+((5, 18), 3) | ((1, 0), 3)
+((6, 18), 3) | ((1, 0), 3)
+((7, 18), 3) | ((1, 0), 3)
+((8, 18), 3) | ((1, 0), 3)
+((9, 18, 'SOUTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((9, 18, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((9, 18, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+BEGINNING EPISODE13
+BEGINNING TRIAL
+((12, 10), 3) | ((-1, 0), 3)
+((11, 10, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((11, 10, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((10, 10), 3) | ((-1, 0), 3)
+((9, 10), 3) | ((-1, 0), 3)
+((8, 10), 3) | ((-1, 0), 3)
+((7, 10), 3) | ((-1, 0), 3)
+((6, 10), 3) | ((-1, 0), 3)
+((5, 10), 3) | ((0, 1), 3)
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 0)
+((5, 11, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((5, 12), 3) | ((1, 0), 3)
+((6, 12), 3) | ((0, 1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'empty'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 0)
+((6, 15), 3) | ((0, 1), 3)
+((6, 16), 3) | ((0, 1), 3)
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 18), 3) | ((0, 1), 3)
+((6, 19, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((6, 19, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 20), 3) | ((0, 1), 3)
+((6, 21), 3) | ((0, 1), 3)
+((6, 22, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((6, 22, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 23), 3) | ((-1, 0), 3)
+((5, 23), 3) | ((-1, 0), 3)
+((4, 23), 3) | ((-1, 0), 3)
+((3, 23, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((3, 23, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((3, 23, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+BEGINNING EPISODE14
+BEGINNING TRIAL
+((10, 18), 3) | ((-1, 0), 3)
+((9, 18, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((9, 18, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((9, 18, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((8, 18), 3) | ((-1, 0), 3)
+((7, 18), 3) | ((-1, 0), 3)
+((6, 18), 3) | ((0, -1), 3)
+((6, 17, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((6, 17, 'WEST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 16), 3) | ((0, -1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'empty'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'WEST', 'empty'), 3) | ((0, 1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'empty'), 3) | ((0, 1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'light'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'busy'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'WEST', 'busy'), 3) | ('cross', 0)
+((6, 13), 3) | ((0, -1), 3)
+((6, 12), 3) | ((-1, 0), 3)
+((5, 12), 3) | ((0, -1), 3)
+((5, 11, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((5, 11, 'WEST', 'door-closed'), 3) | ('open', 0)
+((5, 11, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((5, 10), 3) | ((-1, 0), 3)
+((4, 10), 3) | ((0, -1), 3)
+((4, 9), 3) | ((0, -1), 3)
+((4, 8, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((4, 8, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((4, 7), 3) | ((0, -1), 3)
+((4, 6), 3) | ((0, -1), 3)
+((4, 5, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((4, 5, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((4, 4), 3) | ((1, 0), 3)
+((5, 4), 3) | ((1, 0), 3)
+((6, 4), 3) | ((0, 1), 3)
+((6, 5, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((6, 5, 'EAST', 'door-closed'), 3) | ('open', 0)
+((6, 5, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+BEGINNING EPISODE15
+BEGINNING TRIAL
+((2, 9), 3) | ((1, 0), 3)
+((3, 9, 'SOUTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((3, 9, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((3, 9, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+((4, 9), 3) | ((0, 1), 3)
+((4, 10), 3) | ((1, 0), 3)
+((5, 10), 3) | ((0, 1), 3)
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 0)
+((5, 11, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((5, 12), 3) | ((1, 0), 3)
+((6, 12), 3) | ((0, 1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'empty'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 0)
+((6, 15), 3) | ((0, 1), 3)
+((6, 16), 3) | ((0, 1), 3)
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 18), 3) | ((1, 0), 3)
+((7, 18), 3) | ((1, 0), 3)
+((8, 18), 3) | ((1, 0), 3)
+((9, 18, 'SOUTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((9, 18, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((9, 18, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+BEGINNING EPISODE16
+BEGINNING TRIAL
+((6, 6), 3) | ((0, -1), 3)
+((6, 5, 'WEST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((6, 5, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 4), 3) | ((-1, 0), 3)
+((5, 4), 3) | ((-1, 0), 3)
+((4, 4), 3) | ((0, 1), 3)
+((4, 5, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((4, 5, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 6), 3) | ((0, 1), 3)
+((4, 7), 3) | ((0, 1), 3)
+((4, 8, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((4, 8, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 9), 3) | ((0, 1), 3)
+((4, 10), 3) | ((1, 0), 3)
+((5, 10), 3) | ((1, 0), 3)
+((6, 10), 3) | ((1, 0), 3)
+((7, 10), 3) | ((1, 0), 3)
+((8, 10), 3) | ((0, -1), 3)
+((8, 9, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((8, 9, 'WEST', 'door-closed'), 3) | ('open', 0)
+((8, 9, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+BEGINNING EPISODE17
+BEGINNING TRIAL
+((2, 9), 3) | ((1, 0), 3)
+((3, 9, 'SOUTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((3, 9, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((3, 9, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+((4, 9), 3) | ((0, 1), 3)
+((4, 10), 3) | ((1, 0), 3)
+((5, 10), 3) | ((0, 1), 3)
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 0)
+((5, 11, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((5, 12), 3) | ((1, 0), 3)
+((6, 12), 3) | ((0, 1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'busy'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'empty'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'empty'), 3) | ('cross', 0)
+((6, 15), 3) | ((0, 1), 3)
+((6, 16), 3) | ((0, 1), 3)
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 18), 3) | ((-1, 0), 3)
+((5, 18), 3) | ((-1, 0), 3)
+((4, 18), 3) | ((-1, 0), 3)
+((3, 18, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((3, 18, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((3, 18, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+BEGINNING EPISODE18
+BEGINNING TRIAL
+((12, 4), 3) | ((-1, 0), 3)
+((11, 4, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((11, 4, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((11, 4, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((10, 4), 3) | ((-1, 0), 3)
+((9, 4), 3) | ((-1, 0), 3)
+((8, 4), 3) | ((-1, 0), 3)
+((7, 4, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((7, 4, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((6, 4), 3) | ((-1, 0), 3)
+((5, 4), 3) | ((-1, 0), 3)
+((4, 4), 3) | ((0, -1), 3)
+((4, 3, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((4, 3, 'WEST', 'door-closed'), 3) | ('open', 0)
+((4, 3, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+Discriminator added: doorsize
+BEGINNING EPISODE19
+BEGINNING TRIAL
+((10, 23), 3) | ((-1, 0), 3)
+((9, 23, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((9, 23, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((9, 23, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((8, 23), 3) | ((-1, 0), 3)
+((7, 23), 3) | ((-1, 0), 3)
+((6, 23), 3) | ((0, -1), 3)
+((6, 22, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((6, 22, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 21), 3) | ((0, -1), 3)
+((6, 20), 3) | ((0, -1), 3)
+((6, 19, 'WEST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((6, 19, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 18), 3) | ((0, -1), 3)
+((6, 17, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((6, 17, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 16), 3) | ((0, -1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'light'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'empty'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'WEST', 'empty'), 3) | ((0, 1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'empty'), 3) | ((0, 1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'busy'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'WEST', 'busy'), 3) | ('cross', 0)
+((6, 13), 3) | ((0, -1), 3)
+((6, 12), 3) | ((-1, 0), 3)
+((5, 12), 3) | ((0, -1), 3)
+((5, 11, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((5, 11, 'WEST', 'door-closed'), 3) | ((0, 1), 3)
+((5, 12), 3) | ((1, 0), 3)
+((6, 12), 3) | ((1, 0), 3)
+((7, 12), 3) | ((1, 0), 3)
+((8, 12), 3) | ((1, 0), 3)
+((9, 12), 3) | ((0, -1), 3)
+((9, 11, 'WEST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((9, 11, 'WEST', 'door-closed'), 3) | ('open', 0)
+((9, 11, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((9, 10), 3) | ((-1, 0), 3)
+((8, 10), 3) | ((0, -1), 3)
+((8, 9, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((8, 9, 'WEST', 'door-closed'), 3) | ('open', 0)
+((8, 9, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+BEGINNING EPISODE20
+BEGINNING TRIAL
+((4, 2), 3) | ((0, 1), 3)
+((4, 3, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((4, 3, 'EAST', 'door-closed'), 3) | ('open', 0)
+((4, 3, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 4), 3) | ((0, 1), 3)
+((4, 5, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((4, 5, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 6), 3) | ((0, 1), 3)
+((4, 7), 3) | ((0, 1), 3)
+((4, 8, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((4, 8, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 9), 3) | ((0, 1), 3)
+((4, 10), 3) | ((1, 0), 3)
+((5, 10), 3) | ((0, 1), 3)
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 0)
+((5, 11, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((5, 12), 3) | ((1, 0), 3)
+((6, 12), 3) | ((0, 1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'empty'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'busy'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'busy'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'light'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'light'), 3) | ('cross', 0)
+((6, 15), 3) | ((0, 1), 3)
+((6, 16), 3) | ((0, 1), 3)
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 18), 3) | ((0, 1), 3)
+((6, 19, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((6, 19, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 20), 3) | ((0, 1), 3)
+((6, 21), 3) | ((0, 1), 3)
+((6, 22, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((6, 22, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 23), 3) | ((-1, 0), 3)
+((5, 23), 3) | ((-1, 0), 3)
+((4, 23), 3) | ((-1, 0), 3)
+((3, 23, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((3, 23, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((3, 23, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+BEGINNING EPISODE21
+BEGINNING TRIAL
+((2, 23), 3) | ((1, 0), 3)
+((3, 23, 'SOUTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((3, 23, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((3, 23, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+((4, 23), 3) | ((1, 0), 3)
+((5, 23), 3) | ((1, 0), 3)
+((6, 23), 3) | ((1, 0), 3)
+((7, 23), 3) | ((1, 0), 3)
+((8, 23), 3) | ((1, 0), 3)
+((9, 23, 'SOUTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((9, 23, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((9, 23, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+BEGINNING EPISODE22
+BEGINNING TRIAL
+((6, 6), 3) | ((0, -1), 3)
+((6, 5, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((6, 5, 'WEST', 'door-closed'), 3) | ('open', 0)
+((6, 5, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 4), 3) | ((-1, 0), 3)
+((5, 4), 3) | ((-1, 0), 3)
+((4, 4), 3) | ((0, 1), 3)
+((4, 5, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((4, 5, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 6), 3) | ((0, 1), 3)
+((4, 7), 3) | ((0, 1), 3)
+((4, 8, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((4, 8, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 9), 3) | ((0, 1), 3)
+((4, 10), 3) | ((1, 0), 3)
+((5, 10), 3) | ((0, 1), 3)
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 0)
+((5, 11, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((5, 12), 3) | ((1, 0), 3)
+((6, 12), 3) | ((0, 1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'empty'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 0)
+((6, 15), 3) | ((0, 1), 3)
+((6, 16), 3) | ((0, 1), 3)
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 18), 3) | ((-1, 0), 3)
+((5, 18), 3) | ((-1, 0), 3)
+((4, 18), 3) | ((-1, 0), 3)
+((3, 18, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((3, 18, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((3, 18, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+BEGINNING EPISODE23
+BEGINNING TRIAL
+((12, 4), 3) | ((-1, 0), 3)
+((11, 4, 'NORTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((11, 4, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((11, 4, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+((10, 4), 3) | ((0, 1), 3)
+((10, 5), 3) | ((0, 1), 3)
+((10, 6, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((10, 6, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((10, 7), 3) | ((0, 1), 3)
+((10, 8), 3) | ((0, 1), 3)
+((10, 9, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((10, 9, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((10, 10), 3) | ((-1, 0), 3)
+((9, 10), 3) | ((0, 1), 3)
+((9, 11, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((9, 11, 'EAST', 'door-closed'), 3) | ((0, -1), 3)
+((9, 10), 3) | ((-1, 0), 3)
+((8, 10), 3) | ((-1, 0), 3)
+((7, 10), 3) | ((-1, 0), 3)
+((6, 10), 3) | ((-1, 0), 3)
+((5, 10), 3) | ((0, 1), 3)
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((5, 11, 'EAST', 'door-closed'), 3) | ('open', 0)
+((5, 11, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((5, 12), 3) | ((1, 0), 3)
+((6, 12), 3) | ((0, 1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'empty'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'empty'), 3) | ((0, -1), 3)
+((6, 13), 3) | ((0, 1), 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'light'), 3) | ('wait', 3)
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'EAST', 'busy'), 3) | ('cross', 0)
+((6, 15), 3) | ((0, 1), 3)
+((6, 16), 3) | ((0, 1), 3)
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((6, 17, 'EAST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 18), 3) | ((0, 1), 3)
+((6, 19, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((6, 19, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 20), 3) | ((0, 1), 3)
+((6, 21), 3) | ((0, 1), 3)
+((6, 22, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((6, 22, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((6, 23), 3) | ((-1, 0), 3)
+((5, 23), 3) | ((-1, 0), 3)
+((4, 23), 3) | ((-1, 0), 3)
+((3, 23, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((3, 23, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((3, 23, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+BEGINNING EPISODE24
+BEGINNING TRIAL
+((2, 23), 3) | ((1, 0), 3)
+((3, 23, 'SOUTH', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((3, 23, 'SOUTH', 'door-closed'), 3) | ('open', 0)
+((3, 23, 'SOUTH', 'door-open'), 3) | ((1, 0), 3)
+((4, 23), 3) | ((1, 0), 3)
+((5, 23), 3) | ((1, 0), 3)
+((6, 23), 3) | ((0, 1), 3)
+((6, 24, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((6, 24, 'EAST', 'door-closed'), 3) | ((0, -1), 3)
+((6, 23), 3) | ((0, -1), 3)
+((6, 22, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((6, 22, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 21), 3) | ((0, -1), 3)
+((6, 20), 3) | ((0, -1), 3)
+((6, 19, 'WEST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((6, 19, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 18), 3) | ((0, -1), 3)
+((6, 17, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((6, 17, 'WEST', 'door-closed'), 3) | ('open', 0)
+((6, 17, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 16), 3) | ((0, -1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'light'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'busy'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'WEST', 'busy'), 3) | ((0, 1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'busy'), 3) | ((0, 1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'busy'), 3) | ((0, 1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'busy'), 3) | ((0, 1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'light'), 3) | ('wait', 3)
+((6, 14, 'WEST', 'busy'), 3) | ((0, 1), 3)
+((6, 15), 3) | ((0, -1), 3)
+((6, 14, 'WEST', 'empty'), 3) | ('cross', 2)
+Feedback: no
+((6, 14, 'WEST', 'empty'), 3) | ('cross', 0)
+((6, 13), 3) | ((1, 0), 3)
+((7, 13), 3) | ((1, 0), 3)
+((8, 13), 3) | ((1, 0), 3)
+((9, 13), 3) | ((0, -1), 3)
+((9, 12), 3) | ((0, -1), 3)
+((9, 11, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((9, 11, 'WEST', 'door-closed'), 3) | ('open', 0)
+((9, 11, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((9, 10), 3) | ((-1, 0), 3)
+((8, 10), 3) | ((0, -1), 3)
+((8, 9, 'WEST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((8, 9, 'WEST', 'door-closed'), 3) | ('open', 0)
+((8, 9, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+BEGINNING EPISODE25
+BEGINNING TRIAL
+((8, 8), 3) | ((0, 1), 3)
+((8, 9, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((8, 9, 'EAST', 'door-closed'), 3) | ('open', 0)
+((8, 9, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((8, 10), 3) | ((-1, 0), 3)
+((7, 10), 3) | ((-1, 0), 3)
+((6, 10), 3) | ((-1, 0), 3)
+((5, 10), 3) | ((-1, 0), 3)
+((4, 10), 3) | ((0, -1), 3)
+((4, 9), 3) | ((-1, 0), 3)
+((3, 9, 'NORTH', 'door-closed'), 3) | ('open', 2)
+Feedback: no
+((3, 9, 'NORTH', 'door-closed'), 3) | ('open', 0)
+((3, 9, 'NORTH', 'door-open'), 3) | ((-1, 0), 3)
+BEGINNING EPISODE26
+BEGINNING TRIAL
+((6, 6), 3) | ((0, -1), 3)
+((6, 5, 'WEST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((6, 5, 'WEST', 'door-closed'), 3) | ('open', 0)
+((6, 5, 'WEST', 'door-open'), 3) | ((0, -1), 3)
+((6, 4), 3) | ((-1, 0), 3)
+((5, 4), 3) | ((-1, 0), 3)
+((4, 4), 3) | ((0, 1), 3)
+((4, 5, 'EAST', 'door-closed'), 3) | ('open', 1)
+Feedback: yes
+((4, 5, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 6), 3) | ((0, 1), 3)
+((4, 7), 3) | ((0, 1), 3)
+((4, 8, 'EAST', 'door-closed'), 3) | ('open', 2)
+Feedback: yes
+((4, 8, 'EAST', 'door-open'), 3) | ((0, 1), 3)
+((4, 9), 3) | ((0, 1), 3)
+((4, 10), 3) | ((1, 0), 3)
+((5, 10), 3) | ((1, 0), 3)
+((6, 10), 3) | ((1, 0), 3)
+((7, 10), 3) | ((1, 0), 3)
+((8, 10), 3) | ((0, -1), 3)
+((8, 9, 'WEST', 'door-closed'), 3) | ('open', 1)
+Feedback: no
+((8, 9, 'WEST', 'door-closed'), 3) | ('open', 0)
+((8, 9, 'WEST', 'door-open'), 3) | ((0, -1), 3)
