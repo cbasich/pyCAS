@@ -63,7 +63,7 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
     DM.set_goal(end)
     AM = autonomy_model.AutonomyModel(DM, [0,1,2,3])
     HM = feedback_model.FeedbackModel(DM, AM, ['+', '-', '/', None], ['cross', 'open'])
-    CAS = competence_aware_system.CAS(DM, AM, HM, persistence = 0.75)
+    CAS = competence_aware_system.CAS(DM, AM, HM, persistence = 0.9)
 
     # embed()
     # quit()
@@ -389,7 +389,7 @@ def process_results(CAS):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--map_file', type=str, default='small_campus.txt')
+    parser.add_argument('-m', '--map_file', type=str, default='large_campus.txt')
     parser.add_argument('-n', '--num_runs', type=int, default=1)
     parser.add_argument('-u', '--update', type=int, default=1)
     parser.add_argument('-i', '--interact', type=int, default=0)

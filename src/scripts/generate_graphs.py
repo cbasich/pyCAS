@@ -5,11 +5,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 from IPython import embed
 
-OUTPUT_PATH = os.path.join('..','..','output','CDB_icra')
+OUTPUT_PATH = os.path.join('..','..','output','CDB_aij')
 
 def generate_cost_graphs():
-    cost_file = open(os.path.join(OUTPUT_PATH,'large_campus_costs.txt'), mode = 'r+')
-    expected_cost_file = open(os.path.join(OUTPUT_PATH, 'large_campus_expected_costs.txt'), mode = 'r+')
+    cost_file = open(os.path.join(OUTPUT_PATH,'small_campus_costs.txt'), mode = 'r+')
+    expected_cost_file = open(os.path.join(OUTPUT_PATH, 'small_campus_expected_costs.txt'), mode = 'r+')
 
     costs, expected_costs = [], []
 
@@ -48,9 +48,9 @@ def generate_cost_graphs():
 
 def generate_competence_graphs():
     alo_vanilla, alo_update, vlo_vanilla, vlo_update, fc_vanilla, fc_update = [], [], [], [], [], []
-    with open(os.path.join(OUTPUT_PATH, 'vanilla', 'large_campus_alo.txt'), mode = 'r+') as f:
+    with open(os.path.join(OUTPUT_PATH, 'vanilla', 'small_campus_alo.txt'), mode = 'r+') as f:
         alo_vanilla = np.array([float(x) for x in f.readline().split(',')])
-    with open(os.path.join(OUTPUT_PATH, 'update', 'large_campus_alo.txt'), mode = 'r+') as f:
+    with open(os.path.join(OUTPUT_PATH, 'update', 'small_campus_alo.txt'), mode = 'r+') as f:
         alo_update = np.array([float(x) for x in f.readline().split(',')])
 
     with open(os.path.join(OUTPUT_PATH, 'vanilla', 'competence_graph_info.pkl'), mode = 'rb') as f:
@@ -110,5 +110,5 @@ def generate_candidate_count_graphs():
     plt.close(fig)
 
 if __name__ == '__main__':
-    # generate_cost_graphs()
+    generate_cost_graphs()
     generate_competence_graphs()

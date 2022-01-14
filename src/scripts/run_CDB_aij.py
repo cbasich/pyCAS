@@ -6,6 +6,7 @@ from IPython import embed
 from matplotlib import pyplot as plt
 
 import numpy as np
+import pandas as pd
 import itertools as it
 
 current_file_path = os.path.dirname(os.path.realpath(__file__))
@@ -14,23 +15,23 @@ sys.path.append(os.path.join(current_file_path, '..'))
 import utils
 import process_data
 
-from models.CDB.competence_aware_system import CAS
-from models.CDB import autonomy_model, feedback_model, domain_model
+from models.CDB_aij import autonomy_model, feedback_model, domain_model, competence_aware_system
 
-OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB')
-FEEDBACK_DATA_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'feedback')
-PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'params')
-MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB', 'maps')
+OUTPUT_PATH = os.path.join(current_file_path, '..', '..', 'output', 'CDB_aij')
+FEEDBACK_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_aij', 'feedback')
+PARAM_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_aij', 'params')
+MAP_PATH = os.path.join(current_file_path, '..', '..', 'domains', 'CDB_aij', 'maps')
 
+global new_feedback
 
-def main(grid_file, N, update=False, interact=False, logging=False, verbose=True, start=None, end=None):
-    if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'cross.data') ):
+def main(grid_file, N, update=False, interact=False, logging=False, verbose=True, _start=None, _end=None):
+    if not os.path.exists( os.path.join(FEEDBACK_PATH, 'cross.data') ):
         init_cross_data()
-    if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open.data') ):
+    if not os.path.exists( os.path.join(FEEDBACK_PATH, 'open.data') ):
         init_open_data()
-    if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data') ):
+    if not os.path.exists( os.path.join(FEEDBACK_PATH, 'cross_full.data') ):
         init_full_cross_data()
-    if not os.path.exists( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data') ):
+    if not os.path.exists( os.path.join(FEEDBACK_PATH, 'open_full.data') ):
         init_full_open_data()
 
     all_level_optimality = []
@@ -40,7 +41,17 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
     except Exception:
         pass
 
-    non_offices = set(['.', '.\n', '\n', 'X', 'C', 'D'])
+    total_feedback_received = [0]
+    try:
+        with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_fbc.txt'), mode = 'r+') as feedback_count_file:
+            total_feedback_received = [int(x) for x in total_feedback_received.readline().split(",")]
+    except Exception:
+        pass
+
+    global new_feedback
+    new_feedback = False
+
+    non_offices = set(['.', '.\n', '\n', 'X', 'X\n', 'C', 'D'])
     offices = []
 
     with open(os.path.join(MAP_PATH, grid_file), 'r') as f:
@@ -48,69 +59,78 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
             chars = line.split(' ')
             offices += [ele for ele in chars if ele not in non_offices]
 
-    for i in range(N):
-        if start == None:
-            start = offices[np.random.randint(len(offices))]
-        if end == None:
-            end = offices[np.random.randint(len(offices))]
-        while end == start:
-            end = offices[np.random.randint(len(offices))]
+    if _start == None:
+        start = np.random.choice(offices)
+    if _end == None:
+        end = np.random.choice(offices)
+    while end == start:
+        end = np.random.choice(offices)
 
-        print("Building environment...")
-        print("Building domain model...")
-        DM = domain_model.DeliveryBotDomain(grid_file, start, end)
-        print("Building autonomy model...")
-        AM = autonomy_model.AutonomyModel(DM, [0, 1, 2, 3])
-        print("Building feedback model...")
-        HM = feedback_model.FeedbackModel(DM, AM, ['+', '-', '/', None], ['cross', 'open'])
-        print("Building CAS...")
-        environment = CAS(DM, AM, HM, persistence=0.9)
+    DM = domain_model.DeliveryBotDomain(grid_file, start)
+    DM.set_goal(end)
+    AM = autonomy_model.AutonomyModel(DM, [0,1,2,3])
+    HM = feedback_model.FeedbackModel(DM, AM, ['+', '-', '/', None], ['cross', 'open'])
+    CAS = competence_aware_system.CAS(DM, AM, HM, persistence = 0.9)
+
+    # embed()
+    # quit()
+
+    for i in range(N):
+        print("Starting episode {} with state {} and goal {}...\n".format(i, start, end))
+        if new_feedback:
+            DM.helper.build_gams()
+            DM.compute_transitions()
+            CAS.compute_transitions()
+        DM.compute_costs()
+        CAS.compute_costs()
 
         solver = 'FVI'
         print("Solving mdp...")
-        print(environment.solve(solver=solver))
+        print(CAS.solve(solver=solver))
+
+        alo_value = CAS.check_level_optimality() * 100.0
+        all_level_optimality.append(alo_value)
 
         if logging:
             with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_expected_costs.txt'), mode='a+') as expected_cost_file:
-                expected_cost_file.write(str(environment.V[environment.states.index(environment.init)]) + "\n")
-
-            alo_value = environment.check_level_optimality() * 100.0
-            all_level_optimality.append(alo_value)
-
+                expected_cost_file.write(str(CAS.V[CAS.states.index(CAS.init)]) + "\n")
             with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_alo.txt'), mode = 'a+') as all_level_optimality_file:
                 all_level_optimality_file.write("," + str(alo_value))
 
         print("Beginning simulation...")
-        costs = execute_policy(environment, 1, i, interact, verbose=verbose)
+        costs, feedback_count = execute_policy(CAS, 1, i, interact, verbose=verbose)
+        total_feedback_received.append(total_feedback_received[-1] + feedback_count)
 
         if logging:
             with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_costs.txt'), mode = 'a+') as cost_file:
                 for cost in costs:
                     cost_file.write(str(cost) + ",")
-            cost_file.write("\n")
+                cost_file.write("\n")
+            with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + 'fbc.txt'), mode='a+') as feedback_count_file:
+                feedback_count_file.write("," + str(total_feedback_received))
 
         print("Updating parameters...")
-        environment.update_kappa()
-        environment.save_kappa()
+        CAS.update_kappa()
+        CAS.save_kappa()
 
         if update:
             print("Identifying candidates...")
-            candidates, init_state_candidate_count = environment.HM.find_candidates()
+            candidates, init_state_candidate_count = CAS.HM.find_candidates()
             if len(candidates) > 0:
                 candidate = candidates[np.random.randint(len(candidates))]
                 print(candidate)
-
+                # embed()
                 print("Identifying potential discriminators...")
-                try:
-                    discriminator = environment.HM.get_most_likely_discriminator(candidate, 1)
-                except Exception:
-                    discriminator = None
+                # try:
+                discriminator = CAS.HM.get_most_likely_discriminator(candidate, 3)
+                # except Exception:
+                #     discriminator = None
 
                 if discriminator == None:
                     print("No discriminator found...")
                 else:
                     print("Found discriminator " + str(discriminator) + ".\n")
-                    environment.DM.helper.add_feature(discriminator, candidate)
+                    CAS.DM.helper.add_feature(discriminator, candidate)
                     with open(os.path.join(OUTPUT_PATH, 'execution_trace.txt'), mode = 'a+') as f:
                         f.write("Discriminator added: " + str(discriminator) + "\n")
             else:
@@ -122,9 +142,22 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
             with open(os.path.join(OUTPUT_PATH, 'init_state_candidate_count.txt'), mode = 'a+') as f:
                 f.write(str(init_state_candidate_count) + ",")
 
+        if CAS.check_level_optimality() == 1.0:
+            break
+
+        start = np.random.choice(offices)
+        end = np.random.choice(offices)
+        while start == end:
+            end = np.random.choice(offices)
+
+        DM.set_init(start)
+        DM.set_goal(end)
+        CAS.set_init()
+        CAS.set_goals()
+
     if logging:
         tmp_dic = {}
-        visited_level_optimality, feedback_count = process_results(environment)
+        visited_level_optimality, feedback_count = process_results(CAS)
         tmp_dic["visited_LO"] = visited_level_optimality
         tmp_dic["feedback_count"] = feedback_count
         with open(os.path.join(OUTPUT_PATH, "competence_graph_info.pkl"), 'wb') as f:
@@ -135,6 +168,7 @@ def execute_policy(CAS, M, i, interact, verbose=True):
     pi_base = CAS.pi
     transitions_base = CAS.transitions.copy()
     total_returns = []
+    feedback_count = 0
 
     execution_trace_file = open(os.path.join(OUTPUT_PATH, 'execution_trace.txt'), mode = 'a+')
 
@@ -149,9 +183,15 @@ def execute_policy(CAS, M, i, interact, verbose=True):
     with open(os.path.join(MAP_PATH, 'map_info.json')) as F:
         map_info = json.load(F)
 
-    used_features = open(os.path.join(PARAM_PATH, 'used_features.txt')).readline().split(",")
     full_features = open(os.path.join(PARAM_PATH, 'full_features.txt')).readline().split(",")
-    unused_features = [feature for feature in full_features if feature not in used_features]
+
+    used_open_features, used_cross_features = [], []
+    with open( os.path.join(FEEDBACK_PATH, 'open.data'), mode='r+') as f:
+        df = pd.read_csv(f)
+        used_open_features = list(df.columns)
+    with open( os.path.join(FEEDBACK_PATH, 'cross.data'), mode='r+') as f:
+        df = pd.read_csv(f)
+        used_cross_features = list(df.columns)
 
     execution_trace_file.write("BEGINNING EPISODE" + str(i) + "\n")
     for j in range(M):
@@ -162,7 +202,9 @@ def execute_policy(CAS, M, i, interact, verbose=True):
         r = 0
 
         while not state in CAS.goals:
-
+            if state == (None, 3):
+                embed()
+                quit()
             action = pi[CAS.state_map[state]]
             execution_trace_file.write(str(state) + " | " + str(action) + "\n")
             if verbose:
@@ -172,20 +214,23 @@ def execute_policy(CAS, M, i, interact, verbose=True):
 
             feedback = None
             if action[1] == 1 or action[1] == 2:
-                feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))], interact=interact)
+                feedback = interfaceWithHuman(state[0], action, map_info[str((state[0][0], state[0][1]))], CAS.DM.timeofday, interact=interact)
                 if j == M-1:
-                    f1 = [action[1]] + [CAS.DM.helper.get_state_feature_value(state[0], f) for f in used_features
-                            if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
-                    if f1[2] == 'crosswalk':
-                        f1[2] = state[0][3]
+                    if action[0] == 'open':
+                        f1 = [action[1]] + [CAS.DM.helper.get_state_feature_value(state[0], f) 
+                                for f in used_open_features if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
+                    elif action[0] == 'cross':
+                        f1 = [action[1]] + [CAS.DM.helper.get_state_feature_value(state[0], f) 
+                                for f in used_cross_features if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
 
-                    f2 = [CAS.DM.helper.get_state_feature_value(state[0], f) for f in unused_features 
+                    f2 = [action[1]] + [CAS.DM.helper.get_state_feature_value(state[0], f) for f in full_features 
                           if CAS.DM.helper.get_state_feature_value(state[0], f) != None]
 
                     flagged = (action[1] == 1 and CAS.flags[CAS.states.index(state)][CAS.DM.actions.index(action[0])] == False)
 
                     updateData(action[0], f1, f2, feedback, flagged)
                     if feedback is not None:
+                        feedback_count += 1
                         execution_trace_file.write("Feedback: " + feedback + "\n")
             if feedback == 'no':
                 CAS.remove_transition(state, action)
@@ -202,10 +247,10 @@ def execute_policy(CAS, M, i, interact, verbose=True):
 
     execution_trace_file.close()
 
-    return total_returns
+    return total_returns, feedback_count
 
 
-def interfaceWithHuman(state, action, info, interact=True):
+def interfaceWithHuman(state, action, info, timeofday, interact=True):
     feedback = None
 
     if interact:
@@ -223,14 +268,18 @@ def interfaceWithHuman(state, action, info, interact=True):
             if info['doortype'] == 'pull':
                 feedback = 'no'
             else:
-                if info['doorsize'] == 'small' or (info['doorsize'] == 'medium' and info['region'] in ['b1','b2']):
+                if ((info['doorsize'] == 'small') 
+                 or (info['doorsize'] == 'medium' and info['region'] in ['b1','b2'])):
                     feedback = 'yes'
                 else:
                     feedback = 'no'
 
         elif info['obstacle'] == 'crosswalk':
             if state[3] == 'empty' or (info['visibility'] == 'high' and state[3] == 'light'):
-                feedback = 'yes'
+                if timeofday in info['pedestrians']:
+                    feedback = 'no'
+                else:
+                    feedback = 'yes'
             else:
                 feedback = 'no'
 
@@ -240,40 +289,41 @@ def interfaceWithHuman(state, action, info, interact=True):
     return feedback
 
 
-def updateData(action, used_features, unused_features, feedback, flagged):
+def updateData(action, used_features, full_features, feedback, flagged):
     if feedback is None:
         print("Feedback is NONE")
         pass
 
+    global new_feedback
+    new_feedback = True
+
     data_string = ",".join([str(f) for f in used_features])
-    full_data_string = data_string 
-    if len(unused_features) > 0:
-        full_data_string = full_data_string + "," + ",".join([str(f) for f in unused_features])
+    full_data_string = ",".join([str(f) for f in full_features])
 
     if flagged:
         data_string_copy = "2" + data_string[1:]
         full_data_string_copy = "2" + full_data_string[1:]
 
     if action == 'cross':
-        filepath = os.path.join(FEEDBACK_DATA_PATH, 'cross.data')
+        filepath = os.path.join(FEEDBACK_PATH, 'cross.data')
         with open(filepath, mode='a+') as f:
             f.write("\n" + data_string + "," + str(feedback))
             if flagged:
                 f.write("\n" + data_string_copy + "," + str(feedback))
 
-        filepath = os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data')
+        filepath = os.path.join(FEEDBACK_PATH, 'cross_full.data')
         with open(filepath, mode='a+') as f:
             f.write("\n" + full_data_string + "," + str(feedback))
             if flagged:
                 f.write("\n" + full_data_string_copy + "," + str(feedback))
     elif action == 'open':
-        filepath = os.path.join(FEEDBACK_DATA_PATH, 'open.data')
+        filepath = os.path.join(FEEDBACK_PATH, 'open.data')
         with open(filepath, mode='a+') as f:
             f.write("\n" + data_string + "," + str(feedback))
             if flagged:
                 f.write("\n" + data_string_copy + "," + str(feedback))
 
-        filepath = os.path.join(FEEDBACK_DATA_PATH, 'open_full.data')
+        filepath = os.path.join(FEEDBACK_PATH, 'open_full.data')
         with open(filepath, mode='a+') as f:
             f.write("\n" + full_data_string + "," + str(feedback))
             if flagged:
@@ -281,35 +331,34 @@ def updateData(action, used_features, unused_features, feedback, flagged):
 
 
 def init_cross_data():
-    with open( os.path.join(FEEDBACK_DATA_PATH, 'cross.data'), 'a+') as f:
-        f.write('level,region,obstacle,feedback')
+    with open( os.path.join(FEEDBACK_PATH, 'cross.data'), 'a+') as f:
+        f.write('level,region,traffic,feedback')
         for level in ['1','2']:
             for region in ['r1','r2']:
-                for obstacle in ['empty', 'light', 'heavy']:
+                for obstacle in ['empty', 'light', 'busy']:
                     for feedback in ['yes','no']:
-                        entry = level + "," + region + "," + obstacle + "," + feedback
+                        entry = ",".join([level,region,obstacle,feedback])
                         f.write("\n" + entry)
 
 
 def init_full_cross_data():
-    with open( os.path.join(FEEDBACK_DATA_PATH, 'cross_full.data'), 'a+') as f:
-        f.write('level,region,obstacle,visibility,streettype,feedback')
+    with open( os.path.join(FEEDBACK_PATH, 'cross_full.data'), 'a+') as f:
+        f.write('level,region,traffic,visibility,streettype,timeofday,feedback')
 
 
 def init_open_data():
-    with open( os.path.join(FEEDBACK_DATA_PATH, 'open.data'), 'a+') as f:
-        f.write('level,region,obstacle,feedback')
+    with open( os.path.join(FEEDBACK_PATH, 'open.data'), 'a+') as f:
+        f.write('level,region,feedback')
         for level in ['1','2']:
             for region in ['b1','b2','b3']:
-                for obstacle in ['door']:
-                    for feedback in ['yes','no']:
-                        entry = level + "," + region + "," + obstacle + "," + feedback
-                        f.write("\n" + entry)
+                for feedback in ['yes','no']:
+                    entry = ",".join([level,region,feedback])
+                    f.write("\n" + entry)
 
 
 def init_full_open_data():
-    with open( os.path.join(FEEDBACK_DATA_PATH, 'open_full.data'), 'a+') as f:
-        f.write('level,region,obstacle,doorsize,doorcolor,doortype,feedback')
+    with open( os.path.join(FEEDBACK_PATH, 'open_full.data'), 'a+') as f:
+        f.write('level,region,doorsize,doorcolor,doortype,timeofday,feedback')
 
 
 def process_results(CAS):
@@ -351,9 +400,9 @@ def process_results(CAS):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--map_file', type=str, default='small_campus.txt')
+    parser.add_argument('-m', '--map_file', type=str, default='large_campus.txt')
     parser.add_argument('-n', '--num_runs', type=int, default=1)
-    parser.add_argument('-u', '--update', type=int, default=0)
+    parser.add_argument('-u', '--update', type=int, default=1)
     parser.add_argument('-i', '--interact', type=int, default=0)
     parser.add_argument('-l', '--logging', type=int, default=0)
     parser.add_argument('-v', '--verbose', type=int, default=1)
