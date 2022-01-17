@@ -348,10 +348,10 @@ class CAS():
                                 and self.DM.helper.get_state_feature_value(state, 'visibility') == 'low')))):
                                 self.potential[s][a][L[level_index]] = 0.0
                                 break
-                            elif self.HM.lambda_[state][action][2] < 0.9:
+                            elif self.HM.lambda_[state][action][2] < 0.95:
                                 break
 
-                        elif L[level_index] == 0 and len(state) > 2:
+                        if L[level_index] == 0 and len(state) > 2:
                             if ((state[3] == 'door-closed' and action == 'open'
                                 and self.DM.helper.get_state_feature_value(state, 'doortype') == 'push'
                                 and (self.DM.helper.get_state_feature_value(state, 'doorsize') == 'small'
@@ -362,12 +362,12 @@ class CAS():
                                 and action == 'cross')):
                                 self.potential[s][a][L[level_index]] = 0.0
                                 break
-                            elif self.HM.lambda_[state][action][1] > 0.3:
+                            elif self.HM.lambda_[state][action][1] > 0.25:
                                 break
 
-                        elif  L[level_index] == self.AM.kappa[state][action]:
-                            self.potential[s][a][L[level_index]] = 0.0
-                            break
+                        # elif  L[level_index] == self.AM.kappa[state][action]:
+                        #     self.potential[s][a][L[level_index]] = 0.0
+                        #     break
 
                         self.AM.kappa[state][action] = L[level_index]
                         self.potential[s][a][L[level_index]] = 0.0
