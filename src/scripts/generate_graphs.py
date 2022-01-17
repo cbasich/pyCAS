@@ -7,9 +7,18 @@ from IPython import embed
 
 OUTPUT_PATH = os.path.join('..','..','output','CDB_aij')
 
+def get_smoothed_values(data, window_size):
+    smoothed_values = []
+    for i in range(1, len(data)):
+        truncated_data = data[:i]
+        windowed_data = truncated_data[-window_size:]
+        smoothed_values.append(np.average(windowed_data))
+    # println(smoothed_values)
+    return smoothed_values
+
 def generate_cost_graphs():
-    cost_file = open(os.path.join(OUTPUT_PATH,'small_campus_costs.txt'), mode = 'r+')
-    expected_cost_file = open(os.path.join(OUTPUT_PATH, 'small_campus_expected_costs.txt'), mode = 'r+')
+    cost_file = open(os.path.join(OUTPUT_PATH, 'update', 'large_campus_costs.txt'), mode = 'r+')
+    expected_cost_file = open(os.path.join(OUTPUT_PATH, 'update', 'large_campus_expected_costs.txt'), mode = 'r+')
 
     costs, expected_costs = [], []
 
@@ -24,14 +33,14 @@ def generate_cost_graphs():
     expected_costs = np.array(expected_costs).reshape(-1,1)
 
     diffs = 100 * (costs - expected_costs)/expected_costs
-    avgs = np.mean(diffs, axis = 1)
-    stes = np.sqrt(np.std(diffs, axis = 1))
+    avgs = get_smoothed_values(np.mean(diffs, axis = 1), 5)
+    stes = get_smoothed_values(np.sqrt(np.std(diffs, axis = 1)), 5)
 
     fig, ax1 = plt.subplots()
     ax1.set_xlabel('Episode', fontsize=14)
     ax1.set_ylabel('Percent Error in Cost Prediction', fontsize=14)
 
-    ax1.errorbar(x = np.arange(len(diffs)), y = avgs, yerr = stes, color='steelblue', ecolor='orange')
+    ax1.errorbar(x = np.arange(200), y = avgs[:200], yerr = stes[:200], color='steelblue', ecolor='orange')
     ax1.tick_params(axis='y')
 
     fig.tight_layout()
@@ -48,35 +57,38 @@ def generate_cost_graphs():
 
 def generate_competence_graphs():
     alo_vanilla, alo_update, vlo_vanilla, vlo_update, fc_vanilla, fc_update = [], [], [], [], [], []
-    with open(os.path.join(OUTPUT_PATH, 'vanilla', 'small_campus_alo.txt'), mode = 'r+') as f:
-        alo_vanilla = np.array([float(x) for x in f.readline().split(',')])
-    with open(os.path.join(OUTPUT_PATH, 'update', 'small_campus_alo.txt'), mode = 'r+') as f:
-        alo_update = np.array([float(x) for x in f.readline().split(',')])
+    with open(os.path.join(OUTPUT_PATH, 'vanilla', 'large_campus_alo.txt'), mode = 'r+') as f:
+        alo_vanilla = get_smoothed_values(np.array([float(x) for x in f.readline().split(',')]), 5)
+    with open(os.path.join(OUTPUT_PATH, 'update', 'large_campus_alo.txt'), mode = 'r+') as f:
+        alo_update = get_smoothed_values(np.array([float(x) for x in f.readline().split(',')]), 5)
+
+    with open(os.path.join(OUTPUT_PATH, 'update', 'large_campus_fbc.txt'), mode = 'r+') as f:
+        fc_update = np.array(np.array([int(x) for x in f.readline().split(',')]))
 
     with open(os.path.join(OUTPUT_PATH, 'vanilla', 'competence_graph_info.pkl'), mode = 'rb') as f:
         tmp = pickle.load(f, encoding='bytes')
-        vlo_vanilla = tmp['visited_LO']
+        vlo_vanilla = get_smoothed_values(tmp['visited_LO'], 5)
         fc_vanilla = tmp['feedback_count']
     with open(os.path.join(OUTPUT_PATH, 'update', 'competence_graph_info.pkl'), mode = 'rb') as f:
         tmp = pickle.load(f, encoding='bytes')
-        vlo_update = tmp['visited_LO']
-        fc_update = tmp['feedback_count']
+        vlo_update = get_smoothed_values(tmp['visited_LO'], 5)
+        # fc_update = tmp['feedback_count']
 
     fig, ax1 = plt.subplots()
     ax1.set_xlabel('Episode', fontsize=14)
     ax1.set_ylabel('% Policy at Competence', fontsize=14)
     ax1.set_ylim(top=100)
 
-    ax1.plot(alo_vanilla, color = 'skyblue', label = 'All States Vanilla')
-    ax1.plot(alo_update, color = 'steelblue', label = 'All States Modifed')
-    ax1.plot(vlo_vanilla, color = 'pink', label = 'Visited States Vanilla')
-    ax1.plot(vlo_update, color = 'indianred', label = 'Visited States Modifed')
+    ax1.plot(alo_vanilla[:200], color = 'skyblue', label = 'All States Vanilla')
+    ax1.plot(alo_update[:200], color = 'steelblue', label = 'All States Modifed')
+    ax1.plot(vlo_vanilla[:200], color = 'pink', label = 'Visited States Vanilla')
+    ax1.plot(vlo_update[:200], color = 'indianred', label = 'Visited States Modifed')
     ax1.tick_params(axis='y')
 
     ax2 = ax1.twinx()
     ax2.set_ylabel('Number of Feedback Signals', fontsize=14)
-    ax2.plot(fc_update, color = 'black', label = 'Cumulative Signals Vanilla')
-    ax2.plot(fc_vanilla, color = 'grey', label = 'Cumulative Signals Modifed')
+    ax2.plot(fc_update[:200], color = 'black', label = 'Cumulative Signals Modified')
+    ax2.plot(fc_vanilla[:200], color = 'grey', label = 'Cumulative Signals Vanilla')
     ax2.tick_params(axis = 'y')
 
     fig.tight_layout()

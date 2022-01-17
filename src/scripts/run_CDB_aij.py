@@ -114,8 +114,8 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
                 for cost in costs:
                     cost_file.write(str(cost) + ",")
                 cost_file.write("\n")
-            with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_fbc.txt'), mode='w+') as feedback_count_file:
-                feedback_count_file.write("," + str(total_feedback_received))
+            with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_fbc.txt'), mode='a+') as feedback_count_file:
+                feedback_count_file.write(str(total_feedback_received[-1]) + ",")
 
         print("Updating parameters...")
         CAS.update_kappa()
