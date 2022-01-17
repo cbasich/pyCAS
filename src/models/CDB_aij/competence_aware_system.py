@@ -348,7 +348,7 @@ class CAS():
                                 and self.DM.helper.get_state_feature_value(state, 'visibility') == 'low')))):
                                 self.potential[s][a][L[level_index]] = 0.0
                                 break
-                            elif self.HM.lambda_[state][action][2] < 0.85:
+                            elif self.HM.lambda_[state][action][2] < 0.9:
                                 break
 
                         elif L[level_index] == 0 and len(state) > 2:
@@ -362,7 +362,7 @@ class CAS():
                                 and action == 'cross')):
                                 self.potential[s][a][L[level_index]] = 0.0
                                 break
-                            elif self.HM.lambda_[state][action][1] > 0.35:
+                            elif self.HM.lambda_[state][action][1] > 0.3:
                                 break
 
                         elif  L[level_index] == self.AM.kappa[state][action]:

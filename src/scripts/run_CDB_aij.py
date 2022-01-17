@@ -48,6 +48,14 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
     except Exception:
         pass
 
+
+    single_task_expected_costs = []
+    try:
+        with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + 'single_task_expected_cost.txt'), mode='r+') as single_task_expected_cost_file:
+            single_task_expected_costs = [float(x) for x in single_task_expected_cost_file.readline().split(",")]
+    except Exception:
+        pass
+
     global new_feedback
     new_feedback = False
 
@@ -98,7 +106,7 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
                 all_level_optimality_file.write("," + str(alo_value))
 
         print("Beginning simulation...")
-        costs, feedback_count = execute_policy(CAS, 1, i, interact, verbose=verbose)
+        costs, feedback_count = execute_policy(CAS, 10, i, interact, verbose=verbose)
         total_feedback_received.append(total_feedback_received[-1] + feedback_count)
 
         if logging:
@@ -106,7 +114,7 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
                 for cost in costs:
                     cost_file.write(str(cost) + ",")
                 cost_file.write("\n")
-            with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + 'fbc.txt'), mode='a+') as feedback_count_file:
+            with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_fbc.txt'), mode='w+') as feedback_count_file:
                 feedback_count_file.write("," + str(total_feedback_received))
 
         print("Updating parameters...")
@@ -121,10 +129,10 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
                 print(candidate)
                 # embed()
                 print("Identifying potential discriminators...")
-                # try:
-                discriminator = CAS.HM.get_most_likely_discriminator(candidate, 3)
-                # except Exception:
-                #     discriminator = None
+                try:
+                    discriminator = CAS.HM.get_most_likely_discriminator(candidate, 3)
+                except Exception:
+                    discriminator = None
 
                 if discriminator == None:
                     print("No discriminator found...")
@@ -145,6 +153,21 @@ def main(grid_file, N, update=False, interact=False, logging=False, verbose=True
         if CAS.check_level_optimality() == 1.0:
             break
 
+        # Single task expected cost experiment
+        start = 'b'
+        end = 'p'
+        DM.set_init(start)
+        DM.set_goal(end)
+        CAS.set_init()
+        CAS.set_goals()
+        DM.compute_costs()
+        CAS.compute_costs()
+        CAS.solve(solver=solver)
+        with open(os.path.join(OUTPUT_PATH, grid_file[:-4] + '_single_task_expected_cost_file.txt'), mode='a+') as f:
+                f.write(str(CAS.V[CAS.states.index(CAS.init)]) + "\n")
+
+
+        # Randomly assign new task
         start = np.random.choice(offices)
         end = np.random.choice(offices)
         while start == end:
@@ -230,7 +253,8 @@ def execute_policy(CAS, M, i, interact, verbose=True):
 
                     updateData(action[0], f1, f2, feedback, flagged)
                     if feedback is not None:
-                        feedback_count += 1
+                        if not (action[1] == 2 and feedback == 'yes'):
+                            feedback_count += 1
                         execution_trace_file.write("Feedback: " + feedback + "\n")
             if feedback == 'no':
                 CAS.remove_transition(state, action)

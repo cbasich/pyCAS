@@ -339,7 +339,7 @@ class FeedbackModel():
         lambdas = [(self.build_lambda(D_train, used_features, discriminator), discriminator) for discriminator in discriminators]
         scores = [self.test_lambda(lambda_, lambda_map, D_test, used_features, discriminator) for (lambda_, lambda_map), discriminator in lambdas]
 
-        print("Checkpoint 1.5")
+        # print("Checkpoint 1.5")
 
         best_score = np.max(scores)
         best_discrims = []
@@ -353,7 +353,7 @@ class FeedbackModel():
                 break
 
         print("Checking discriminator " + str(d) + "...")
-        print("Checkpoint 2")
+        # print("Checkpoint 2")
 
         if 'traffic' in D_train.columns:
             curr_score = self.test_lambda(self.DM.helper.cross_GAM, self.DM.helper.cross_GAM_map, D_test, used_features, discriminator = None)
@@ -364,7 +364,7 @@ class FeedbackModel():
             if np.max(scores) < curr_score + 0.05 or np.max(scores) < 0.5 or curr_score == -1.0:
                 return None
 
-        print("Checkpoint 3")
+        # print("Checkpoint 3")
         return d
 
     def build_lambda(self, D_train, used_features, discriminator):
@@ -405,6 +405,9 @@ class FeedbackModel():
         if lambda_ is None:
             return -1.
 
+        # if discriminator == "doorsize":
+        #     embed()
+
         if discriminator == None:
             X = D_test[used_features]
         else:
@@ -431,7 +434,7 @@ class FeedbackModel():
         predictions = lambda_.predict(X_)
         y_pred = predictions > 0.5
 
-        print("Checkpoint 1")
+        # print("Checkpoint 1")
         # if matthews_corrcoef(y_true, y_pred) > 0.5:
         #     embed()
 
