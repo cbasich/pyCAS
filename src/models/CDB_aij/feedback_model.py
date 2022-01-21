@@ -357,11 +357,11 @@ class FeedbackModel():
 
         if 'traffic' in D_train.columns:
             curr_score = self.test_lambda(self.DM.helper.cross_GAM, self.DM.helper.cross_GAM_map, D_test, used_features, discriminator = None)
-            if np.max(scores) < curr_score + 0.05 or np.max(scores) < 0.5 or curr_score == -1.0:
+            if np.max(scores) < curr_score + 0.1 or np.max(scores) < 0.5 or curr_score == -1.0:
                 return None
         else:
             curr_score = self.test_lambda(self.DM.helper.open_GAM, self.DM.helper.open_GAM_map, D_test, used_features, discriminator = None) 
-            if np.max(scores) < curr_score + 0.05 or np.max(scores) < 0.5 or curr_score == -1.0:
+            if np.max(scores) < curr_score + 0.1 or np.max(scores) < 0.5 or curr_score == -1.0:
                 return None
 
         # print("Checkpoint 3")
