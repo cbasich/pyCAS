@@ -40,7 +40,7 @@ def generate_cost_graphs():
     ax1.set_xlabel('Episode', fontsize=14)
     ax1.set_ylabel('Percent Error in Cost Prediction', fontsize=14)
 
-    ax1.errorbar(x = np.arange(200), y = avgs[:200], yerr = stes[:200], color='steelblue', ecolor='orange')
+    ax1.errorbar(x = np.arange(300), y = avgs[:300], yerr = stes[:300], color='steelblue', ecolor='orange')
     ax1.tick_params(axis='y')
 
     fig.tight_layout()
@@ -123,4 +123,4 @@ def generate_candidate_count_graphs():
 
 if __name__ == '__main__':
     generate_cost_graphs()
-    generate_competence_graphs()
+    # generate_competence_graphs()
